@@ -1,13 +1,13 @@
-package com.example.wilispikmins.entity.client;
+package net.wili.wilispikmins.entity.animations;
 
 import net.minecraft.client.animation.AnimationChannel;
 import net.minecraft.client.animation.AnimationDefinition;
 import net.minecraft.client.animation.Keyframe;
 import net.minecraft.client.animation.KeyframeAnimations;
 
-public class RedPikminAnimations {
+public class ModAnimationDefinitions {
 
-    public static final AnimationDefinition WALK = AnimationDefinition.Builder.withLength(2.0416765f).looping()
+    public static final AnimationDefinition PIKMIN_WALK = AnimationDefinition.Builder.withLength(2.0416765f).looping()
             .addAnimation("colita",
                     new AnimationChannel(AnimationChannel.Targets.ROTATION,
                             new Keyframe(0f, KeyframeAnimations.degreeVec(-50f, 0f, 0f),
@@ -80,7 +80,7 @@ public class RedPikminAnimations {
                                     AnimationChannel.Interpolations.LINEAR),
                             new Keyframe(2f, KeyframeAnimations.posVec(0f, 0.5f, 0f),
                                     AnimationChannel.Interpolations.LINEAR))).build();
-    public static final AnimationDefinition IDLE = AnimationDefinition.Builder.withLength(1.04167f).looping()
+    public static final AnimationDefinition PIKMIN_IDLE = AnimationDefinition.Builder.withLength(1.04167f).looping()
             .addAnimation("head",
                     new AnimationChannel(AnimationChannel.Targets.POSITION,
                             new Keyframe(0f, KeyframeAnimations.posVec(0f, 0f, 0f),

@@ -1,32 +1,17 @@
-package com.example.wilispikmins.entity.client;
-
-// Made with Blockbench 4.12.5
-// Exported for Minecraft version 1.17 or later with Mojang mappings
-// Paste this class into your mod and generate all required imports
+package net.wili.wilispikmins.entity.client;
 
 
-import com.example.wilispikmins.WilisPikmins;
-import com.example.wilispikmins.entity.custom.RedPikminEntity;
-import com.ibm.icu.text.Normalizer2;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
-import net.minecraft.client.model.EntityModel;
 import net.minecraft.client.model.HierarchicalModel;
-import net.minecraft.client.model.geom.ModelLayerLocation;
 import net.minecraft.client.model.geom.ModelPart;
 import net.minecraft.client.model.geom.PartPose;
 import net.minecraft.client.model.geom.builders.*;
-import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.Mth;
-// Made with Blockbench 4.12.5
-// Exported for Minecraft version 1.17 or later with Mojang mappings
-// Paste this class into your mod and generate all required imports
-
+import net.wili.wilispikmins.entity.animations.ModAnimationDefinitions;
+import net.wili.wilispikmins.entity.custom.RedPikminEntity;
 
 public class RedPikminModel<T extends RedPikminEntity> extends HierarchicalModel<T> {
-    // This layer location should be baked with EntityRendererProvider.Context in the entity renderer and passed into this model's constructor
-    public static final ModelLayerLocation LAYER_LOCATION = new ModelLayerLocation(ResourceLocation.fromNamespaceAndPath(WilisPikmins.MOD_ID, "red_pikmin"), "main");
-
     private final ModelPart root;
     private final ModelPart body;
     private final ModelPart head;
@@ -75,16 +60,11 @@ public class RedPikminModel<T extends RedPikminEntity> extends HierarchicalModel
 
     @Override
     public void setupAnim(RedPikminEntity entity, float limbSwing, float limbSwingAmount, float ageInTicks, float netHeadYaw, float headPitch) {
-        this.root().getAllParts().forEach(ModelPart::resetPose);
+        this.root.getAllParts().forEach(ModelPart::resetPose);
         this.applyHeadRotation(netHeadYaw, headPitch);
 
-        this.animateWalk(RedPikminAnimations.WALK, limbSwing, limbSwingAmount, 2f, 2.5f);
-        this.animate(entity.idleAnimationState, RedPikminAnimations.IDLE, ageInTicks, 1f);
-    }
-
-    @Override
-    public void renderToBuffer(PoseStack poseStack, VertexConsumer vertexConsumer, int packedLight, int packedOverlay, int color) {
-        root.render(poseStack, vertexConsumer, packedLight, packedOverlay, color);
+        this.animateWalk(ModAnimationDefinitions.PIKMIN_WALK, limbSwing, limbSwingAmount, 2f, 2.5f);
+        this.animate(entity.idleAnimationState, ModAnimationDefinitions.PIKMIN_IDLE, ageInTicks, 1f);
     }
 
     private void applyHeadRotation(float headYaw, float headPitch) {
@@ -93,6 +73,11 @@ public class RedPikminModel<T extends RedPikminEntity> extends HierarchicalModel
 
         this.head.yRot = headYaw * ((float)Math.PI /180f);
         this.head.xRot = headPitch * ((float)Math.PI / 180f);
+    }
+
+    @Override
+    public void renderToBuffer(PoseStack poseStack, VertexConsumer vertexConsumer, int packedLight, int packedOverlay, float red, float green, float blue, float alpha) {
+        root.render(poseStack, vertexConsumer, packedLight, packedOverlay, red, green, blue, alpha);
     }
 
     @Override
