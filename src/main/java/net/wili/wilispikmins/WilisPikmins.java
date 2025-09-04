@@ -14,7 +14,9 @@ import net.minecraftforge.fml.event.lifecycle.FMLClientSetupEvent;
 import net.minecraftforge.fml.event.lifecycle.FMLCommonSetupEvent;
 import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
 import net.wili.wilispikmins.entity.ModEntities;
+import net.wili.wilispikmins.entity.client.BluePikminRenderer;
 import net.wili.wilispikmins.entity.client.RedPikminRenderer;
+import net.wili.wilispikmins.entity.client.YellowPikminRenderer;
 import org.slf4j.Logger;
 
 // The value here should match an entry in the META-INF/mods.toml file
@@ -68,6 +70,8 @@ public class WilisPikmins
         public static void onClientSetup(FMLClientSetupEvent event)
         {
             EntityRenderers.register(ModEntities.RED_PIKMIN.get(), RedPikminRenderer::new);
+            EntityRenderers.register(ModEntities.YELLOW_PIKMIN.get(), YellowPikminRenderer::new);
+            EntityRenderers.register(ModEntities.BLUE_PIKMIN.get(), BluePikminRenderer::new);
         }
     }
 }

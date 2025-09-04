@@ -9,9 +9,9 @@ import net.minecraft.client.model.geom.PartPose;
 import net.minecraft.client.model.geom.builders.*;
 import net.minecraft.util.Mth;
 import net.wili.wilispikmins.entity.animations.ModAnimationDefinitions;
-import net.wili.wilispikmins.entity.custom.RedPikminEntity;
+import net.wili.wilispikmins.entity.custom.PikminEntity;
 
-public class RedPikminModel<T extends RedPikminEntity> extends HierarchicalModel<T> {
+public class RedPikminModel<T extends PikminEntity> extends HierarchicalModel<T> {
     private final ModelPart root;
     private final ModelPart body;
     private final ModelPart head;
@@ -59,7 +59,7 @@ public class RedPikminModel<T extends RedPikminEntity> extends HierarchicalModel
     }
 
     @Override
-    public void setupAnim(RedPikminEntity entity, float limbSwing, float limbSwingAmount, float ageInTicks, float netHeadYaw, float headPitch) {
+    public void setupAnim(PikminEntity entity, float limbSwing, float limbSwingAmount, float ageInTicks, float netHeadYaw, float headPitch) {
         this.root.getAllParts().forEach(ModelPart::resetPose);
         this.applyHeadRotation(netHeadYaw, headPitch);
 

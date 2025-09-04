@@ -7,4 +7,10 @@ import net.wili.wilispikmins.WilisPikmins;
 public class ModModelLayers {
     public static final ModelLayerLocation RED_PIKMIN_LAYER = new ModelLayerLocation(
             new ResourceLocation(WilisPikmins.MOD_ID, "red_pikmin_layer"), "main");
+
+    public static final ModelLayerLocation YELLOW_PIKMIN_LAYER = new ModelLayerLocation(
+            new ResourceLocation(WilisPikmins.MOD_ID, "yellow_pikmin_layer"), "main");
+
+    public static final ModelLayerLocation BLUE_PIKMIN_LAYER = new ModelLayerLocation(
+            new ResourceLocation(WilisPikmins.MOD_ID, "blue_pikmin_layer"), "main");
 }

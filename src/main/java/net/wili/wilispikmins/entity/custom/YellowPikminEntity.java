@@ -4,9 +4,8 @@ import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.animal.Animal;
 import net.minecraft.world.level.Level;
 
-public class RedPikminEntity extends PikminEntity{
-    public RedPikminEntity(EntityType<? extends Animal> pEntityType, Level pLevel) {
+public class YellowPikminEntity extends PikminEntity{
+    public YellowPikminEntity(EntityType<? extends Animal> pEntityType, Level pLevel) {
         super(pEntityType, pLevel);
     }
-
 }
