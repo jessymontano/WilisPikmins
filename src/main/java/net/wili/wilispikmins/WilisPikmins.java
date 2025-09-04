@@ -3,6 +3,7 @@ package net.wili.wilispikmins;
 import com.mojang.logging.LogUtils;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.entity.EntityRenderers;
+import net.minecraft.world.item.CreativeModeTabs;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.event.BuildCreativeModeTabContentsEvent;
@@ -17,6 +18,7 @@ import net.wili.wilispikmins.entity.ModEntities;
 import net.wili.wilispikmins.entity.client.BluePikminRenderer;
 import net.wili.wilispikmins.entity.client.RedPikminRenderer;
 import net.wili.wilispikmins.entity.client.YellowPikminRenderer;
+import net.wili.wilispikmins.item.ModItems;
 import org.slf4j.Logger;
 
 // The value here should match an entry in the META-INF/mods.toml file
@@ -31,6 +33,9 @@ public class WilisPikmins
     public WilisPikmins(FMLJavaModLoadingContext context)
     {
         IEventBus modEventBus = context.getModEventBus();
+
+        // register mod items
+        ModItems.register(modEventBus);
 
         // Register the commonSetup method for modloading
         modEventBus.addListener(this::commonSetup);
@@ -52,6 +57,10 @@ public class WilisPikmins
     // Add the example block item to the building blocks tab
     private void addCreative(BuildCreativeModeTabContentsEvent event)
     {
+        // agrega los spawn eggs al menu de modo creativo
+        if(event.getTabKey() == CreativeModeTabs.SPAWN_EGGS) {
+            event.accept(ModItems.RED_PIKMIN_SPAWN_EGG);
+        }
     }
 
     // You can use SubscribeEvent and let the Event Bus discover methods to call
