@@ -14,13 +14,26 @@ import net.wili.wilispikmins.entity.custom.PikminEntity;
 public class RedPikminModel<T extends PikminEntity> extends HierarchicalModel<T> {
     private final ModelPart root;
     private final ModelPart body;
+    private final ModelPart leftarm;
+    private final ModelPart rightarm;
     private final ModelPart head;
-
+    private final ModelPart colita;
+    private final ModelPart hoja;
+    private final ModelPart eyes;
+    private final ModelPart rightleg;
+    private final ModelPart leftleg;
 
     public RedPikminModel(ModelPart root) {
         this.root = root.getChild("root");
         this.body = this.root.getChild("body");
+        this.leftarm = this.body.getChild("leftarm");
+        this.rightarm = this.body.getChild("rightarm");
         this.head = this.body.getChild("head");
+        this.colita = this.head.getChild("colita");
+        this.hoja = this.colita.getChild("hoja");
+        this.eyes = this.head.getChild("eyes");
+        this.rightleg = this.root.getChild("rightleg");
+        this.leftleg = this.root.getChild("leftleg");
     }
 
     public static LayerDefinition createBodyLayer() {
@@ -31,13 +44,12 @@ public class RedPikminModel<T extends PikminEntity> extends HierarchicalModel<T>
 
         PartDefinition body = root.addOrReplaceChild("body", CubeListBuilder.create().texOffs(0, 11).addBox(-1.5F, -6.0F, -1.5F, 3.0F, 4.0F, 3.0F, new CubeDeformation(0.0F)), PartPose.offset(0.0F, 0.0F, 0.0F));
 
-        PartDefinition leftarm = body.addOrReplaceChild("leftarm", CubeListBuilder.create().texOffs(20, 2).addBox(-3.0F, 0.0F, -0.5F, 3.0F, 1.0F, 1.0F, new CubeDeformation(0.0F)), PartPose.offset(-1.5F, -5.0F, 0.0F));
+        PartDefinition leftarm = body.addOrReplaceChild("leftarm", CubeListBuilder.create().texOffs(20, 2).addBox(-3.0F, -0.75F, -0.5F, 3.0F, 1.0F, 1.0F, new CubeDeformation(0.0F)), PartPose.offset(-1.5F, -5.0F, 0.0F));
 
-        PartDefinition rightarm = body.addOrReplaceChild("rightarm", CubeListBuilder.create().texOffs(20, 0).addBox(0.0F, 0.0F, -0.5F, 3.0F, 1.0F, 1.0F, new CubeDeformation(0.0F)), PartPose.offset(1.5F, -5.0F, 0.0F));
+        PartDefinition rightarm = body.addOrReplaceChild("rightarm", CubeListBuilder.create().texOffs(20, 0).addBox(-0.25F, -1.0F, -0.5F, 3.0F, 1.0F, 1.0F, new CubeDeformation(0.0F)), PartPose.offset(1.5F, -5.0F, 0.0F));
 
         PartDefinition head = body.addOrReplaceChild("head", CubeListBuilder.create().texOffs(0, 0).addBox(-2.5F, -6.0F, -2.5F, 5.0F, 6.0F, 5.0F, new CubeDeformation(0.0F))
                 .texOffs(12, 11).addBox(-1.5F, -8.0F, -1.5F, 3.0F, 2.0F, 3.0F, new CubeDeformation(0.0F))
-                .texOffs(22, 4).addBox(1.0F, -3.0F, -3.5F, 0.0F, 2.0F, 1.0F, new CubeDeformation(0.0F))
                 .texOffs(19, 6).addBox(-0.5F, -2.5F, -5.5F, 1.0F, 1.0F, 3.0F, new CubeDeformation(0.0F)), PartPose.offset(0.0F, -6.0F, 0.0F));
 
         PartDefinition colita = head.addOrReplaceChild("colita", CubeListBuilder.create().texOffs(0, 18).addBox(-1.0F, -2.0F, 0.0F, 2.0F, 2.0F, 2.0F, new CubeDeformation(0.0F)), PartPose.offset(0.0F, -8.0F, -1.0F));
@@ -63,7 +75,7 @@ public class RedPikminModel<T extends PikminEntity> extends HierarchicalModel<T>
         this.root.getAllParts().forEach(ModelPart::resetPose);
         this.applyHeadRotation(netHeadYaw, headPitch);
 
-        this.animateWalk(ModAnimationDefinitions.PIKMIN_WALK, limbSwing, limbSwingAmount, 2f, 2.5f);
+        this.animateWalk(ModAnimationDefinitions.PIKMIN_WALK, limbSwing, limbSwingAmount, 2.5f, 0.65f); // Ajustado
         this.animate(entity.idleAnimationState, ModAnimationDefinitions.PIKMIN_IDLE, ageInTicks, 1f);
     }
 

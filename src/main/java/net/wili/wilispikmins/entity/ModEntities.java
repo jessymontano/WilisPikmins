@@ -17,13 +17,13 @@ public class ModEntities {
             DeferredRegister.create(ForgeRegistries.ENTITY_TYPES, WilisPikmins.MOD_ID);
 
     public static final RegistryObject<EntityType<RedPikminEntity>> RED_PIKMIN =
-            ENTITY_TYPES.register("red_pikmin", () -> EntityType.Builder.of(RedPikminEntity::new, MobCategory.CREATURE).sized(0.75f, 0.35f).build("red_pikmin"));
+            ENTITY_TYPES.register("red_pikmin", () -> EntityType.Builder.of(RedPikminEntity::new, MobCategory.CREATURE).sized(0.35f, 0.75f).build("red_pikmin"));
 
     public static final RegistryObject<EntityType<YellowPikminEntity>> YELLOW_PIKMIN =
-            ENTITY_TYPES.register("yellow_pikmin", () -> EntityType.Builder.of(YellowPikminEntity::new, MobCategory.CREATURE).sized(0.75f, 0.35f).build("yellow_pikmin"));
+            ENTITY_TYPES.register("yellow_pikmin", () -> EntityType.Builder.of(YellowPikminEntity::new, MobCategory.CREATURE).sized(0.35f, 0.75f).build("yellow_pikmin"));
 
     public static final RegistryObject<EntityType<BluePikminEntity>> BLUE_PIKMIN =
-            ENTITY_TYPES.register("blue_pikmin", () -> EntityType.Builder.of(BluePikminEntity::new, MobCategory.CREATURE).sized(0.75f, 0.35f).build("blue_pikmin"));
+            ENTITY_TYPES.register("blue_pikmin", () -> EntityType.Builder.of(BluePikminEntity::new, MobCategory.CREATURE).sized(0.35f, 0.75f).build("blue_pikmin"));
     public static void register(IEventBus eventBus) {
         ENTITY_TYPES.register(eventBus);
     }
