@@ -60,6 +60,8 @@ public class WilisPikmins
         // agrega los spawn eggs al menu de modo creativo
         if(event.getTabKey() == CreativeModeTabs.SPAWN_EGGS) {
             event.accept(ModItems.RED_PIKMIN_SPAWN_EGG);
+            event.accept(ModItems.BLUE_PIKMIN_SPAWN_EGG);
+            event.accept(ModItems.YELLOW_PIKMIN_SPAWN_EGG);
         }
     }
 
