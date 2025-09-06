@@ -12,6 +12,8 @@
   "examplemod.configuration.magicNumber": "Magic Number",
 
   "item.wilispikmins.red_pikmin_spawn_egg": "Red Pikmin Spawn Egg",
+  "item.wilispikmins.blue_pikmin_spawn_egg": "Blue Pikmin Spawn Egg",
+  "item.wilispikmins.yellow_pikmin_spawn_egg": "Yellow Pikmin Spawn Egg",
   "entity.wilispikmins.red_pikmin": "Red Pikmin",
   "entity.wilispikmins.yellow_pikmin": "Yellow Pikmin",
   "entity.wilispikmins.blue_pikmin": "Blue Pikmin",

@@ -21,6 +21,8 @@ public class ModItemModelProvider extends ItemModelProvider {
     protected void registerModels() {
         // aqui se ponen los items
         withExistingParent(ModItems.RED_PIKMIN_SPAWN_EGG.getId().getPath(), mcLoc("item/template_spawn_egg"));
+        withExistingParent(ModItems.BLUE_PIKMIN_SPAWN_EGG.getId().getPath(), mcLoc("item/template_spawn_egg"));
+        withExistingParent(ModItems.YELLOW_PIKMIN_SPAWN_EGG.getId().getPath(), mcLoc("item/template_spawn_egg"));
     }
 
     private ItemModelBuilder simpleItem(RegistryObject<Item> item) {
