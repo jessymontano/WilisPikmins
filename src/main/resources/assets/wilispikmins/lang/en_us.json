@@ -14,5 +14,6 @@
   "item.wilispikmins.red_pikmin_spawn_egg": "Red Pikmin Spawn Egg",
   "entity.wilispikmins.red_pikmin": "Red Pikmin",
   "entity.wilispikmins.yellow_pikmin": "Yellow Pikmin",
-  "entity.wilispikmins.blue_pikmin": "Blue Pikmin"
+  "entity.wilispikmins.blue_pikmin": "Blue Pikmin",
+  "block.wilispikmins.red_buried_pikmin_block": "Red Buried Pikmin Block"
 }

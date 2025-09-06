@@ -14,6 +14,7 @@ import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.event.lifecycle.FMLClientSetupEvent;
 import net.minecraftforge.fml.event.lifecycle.FMLCommonSetupEvent;
 import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
+import net.wili.wilispikmins.block.ModBlocks;
 import net.wili.wilispikmins.entity.ModEntities;
 import net.wili.wilispikmins.entity.client.BluePikminRenderer;
 import net.wili.wilispikmins.entity.client.RedPikminRenderer;
@@ -36,6 +37,9 @@ public class WilisPikmins
 
         // register mod items
         ModItems.register(modEventBus);
+
+        // register mod blocks
+        ModBlocks.register(modEventBus);
 
         // Register the commonSetup method for modloading
         modEventBus.addListener(this::commonSetup);
@@ -78,6 +82,7 @@ public class WilisPikmins
         @SubscribeEvent
         public static void onClientSetup(FMLClientSetupEvent event)
         {
+            // registrar los renderers de las entidades
             EntityRenderers.register(ModEntities.RED_PIKMIN.get(), RedPikminRenderer::new);
             EntityRenderers.register(ModEntities.YELLOW_PIKMIN.get(), YellowPikminRenderer::new);
             EntityRenderers.register(ModEntities.BLUE_PIKMIN.get(), BluePikminRenderer::new);

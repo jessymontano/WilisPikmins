@@ -16,6 +16,7 @@ public class ModEntities {
     public static final DeferredRegister<EntityType<?>> ENTITY_TYPES =
             DeferredRegister.create(ForgeRegistries.ENTITY_TYPES, WilisPikmins.MOD_ID);
 
+    //aqui se registran las entidades
     public static final RegistryObject<EntityType<RedPikminEntity>> RED_PIKMIN =
             ENTITY_TYPES.register("red_pikmin", () -> EntityType.Builder.of(RedPikminEntity::new, MobCategory.CREATURE).sized(0.35f, 0.75f).build("red_pikmin"));
 
@@ -24,6 +25,7 @@ public class ModEntities {
 
     public static final RegistryObject<EntityType<BluePikminEntity>> BLUE_PIKMIN =
             ENTITY_TYPES.register("blue_pikmin", () -> EntityType.Builder.of(BluePikminEntity::new, MobCategory.CREATURE).sized(0.35f, 0.75f).build("blue_pikmin"));
+
     public static void register(IEventBus eventBus) {
         ENTITY_TYPES.register(eventBus);
     }
