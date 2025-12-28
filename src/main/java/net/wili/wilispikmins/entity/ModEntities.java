@@ -1,22 +1,30 @@
 package net.wili.wilispikmins.entity;
 
-import net.wili.wilispikmins.WilisPikmins;
-import net.wili.wilispikmins.entity.custom.RedPikminEntity;
-import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.MobCategory;
-import net.neoforged.bus.api.IEventBus;
-import net.neoforged.neoforge.registries.DeferredRegister;
-
-import java.util.function.Supplier;
+import net.minecraft.world.level.Level;
+import net.minecraftforge.eventbus.api.IEventBus;
+import net.minecraftforge.registries.DeferredRegister;
+import net.minecraftforge.registries.ForgeRegistries;
+import net.minecraftforge.registries.RegistryObject;
+import net.wili.wilispikmins.WilisPikmins;
+import net.wili.wilispikmins.entity.custom.BluePikminEntity;
+import net.wili.wilispikmins.entity.custom.PikminEntity;
+import net.wili.wilispikmins.entity.custom.RedPikminEntity;
+import net.wili.wilispikmins.entity.custom.YellowPikminEntity;
 
 public class ModEntities {
     public static final DeferredRegister<EntityType<?>> ENTITY_TYPES =
-            DeferredRegister.create(BuiltInRegistries.ENTITY_TYPE, WilisPikmins.MOD_ID);
+            DeferredRegister.create(ForgeRegistries.ENTITY_TYPES, WilisPikmins.MOD_ID);
 
-    public static final Supplier<EntityType<RedPikminEntity>> RED_PIKMIN =
-            ENTITY_TYPES.register("red_pikmin", () -> EntityType.Builder.of(RedPikminEntity::new, MobCategory.CREATURE)
-                    .sized(0.75f, 0.35f).build("red_pikmin"));
+    //aqui se registran las entidades
+    public static final RegistryObject<EntityType<PikminEntity>> PIKMIN =
+            ENTITY_TYPES.register("pikmin",
+                    () -> EntityType.Builder.of((EntityType<PikminEntity> type, Level level) -> new PikminEntity(type, level), MobCategory.CREATURE)
+                            .sized(0.35f, 0.75f)
+                            .clientTrackingRange(8)
+                            .build("pikmin"));
 
     public static void register(IEventBus eventBus) {
         ENTITY_TYPES.register(eventBus);

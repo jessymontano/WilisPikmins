@@ -1,81 +1,95 @@
 package net.wili.wilispikmins;
 
-import net.wili.wilispikmins.entity.ModEntities;
-import net.wili.wilispikmins.entity.client.RedPikminRenderer;
-import net.wili.wilispikmins.item.ModItems;
+import com.mojang.logging.LogUtils;
+import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.entity.EntityRenderers;
-import net.neoforged.api.distmarker.Dist;
-import net.neoforged.fml.common.EventBusSubscriber;
-import net.neoforged.fml.event.lifecycle.FMLClientSetupEvent;
+import net.minecraft.world.item.CreativeModeTabs;
+import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.common.MinecraftForge;
+import net.minecraftforge.event.BuildCreativeModeTabContentsEvent;
+import net.minecraftforge.event.server.ServerStartingEvent;
+import net.minecraftforge.eventbus.api.IEventBus;
+import net.minecraftforge.eventbus.api.SubscribeEvent;
+import net.minecraftforge.fml.common.Mod;
+import net.minecraftforge.fml.event.lifecycle.FMLClientSetupEvent;
+import net.minecraftforge.fml.event.lifecycle.FMLCommonSetupEvent;
+import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
+import net.wili.wilispikmins.block.ModBlocks;
+import net.wili.wilispikmins.entity.ModEntities;
+import net.wili.wilispikmins.entity.client.BluePikminRenderer;
+import net.wili.wilispikmins.entity.client.RedPikminRenderer;
+import net.wili.wilispikmins.entity.client.YellowPikminRenderer;
+import net.wili.wilispikmins.item.ModItems;
+import net.wili.wilispikmins.sound.ModSounds;
 import org.slf4j.Logger;
 
-import com.mojang.logging.LogUtils;
-
-import net.minecraft.world.item.CreativeModeTabs;
-import net.neoforged.bus.api.IEventBus;
-import net.neoforged.bus.api.SubscribeEvent;
-import net.neoforged.fml.common.Mod;
-import net.neoforged.fml.config.ModConfig;
-import net.neoforged.fml.ModContainer;
-import net.neoforged.fml.event.lifecycle.FMLCommonSetupEvent;
-import net.neoforged.neoforge.common.NeoForge;
-import net.neoforged.neoforge.event.BuildCreativeModeTabContentsEvent;
-import net.neoforged.neoforge.event.server.ServerStartingEvent;
-
-// The value here should match an entry in the META-INF/neoforge.mods.toml file
+// The value here should match an entry in the META-INF/mods.toml file
 @Mod(WilisPikmins.MOD_ID)
-public class WilisPikmins {
+public class WilisPikmins
+{
     // Define mod id in a common place for everything to reference
     public static final String MOD_ID = "wilispikmins";
     // Directly reference a slf4j logger
-    public static final Logger LOGGER = LogUtils.getLogger();
+    private static final Logger LOGGER = LogUtils.getLogger();
 
-    // The constructor for the mod class is the first code that is run when your mod is loaded.
-    // FML will recognize some parameter types like IEventBus or ModContainer and pass them in automatically.
-    public WilisPikmins(IEventBus modEventBus, ModContainer modContainer) {
+    public WilisPikmins(FMLJavaModLoadingContext context)
+    {
+        IEventBus modEventBus = context.getModEventBus();
+
+        // register mod items
+        ModItems.register(modEventBus);
+
+        // register mod blocks
+        ModBlocks.register(modEventBus);
+
+        // register mod sounds
+        ModSounds.register(modEventBus);
+
         // Register the commonSetup method for modloading
         modEventBus.addListener(this::commonSetup);
 
-        // Register ourselves for server and other game events we are interested in.
-        // Note that this is necessary if and only if we want *this* class (ExampleMod) to respond directly to events.
-        // Do not add this line if there are no @SubscribeEvent-annotated functions in this class, like onServerStarting() below.
-        NeoForge.EVENT_BUS.register(this);
-
-        // Register mod items
-        ModItems.register(modEventBus);
+        // Register ourselves for server and other game events we are interested in
+        MinecraftForge.EVENT_BUS.register(this);
 
         // Register the item to a creative tab
         modEventBus.addListener(this::addCreative);
 
-        // Register our mod's ModConfigSpec so that FML can create and load the config file for us
-        modContainer.registerConfig(ModConfig.Type.COMMON, Config.SPEC);
-
-        // Register mod entities
+        // register mod entities
         ModEntities.register(modEventBus);
     }
 
-    private void commonSetup(FMLCommonSetupEvent event) {
-
+    private void commonSetup(final FMLCommonSetupEvent event)
+    {
     }
 
     // Add the example block item to the building blocks tab
-    private void addCreative(BuildCreativeModeTabContentsEvent event) {
-        if (event.getTabKey() == CreativeModeTabs.SPAWN_EGGS) {
+    private void addCreative(BuildCreativeModeTabContentsEvent event)
+    {
+        // agrega los spawn eggs al menu de modo creativo
+        if(event.getTabKey() == CreativeModeTabs.SPAWN_EGGS) {
             event.accept(ModItems.RED_PIKMIN_SPAWN_EGG);
+            event.accept(ModItems.BLUE_PIKMIN_SPAWN_EGG);
+            event.accept(ModItems.YELLOW_PIKMIN_SPAWN_EGG);
         }
     }
 
     // You can use SubscribeEvent and let the Event Bus discover methods to call
     @SubscribeEvent
-    public void onServerStarting(ServerStartingEvent event) {
-
+    public void onServerStarting(ServerStartingEvent event)
+    {
+        // Do something when the server starts
+        LOGGER.info("HELLO from server starting");
     }
 
-    @EventBusSubscriber(modid = MOD_ID, value = Dist.CLIENT)
-    public static class ClientModEvents {
+    // You can use EventBusSubscriber to automatically register all static methods in the class annotated with @SubscribeEvent
+    @Mod.EventBusSubscriber(modid = MOD_ID, bus = Mod.EventBusSubscriber.Bus.MOD, value = Dist.CLIENT)
+    public static class ClientModEvents
+    {
         @SubscribeEvent
-        public static void onClientSetup(FMLClientSetupEvent event) {
-            EntityRenderers.register(ModEntities.RED_PIKMIN.get(), RedPikminRenderer::new);
+        public static void onClientSetup(FMLClientSetupEvent event)
+        {
+            // registrar los renderers de las entidades
+
         }
     }
 }

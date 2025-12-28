@@ -1,0 +1,38 @@
+{
+  "pikmin_death": {
+    "subtitle" : "sounds.wilispikmins.pikmin_death",
+    "sounds": [
+      "wilispikmins:pikmin_death"
+    ]
+  },
+  "pikmin_greeting": {
+    "subtitle": "sounds.wilispikmins.pikmin_greeting",
+    "sounds": [
+      "wilispikmins:pikmin_greeting_1",
+      "wilispikmins:pikmin_greeting_2",
+      "wilispikmins:pikmin_greeting_3",
+      "wilispikmins:pikmin_greeting_4",
+      "wilispikmins:pikmin_greeting_5",
+      "wilispikmins:pikmin_greeting_6"
+
+    ]
+  },
+  "pikmin_join_squad": {
+    "subtitle": "sounds.wilispikmins.pikmin_join_squad",
+    "sounds": [
+      "wilispikmins:pikmin_join_squad"
+    ]
+  },
+  "pikmin_scream": {
+    "subtitle": "sounds.wilispikmins.pikmin_scream",
+    "sounds": [
+      "wilispikmins:pikmin_scream"
+    ]
+  },
+  "pikmin_drowning": {
+    "subtitle": "sounds.wilispikmins.pikmin_drowning",
+    "sounds": [
+      "wilispikmins:pikmin_drowning"
+    ]
+  }
+}
