@@ -15,8 +15,6 @@ import net.wili.wilispikmins.entity.custom.YellowPikminEntity;
 public class ModEventBusEvents {
     @SubscribeEvent
     public static void registerAttributes(EntityAttributeCreationEvent event) {
-        event.put(ModEntities.RED_PIKMIN.get(), RedPikminEntity.createAttribute().build());
-        event.put(ModEntities.YELLOW_PIKMIN.get(), YellowPikminEntity.createAttribute().build());
-        event.put(ModEntities.BLUE_PIKMIN.get(), BluePikminEntity.createAttribute().build());
+
     }
 }

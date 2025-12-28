@@ -20,6 +20,7 @@ import net.wili.wilispikmins.entity.client.BluePikminRenderer;
 import net.wili.wilispikmins.entity.client.RedPikminRenderer;
 import net.wili.wilispikmins.entity.client.YellowPikminRenderer;
 import net.wili.wilispikmins.item.ModItems;
+import net.wili.wilispikmins.sound.ModSounds;
 import org.slf4j.Logger;
 
 // The value here should match an entry in the META-INF/mods.toml file
@@ -40,6 +41,9 @@ public class WilisPikmins
 
         // register mod blocks
         ModBlocks.register(modEventBus);
+
+        // register mod sounds
+        ModSounds.register(modEventBus);
 
         // Register the commonSetup method for modloading
         modEventBus.addListener(this::commonSetup);
@@ -85,9 +89,7 @@ public class WilisPikmins
         public static void onClientSetup(FMLClientSetupEvent event)
         {
             // registrar los renderers de las entidades
-            EntityRenderers.register(ModEntities.RED_PIKMIN.get(), RedPikminRenderer::new);
-            EntityRenderers.register(ModEntities.YELLOW_PIKMIN.get(), YellowPikminRenderer::new);
-            EntityRenderers.register(ModEntities.BLUE_PIKMIN.get(), BluePikminRenderer::new);
+
         }
     }
 }

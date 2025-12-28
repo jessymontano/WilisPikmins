@@ -77,6 +77,10 @@ public class RedPikminModel<T extends PikminEntity> extends HierarchicalModel<T>
 
         this.animateWalk(ModAnimationDefinitions.PIKMIN_WALK, limbSwing, limbSwingAmount, 2.5f, 0.65f); // Ajustado
         this.animate(entity.idleAnimationState, ModAnimationDefinitions.PIKMIN_IDLE, ageInTicks, 1f);
+
+        if (entity.popAnimationState.isStarted()) {
+            this.animate(entity.popAnimationState, ModAnimationDefinitions.PIKMIN_POP, ageInTicks, 1.0f);
+        }
     }
 
     private void applyHeadRotation(float headYaw, float headPitch) {

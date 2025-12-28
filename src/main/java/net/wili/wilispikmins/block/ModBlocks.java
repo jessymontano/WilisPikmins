@@ -6,12 +6,13 @@ import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.SoundType;
 import net.minecraft.world.level.block.state.BlockBehaviour;
+import net.minecraft.world.level.material.MapColor;
 import net.minecraftforge.eventbus.api.IEventBus;
 import net.minecraftforge.registries.DeferredRegister;
 import net.minecraftforge.registries.ForgeRegistries;
 import net.minecraftforge.registries.RegistryObject;
 import net.wili.wilispikmins.WilisPikmins;
-import net.wili.wilispikmins.block.custom.RedBuriedPikminBlock;
+import net.wili.wilispikmins.block.custom.BuriedPikminBlock;
 import net.wili.wilispikmins.item.ModItems;
 
 import java.util.function.Supplier;
@@ -21,8 +22,12 @@ public class ModBlocks {
             DeferredRegister.create(ForgeRegistries.BLOCKS, WilisPikmins.MOD_ID);
 
     // aqui se agregan los bloques
-    public static final RegistryObject<Block> RED_BURIED_PIKMIN_BLOCK = registerBlock("red_buried_pikmin_block",
-            () -> new RedBuriedPikminBlock(BlockBehaviour.Properties.copy(Blocks.POPPY)
+    public static final RegistryObject<Block> BURIED_PIKMIN_BLOCK = registerBlock("buried_pikmin_block",
+            () -> new BuriedPikminBlock(BlockBehaviour.Properties.of()
+                    .mapColor(MapColor.PLANT)
+                    .instabreak()
+                    .offsetType(BlockBehaviour.OffsetType.XZ)
+                    .randomTicks()
                     .noOcclusion()
                     .noCollission()
                     .sound(SoundType.GRASS)));
