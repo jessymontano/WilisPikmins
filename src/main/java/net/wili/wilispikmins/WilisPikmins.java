@@ -22,6 +22,7 @@ import net.wili.wilispikmins.entity.client.YellowPikminRenderer;
 import net.wili.wilispikmins.item.ModItems;
 import net.wili.wilispikmins.sound.ModSounds;
 import org.slf4j.Logger;
+import software.bernie.geckolib.GeckoLib;
 
 // The value here should match an entry in the META-INF/mods.toml file
 @Mod(WilisPikmins.MOD_ID)
@@ -44,6 +45,8 @@ public class WilisPikmins
 
         // register mod sounds
         ModSounds.register(modEventBus);
+
+        GeckoLib.initialize();
 
         // Register the commonSetup method for modloading
         modEventBus.addListener(this::commonSetup);
