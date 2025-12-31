@@ -9,10 +9,7 @@ import net.minecraftforge.registries.DeferredRegister;
 import net.minecraftforge.registries.ForgeRegistries;
 import net.minecraftforge.registries.RegistryObject;
 import net.wili.wilispikmins.WilisPikmins;
-import net.wili.wilispikmins.entity.custom.BluePikminEntity;
 import net.wili.wilispikmins.entity.custom.PikminEntity;
-import net.wili.wilispikmins.entity.custom.RedPikminEntity;
-import net.wili.wilispikmins.entity.custom.YellowPikminEntity;
 
 public class ModEntities {
     public static final DeferredRegister<EntityType<?>> ENTITY_TYPES =

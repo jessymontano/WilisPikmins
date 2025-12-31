@@ -16,9 +16,7 @@ import net.minecraftforge.fml.event.lifecycle.FMLCommonSetupEvent;
 import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
 import net.wili.wilispikmins.block.ModBlocks;
 import net.wili.wilispikmins.entity.ModEntities;
-import net.wili.wilispikmins.entity.client.BluePikminRenderer;
-import net.wili.wilispikmins.entity.client.RedPikminRenderer;
-import net.wili.wilispikmins.entity.client.YellowPikminRenderer;
+import net.wili.wilispikmins.entity.client.PikminRenderer;
 import net.wili.wilispikmins.item.ModItems;
 import net.wili.wilispikmins.sound.ModSounds;
 import org.slf4j.Logger;
@@ -31,7 +29,7 @@ public class WilisPikmins
     // Define mod id in a common place for everything to reference
     public static final String MOD_ID = "wilispikmins";
     // Directly reference a slf4j logger
-    private static final Logger LOGGER = LogUtils.getLogger();
+    public static final Logger LOGGER = LogUtils.getLogger();
 
     public WilisPikmins(FMLJavaModLoadingContext context)
     {
@@ -92,7 +90,7 @@ public class WilisPikmins
         public static void onClientSetup(FMLClientSetupEvent event)
         {
             // registrar los renderers de las entidades
-
+            EntityRenderers.register(ModEntities.PIKMIN.get(), PikminRenderer::new);
         }
     }
 }

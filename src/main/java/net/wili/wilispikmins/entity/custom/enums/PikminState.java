@@ -8,5 +8,6 @@ public enum PikminState {
     DROWNING,
     BURNING,
     ELECTROCUTED,
-    STUCK
+    STUCK,
+    POPPING
 }
