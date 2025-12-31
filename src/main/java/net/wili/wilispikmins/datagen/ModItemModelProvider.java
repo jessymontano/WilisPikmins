@@ -23,6 +23,9 @@ public class ModItemModelProvider extends ItemModelProvider {
         withExistingParent(ModItems.RED_PIKMIN_SPAWN_EGG.getId().getPath(), mcLoc("item/template_spawn_egg"));
         withExistingParent(ModItems.BLUE_PIKMIN_SPAWN_EGG.getId().getPath(), mcLoc("item/template_spawn_egg"));
         withExistingParent(ModItems.YELLOW_PIKMIN_SPAWN_EGG.getId().getPath(), mcLoc("item/template_spawn_egg"));
+
+        withExistingParent(ModBlocks.BURIED_PIKMIN_BLOCK.getId().getPath(),
+                modLoc("block/buried_pikmin_leaf"));
     }
 
     private ItemModelBuilder simpleItem(RegistryObject<Item> item) {

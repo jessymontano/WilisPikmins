@@ -17,6 +17,7 @@ public class ModSounds {
     public static final RegistryObject<SoundEvent> PIKMIN_JOIN_SQUAD = registerSoundEvents("pikmin_join_squad");
     public static final RegistryObject<SoundEvent> PIKMIN_SCREAM = registerSoundEvents("pikmin_scream");
     public static final RegistryObject<SoundEvent> PIKMIN_DROWNING = registerSoundEvents("pikmin_drowning");
+    public static final RegistryObject<SoundEvent> PIKMIN_ENTER_IDLE = registerSoundEvents("pikmin_enter_idle");
 
     private static RegistryObject<SoundEvent> registerSoundEvents(String name) {
         return SOUND_EVENTS.register(name, () -> SoundEvent.createVariableRangeEvent(new ResourceLocation(WilisPikmins.MOD_ID, name)));

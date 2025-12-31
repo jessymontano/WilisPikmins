@@ -6,11 +6,11 @@ import net.minecraft.util.StringRepresentable;
 public enum PikminType implements StringRepresentable {
     RED("red", 0xFF0000),
     YELLOW("yellow", 0xFFFF00),
-    BLUE("blue", 0x0000FF),
-    PURPLE("purple", 0x800080),
-    WHITE("white", 0xFFFFFF),
-    ROCK("rock", 0x808080),
-    WINGED("winged", 0xFF69B4);
+    BLUE("blue", 0x0000FF);
+   // PURPLE("purple", 0x800080),
+   // WHITE("white", 0xFFFFFF),
+   // ROCK("rock", 0x808080),
+   // WINGED("winged", 0xFF69B4);
 
     private final String name;
     private final int color;

@@ -1,7 +1,10 @@
 package net.wili.wilispikmins.entity.custom.ai;
 
+import net.minecraft.core.BlockPos;
+import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.ai.goal.Goal;
 import net.minecraft.world.level.pathfinder.BlockPathTypes;
+import net.minecraft.world.phys.Vec3;
 import net.wili.wilispikmins.entity.custom.PikminEntity;
 import net.wili.wilispikmins.entity.custom.enums.PikminState;
 
@@ -12,18 +15,23 @@ public class PikminFollowOwnerGoal extends Goal {
     private final double speedModifier;
     private final float startDistance;
     private final float stopDistance;
+    private final float minDistance;
     private float oldWaterCost;
 
-    public PikminFollowOwnerGoal(PikminEntity pikmin, double speedModifier, float startDistance, float stopDistance) {
+    public PikminFollowOwnerGoal(PikminEntity pikmin, double speedModifier, float startDistance, float stopDistance, float minDistance) {
         this.pikmin = pikmin;
         this. speedModifier = speedModifier;
         this.startDistance = startDistance;
         this.stopDistance = stopDistance;
+        this.minDistance = minDistance;
         this.setFlags(EnumSet.of(Flag.MOVE, Flag.LOOK));
     }
 
     @Override
     public boolean canUse() {
+        if (pikmin.getPikminState() == PikminState.POPPING) {
+            return false;
+        }
         if (pikmin.getPikminState() != PikminState.FOLLOWING) {
             return false;
         }
@@ -38,6 +46,9 @@ public class PikminFollowOwnerGoal extends Goal {
 
     @Override
     public boolean canContinueToUse() {
+        if (pikmin.getPikminState() == PikminState.POPPING) {
+            return false;
+        }
         if (pikmin.getPikminState() != PikminState.FOLLOWING) {
             return false;
         }
@@ -60,11 +71,25 @@ public class PikminFollowOwnerGoal extends Goal {
 
     @Override
     public void tick() {
-        pikmin.getLookControl().setLookAt(pikmin.getOwner(), 10.0F, (float)pikmin.getMaxHeadXRot());
-        if (pikmin.distanceToSqr(pikmin.getOwner()) >= 144.0D) {
-            pikmin.teleportTo(pikmin.getOwner().getX(), pikmin.getOwner().getY(), pikmin.getOwner().getZ());
-        } else {
-            pikmin.getNavigation().moveTo(pikmin.getOwner(), speedModifier);
+        LivingEntity owner = pikmin.getOwner();
+        pikmin.getLookControl().setLookAt(owner, 10.0F, (float)pikmin.getMaxHeadXRot());
+        if (pikmin.distanceToSqr(owner) >= 144.0D) {
+            pikmin.teleportTo(owner.getX(), owner.getY(), owner.getZ());
+        } else if (pikmin.distanceToSqr(owner) < (double) (minDistance * minDistance)) {
+            Vec3 awayVector = pikmin.position()
+                    .subtract(owner.position())
+                    .normalize()
+                    .scale(minDistance);
+            BlockPos targetPos = BlockPos.containing(
+                    owner.getX() + awayVector.x,
+                    owner.getY(),
+                    owner.getZ() + awayVector.z
+            );
+
+            pikmin.getNavigation().moveTo(targetPos.getX(), targetPos.getY(), targetPos.getZ(), speedModifier * 0.5);
+        }
+        else {
+            pikmin.getNavigation().moveTo(owner, speedModifier);
         }
     }
 }

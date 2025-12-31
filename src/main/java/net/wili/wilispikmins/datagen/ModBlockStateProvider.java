@@ -5,10 +5,16 @@ import net.minecraft.world.level.block.Block;
 import net.minecraftforge.client.model.generators.BlockStateProvider;
 import net.minecraftforge.client.model.generators.ConfiguredModel;
 import net.minecraftforge.client.model.generators.ModelFile;
+import net.minecraftforge.client.model.generators.VariantBlockStateBuilder;
 import net.minecraftforge.common.data.ExistingFileHelper;
 import net.minecraftforge.registries.RegistryObject;
 import net.wili.wilispikmins.WilisPikmins;
 import net.wili.wilispikmins.block.ModBlocks;
+import net.wili.wilispikmins.block.custom.BuriedPikminBlock;
+import net.wili.wilispikmins.entity.custom.enums.GrowthStage;
+import net.wili.wilispikmins.entity.custom.enums.PikminType;
+
+import java.lang.reflect.Array;
 
 public class ModBlockStateProvider extends BlockStateProvider {
 
@@ -18,8 +24,32 @@ public class ModBlockStateProvider extends BlockStateProvider {
 
     @Override
     protected void registerStatesAndModels() {
-        simpleBlock(ModBlocks.RED_BURIED_PIKMIN_BLOCK.get(),
-                new ModelFile.UncheckedModelFile(modLoc("block/red_buried_pikmin")));
+        makeBuriedPikminBlock();
+    }
+
+    private void makeBuriedPikminBlock() {
+        Block block = ModBlocks.BURIED_PIKMIN_BLOCK.get();
+        VariantBlockStateBuilder builder = getVariantBuilder(block);
+
+        for (PikminType type: PikminType.values()) {
+            for (GrowthStage stage : GrowthStage.values()) {
+                String modelName = type.getName() + "_buried_pikmin_" + stage.getName();
+
+                ModelFile model = models()
+                        .withExistingParent(modelName,
+                                modLoc("block/buried_pikmin_" + stage.getName()))
+                                .texture("pikmin",
+                                        modLoc("block/" + type.getName() + "_buried_pikmin_" + stage.getName()))
+                                        .texture("particle",
+                                                modLoc("block/" + type.getName() + "_buried_pikmin_" + stage.getName()));
+                builder.partialState()
+                        .with(BuriedPikminBlock.PIKMIN_TYPE, type)
+                        .with(BuriedPikminBlock.GROWTH_STAGE, stage)
+                        .modelForState()
+                        .modelFile(model)
+                        .addModel();
+            }
+        }
     }
 
     private void blockWithItem(RegistryObject<Block> blockRegistryObject) {

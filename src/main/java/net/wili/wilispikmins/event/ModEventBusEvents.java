@@ -6,15 +6,12 @@ import net.wili.wilispikmins.WilisPikmins;
 
 import net.minecraftforge.event.entity.EntityAttributeCreationEvent;
 import net.wili.wilispikmins.entity.ModEntities;
-import net.wili.wilispikmins.entity.custom.BluePikminEntity;
 import net.wili.wilispikmins.entity.custom.PikminEntity;
-import net.wili.wilispikmins.entity.custom.RedPikminEntity;
-import net.wili.wilispikmins.entity.custom.YellowPikminEntity;
 
 @Mod.EventBusSubscriber(modid = WilisPikmins.MOD_ID, bus = Mod.EventBusSubscriber.Bus.MOD)
 public class ModEventBusEvents {
     @SubscribeEvent
     public static void registerAttributes(EntityAttributeCreationEvent event) {
-
+        event.put(ModEntities.PIKMIN.get(), PikminEntity.createAttributes().build());
     }
 }

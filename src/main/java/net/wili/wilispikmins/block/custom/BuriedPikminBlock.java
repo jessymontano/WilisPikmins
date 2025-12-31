@@ -17,6 +17,8 @@ import net.minecraft.world.level.block.BushBlock;
 import net.minecraft.world.level.block.RenderShape;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.StateDefinition;
+import net.minecraft.world.level.block.state.properties.BlockStateProperties;
+import net.minecraft.world.level.block.state.properties.DirectionProperty;
 import net.minecraft.world.level.block.state.properties.EnumProperty;
 import net.minecraft.world.level.block.state.properties.IntegerProperty;
 import net.minecraft.world.phys.BlockHitResult;
@@ -24,9 +26,7 @@ import net.minecraft.world.phys.shapes.CollisionContext;
 import net.minecraft.world.phys.shapes.VoxelShape;
 import net.wili.wilispikmins.entity.ModEntities;
 import net.wili.wilispikmins.entity.custom.PikminEntity;
-import net.wili.wilispikmins.entity.custom.RedPikminEntity;
 import net.wili.wilispikmins.entity.custom.enums.GrowthStage;
-import net.wili.wilispikmins.entity.custom.enums.PikminState;
 import net.wili.wilispikmins.entity.custom.enums.PikminType;
 import net.wili.wilispikmins.sound.ModSounds;
 import org.jetbrains.annotations.Nullable;
@@ -36,6 +36,8 @@ public class BuriedPikminBlock extends BushBlock {
     private static final VoxelShape LEAF_SHAPE = Block.box(4.0, 0.0, 4.0, 12.0, 8.0, 12.0);
     private static final VoxelShape BUD_SHAPE = Block.box(4.0, 0.0, 4.0, 12.0, 10.0, 12.0);
     private static final VoxelShape FLOWER_SHAPE = Block.box(4.0, 0.0, 4.0, 12.0, 12.0, 12.0);
+
+    public static final DirectionProperty FACING = BlockStateProperties.HORIZONTAL_FACING;
 
     public static final EnumProperty<PikminType> PIKMIN_TYPE =
             EnumProperty.create("type", PikminType.class);
@@ -47,6 +49,7 @@ public class BuriedPikminBlock extends BushBlock {
         super(pProperties);
 
         this.registerDefaultState(this.stateDefinition.any()
+                .setValue(FACING, Direction.NORTH)
                 .setValue(PIKMIN_TYPE, PikminType.RED)
                 .setValue(GROWTH_STAGE, GrowthStage.LEAF)
                 .setValue(AGE, 0));
@@ -54,7 +57,17 @@ public class BuriedPikminBlock extends BushBlock {
 
     @Override
     protected void createBlockStateDefinition(StateDefinition.Builder<Block, BlockState> builder) {
-        builder.add(PIKMIN_TYPE, GROWTH_STAGE, AGE);
+        builder.add(FACING, PIKMIN_TYPE, GROWTH_STAGE, AGE);
+    }
+
+    @Nullable
+    @Override
+    public BlockState getStateForPlacement(BlockPlaceContext context) {
+        return this.defaultBlockState()
+                .setValue(FACING, context.getHorizontalDirection().getOpposite())
+                .setValue(PIKMIN_TYPE, getRandomPikminType(context.getLevel().random))
+                .setValue(GROWTH_STAGE, GrowthStage.LEAF)
+                .setValue(AGE, 0);
     }
 
     @Override
@@ -86,10 +99,14 @@ public class BuriedPikminBlock extends BushBlock {
             PikminType type = pState.getValue(PIKMIN_TYPE);
             GrowthStage stage = pState.getValue(GROWTH_STAGE);
 
-            PikminEntity pikmin = new PikminEntity(pLevel, type);
-            pikmin.setPos(pPos.getX() + 0-5, pPos.getY(), pPos.getZ() + 0.5);
+            PikminEntity pikmin = ModEntities.PIKMIN.get().create(pLevel);
+            pikmin.setPos(pPos.getX() + 0.5, pPos.getY(), pPos.getZ() + 0.5);
+            pikmin.setPikminType(type);
             pikmin.setGrowthStage(stage);
             pikmin.setOwnerUUID(pPlayer.getUUID());
+
+            Direction facing = pState.getValue(FACING);
+            pikmin.setYRot(facing.toYRot());
 
             pLevel.addFreshEntity(pikmin);
 
@@ -132,24 +149,16 @@ public class BuriedPikminBlock extends BushBlock {
         return state.getValue(AGE) < AGE.getPossibleValues().size() - 1;
     }
 
-    @Nullable
-    @Override
-    public BlockState getStateForPlacement(BlockPlaceContext context) {
-        return this.defaultBlockState()
-                .setValue(PIKMIN_TYPE, getRandomPikminType(context.getLevel().random))
-                .setValue(GROWTH_STAGE, GrowthStage.LEAF)
-                .setValue(AGE, 0);
-    }
 
     private PikminType getRandomPikminType(RandomSource random) {
         int roll = random.nextInt(100);
         if (roll < 15) return PikminType.RED;
         if (roll < 30) return PikminType.YELLOW;
-        if (roll < 45) return PikminType.BLUE;
-        if (roll < 60) return PikminType.WHITE;
+        /*if (roll < 45)*/ return PikminType.BLUE;
+       /* if (roll < 60) return PikminType.WHITE;
         if (roll < 75) return PikminType.PURPLE;
         if (roll < 90) return PikminType.WINGED;
-        return PikminType.ROCK;
+        return PikminType.ROCK;*/
     }
 
     @Override

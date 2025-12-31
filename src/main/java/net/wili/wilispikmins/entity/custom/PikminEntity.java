@@ -1,12 +1,14 @@
 package net.wili.wilispikmins.entity.custom;
 
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.network.syncher.EntityDataSerializers;
 import net.minecraft.network.syncher.SynchedEntityData;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.sounds.SoundEvent;
+import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.damagesource.DamageSource;
@@ -19,18 +21,29 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.ServerLevelAccessor;
+import net.minecraft.world.phys.Vec3;
+import net.wili.wilispikmins.WilisPikmins;
 import net.wili.wilispikmins.entity.ModEntities;
 import net.wili.wilispikmins.entity.custom.enums.GrowthStage;
 import net.wili.wilispikmins.entity.custom.enums.PikminState;
 import net.wili.wilispikmins.entity.custom.enums.PikminType;
 import net.wili.wilispikmins.entity.custom.ai.PikminFollowOwnerGoal;
 import net.wili.wilispikmins.sound.ModSounds;
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import software.bernie.geckolib.animatable.GeoEntity;
+import software.bernie.geckolib.core.animatable.instance.AnimatableInstanceCache;
+import software.bernie.geckolib.core.animation.AnimatableManager;
+import software.bernie.geckolib.core.animation.AnimationController;
+import software.bernie.geckolib.core.animation.RawAnimation;
+import software.bernie.geckolib.core.object.PlayState;
+import software.bernie.geckolib.util.GeckoLibUtil;
+import software.bernie.geckolib.core.animation.AnimationState;
 
 import java.util.Optional;
 import java.util.UUID;
 
-public class PikminEntity extends TamableAnimal {
+public class PikminEntity extends TamableAnimal implements GeoEntity {
     // datos cliente-servidor
     private static final EntityDataAccessor<Integer> DATA_TYPE =
             SynchedEntityData.defineId(PikminEntity.class, EntityDataSerializers.INT);
@@ -42,17 +55,18 @@ public class PikminEntity extends TamableAnimal {
             SynchedEntityData.defineId(PikminEntity.class, EntityDataSerializers.OPTIONAL_UUID);
 
     // animaciones
-    public final AnimationState idleAnimationState = new AnimationState();
-    public final AnimationState popAnimationState = new AnimationState();
-    public final AnimationState attackAnimationState = new AnimationState();
-    private int idleAnimationTimeout = 0;
-    private int popAnimationTimeout = 0;
-    private int attackAnimationTimeout = 0;
+    private final AnimatableInstanceCache cache = GeckoLibUtil.createInstanceCache(this);
+
+    private boolean shouldPlayPop = false;
+    private int popAnimationTicks = 0;
+    private static final int POP_ANIMATION_DURATION = 15;
 
     // estados temporales
     private int drowningTicks = 0;
     private int burningTicks = 0;
     private int growthTicks = 0;
+
+    // proximamente seran utiles
     @Nullable private LivingEntity target;
     @Nullable private BlockPos onionPos;
     private int followRange = 10;
@@ -65,11 +79,79 @@ public class PikminEntity extends TamableAnimal {
         setPikminType(PikminType.RED);
         setGrowthStage(GrowthStage.LEAF);
         setPikminState(PikminState.IDLE);
+
+        // rotacion aleatoria al spawnear
+        this.setYRot(this.level().random.nextFloat() * 360.0F);
+        this.yHeadRot = this.getYRot();
+        this.yBodyRot = this.getYRot();
     }
 
     public PikminEntity(Level level, PikminType type) {
         this(ModEntities.PIKMIN.get(), level);
         setPikminType(type);
+
+        // rotacion aleatoria al spawnear
+        this.setYRot(this.level().random.nextFloat() * 360.0F);
+        this.yHeadRot = this.getYRot();
+        this.yBodyRot = this.getYRot();
+    }
+
+
+    protected <E extends PikminEntity> PlayState predicate(AnimationState<E> event) {
+        if (event.isMoving()) {
+            return event.setAndContinue(RawAnimation.begin()
+                    .thenLoop("animation.pikmin.walk"));
+        } else {
+            return event.setAndContinue(RawAnimation.begin()
+                    .thenLoop("animation.pikmin.idle"));
+        }
+    }
+
+    protected <E extends PikminEntity> PlayState attackPredicate(AnimationState<E> event) {
+        if (this.swinging) {
+            return event.setAndContinue(RawAnimation.begin()
+                    .thenPlay("animation.pikmin.attack")
+                    .thenLoop("animation.pikmin.idle"));
+        }
+        return PlayState.STOP;
+    }
+
+    protected <E extends PikminEntity> PlayState popPredicate(AnimationState<E> event) {
+        if (this.shouldPlayPop) {
+            this.shouldPlayPop = false;
+            return event.setAndContinue(RawAnimation.begin()
+                    .thenPlay("animation.pikmin.pop")
+                    .thenLoop("animation.pikmin.idle"));
+        }
+        if (this.tickCount < 20) {
+            return event.setAndContinue(RawAnimation.begin()
+                    .thenPlay("animation.pikmin.pop"));
+        }
+        return PlayState.STOP;
+    }
+
+    public void triggerPopAnimation() {
+        this.shouldPlayPop = true;
+        this.setPikminState(PikminState.POPPING);
+        this.popAnimationTicks = 0;
+
+        this.getNavigation().stop();
+        this.setDeltaMovement(Vec3.ZERO);
+
+        try {
+            var manager = this.getAnimatableInstanceCache().getManagerForId(this.getId());
+
+            if (manager != null) {
+                var controller = manager.getAnimationControllers().get("pop");
+                if (controller != null) {
+                    controller.forceAnimationReset();
+                    controller.setAnimation(RawAnimation.begin()
+                            .thenPlay("animation.pikmin.pop"));
+                }
+            }
+        } catch (Exception e) {
+            WilisPikmins.LOGGER.error("Error triggering pop animation", e);
+        }
     }
 
     @Override
@@ -85,14 +167,24 @@ public class PikminEntity extends TamableAnimal {
     protected void registerGoals() {
         this.goalSelector.addGoal(0, new FloatGoal(this));
         this.goalSelector.addGoal(1, new PanicGoal(this, 2.0));
-        this.goalSelector.addGoal(2, new PikminFollowOwnerGoal(this, 1.2, 10.0f, 2.0f));
+        this.goalSelector.addGoal(2, new PikminFollowOwnerGoal(this, 1.2, 10.0f, 2.0f, 3.0f));
         this.goalSelector.addGoal(3, new MeleeAttackGoal(this, 1.0, true));
         this.goalSelector.addGoal(4, new WaterAvoidingRandomStrollGoal(this, 1.0));
-        this.goalSelector.addGoal(5, new LookAtPlayerGoal(this, Player.class, 6.0F));
-        this.goalSelector.addGoal(6, new RandomLookAroundGoal(this));
+        this.goalSelector.addGoal(5, new LookAtPlayerGoal(this, Player.class, 6.0F) {
+            @Override
+            public boolean canUse() {
+                return getPikminState() != PikminState.POPPING && super.canUse();
+            }
+        });
+        this.goalSelector.addGoal(6, new RandomLookAroundGoal(this) {
+            @Override
+            public boolean canUse() {
+                return getPikminState() != PikminState.POPPING && super.canUse();
+            }
+        });
     }
 
-    public static AttributeSupplier.Builder createAttribute() {
+    public static AttributeSupplier.Builder createAttributes() {
         return TamableAnimal.createMobAttributes()
                 .add(Attributes.MAX_HEALTH, 16.0) // 8 corazones
                 .add(Attributes.MOVEMENT_SPEED, 0.25)
@@ -146,19 +238,23 @@ public class PikminEntity extends TamableAnimal {
         };
 
         float baseSpeed = 0.25f;
-        if (getPikminType() == PikminType.WHITE) {
+       /* if (getPikminType() == PikminType.WHITE) {
             baseSpeed = 0.3f;
         } else if (getPikminType() == PikminType.PURPLE) {
             baseSpeed = 0.2f;
-        }
+        }*/
 
         this.getAttribute(Attributes.MOVEMENT_SPEED).setBaseValue(baseSpeed * speedMultiplier);
     }
 
     @Override
-    public InteractionResult mobInteract(Player player, InteractionHand hand) {
+    public @NotNull InteractionResult mobInteract(Player player, InteractionHand hand) {
         if (this.level().isClientSide) {
             return InteractionResult.CONSUME;
+        }
+
+        if (getPikminState() == PikminState.POPPING) {
+            return InteractionResult.PASS;
         }
 
         // si no tiene dueño, asignar dueño
@@ -173,7 +269,9 @@ public class PikminEntity extends TamableAnimal {
         if (isOwnedBy(player)) {
             if (getPikminState() == PikminState.FOLLOWING) {
                 setPikminState(PikminState.IDLE);
+                this.level().playSound(this, this.getOnPos(), ModSounds.PIKMIN_ENTER_IDLE.get(), SoundSource.NEUTRAL, 0.5f, 1.0f);
             } else {
+                this.level().playSound(this, this.getOnPos(), ModSounds.PIKMIN_JOIN_SQUAD.get(), SoundSource.NEUTRAL, 0.5f, 1.0f);
                 setPikminState(PikminState.FOLLOWING);
             }
             player.swing(hand);
@@ -187,12 +285,51 @@ public class PikminEntity extends TamableAnimal {
     public void tick() {
         super.tick();
 
-        if (this.level().isClientSide()) {
-            this.setupAnimationStates();
-        } else {
+        if (this.tickCount % 20 == 0 && this.shouldPlayPop) {
+            this.shouldPlayPop = false;
+        }
+
+        if (getPikminState() == PikminState.POPPING) {
+            if (this.level().isClientSide && this.tickCount %2 == 0) {
+                spawnPopParticles();
+            }
+            this.popAnimationTicks++;
+
+            this.getNavigation().stop();
+            this.setDeltaMovement(Vec3.ZERO);
+
+            if (this.popAnimationTicks >= POP_ANIMATION_DURATION) {
+                if (getOwner() != null) {
+                    setPikminState(PikminState.FOLLOWING);
+                } else {
+                    setPikminState(PikminState.IDLE);
+                }
+            }
+            return;
+        }
+
+        if (!this.level().isClientSide()) {
             updateGrowth();
             updateDangerStates();
             updateAIState();
+        }
+    }
+
+    private void spawnPopParticles() {
+        Level level = this.level();
+        PikminType type = getPikminType();
+        int color = type.getColor();
+
+        for (int i = 0; i < 3; i++) {
+            double x = this.getX() + (level.random.nextDouble() - 0.5) * 0.3;
+            double y = this.getY() + 0.2;
+            double z = this.getZ() + (level.random.nextDouble() - 0.5) * 0.3;
+            if (level.isClientSide) {
+                level.addParticle(ParticleTypes.ENTITY_EFFECT, x, y, z,
+                        ((color >> 16) & 0xFF) / 255.0,
+                        ((color >> 8) & 0xFF) / 255.0,
+                        (color & 0xFF) / 255.0);
+            }
         }
     }
 
@@ -215,7 +352,7 @@ public class PikminEntity extends TamableAnimal {
         // pikmin se ahoga excepto el azul
         if (isInWater() && !isWaterResistant()) {
             drowningTicks++;
-            if (drowningTicks > 100) {
+            if (drowningTicks > 60) {
                 hurt(this.damageSources().drown(), 2.0f);
                 drowningTicks = 0;
             }
@@ -266,58 +403,6 @@ public class PikminEntity extends TamableAnimal {
 
     public boolean isWaterResistant() {
         return getPikminType() == PikminType.BLUE;
-    }
-
-    private void setupAnimationStates() {
-        if (this.idleAnimationTimeout <= 0) {
-            this.idleAnimationTimeout = 40;
-            this.idleAnimationState.start(this.tickCount);
-        } else {
-            --this.idleAnimationTimeout;
-        }
-
-        if (this.popAnimationTimeout > 0) {
-            this.popAnimationTimeout--;
-        }
-
-        if (this.attackAnimationTimeout > 0) {
-            this.attackAnimationTimeout--;
-        } else {
-            this.attackAnimationState.stop();
-        }
-
-        if (this.tickCount == 1) {
-            triggerPopAnimation();
-        }
-    }
-
-    @Override
-    protected void updateWalkAnimation(float pPartialTick) {
-        float f;
-        if (this.getPose() == Pose.STANDING) {
-            f = Math.min(pPartialTick * 6f, 1f);
-        } else {
-            f = 0f;
-        }
-
-        this.walkAnimation.update(f, 0.2f);
-    }
-
-    public void triggerPopAnimation() {
-        this.popAnimationTimeout = 20;
-        this.popAnimationState.start(this.tickCount);
-    }
-
-    public void triggerAttackAnimation() {
-        this.attackAnimationTimeout = 10;
-        this.attackAnimationState.start(this.tickCount);
-    }
-
-    // atacar
-    @Override
-    public boolean doHurtTarget(Entity target) {
-        triggerAttackAnimation();
-        return super.doHurtTarget(target);
     }
 
     // guardar y cargar datos
@@ -372,5 +457,35 @@ public class PikminEntity extends TamableAnimal {
         PikminEntity offspring = new PikminEntity(serverLevel, parent.getPikminType());
         offspring.setOwnerUUID(parent.getOwnerUUID());
         return offspring;
+    }
+
+    @Override
+    public void registerControllers(AnimatableManager.ControllerRegistrar controllerRegistrar) {
+        controllerRegistrar.add(new AnimationController<>(this, "main", 0, this::predicate));
+        controllerRegistrar.add(new AnimationController<>(this, "attack", 0, this::attackPredicate));
+        controllerRegistrar.add(new AnimationController<>(this, "pop", 0, this::popPredicate));
+    }
+
+    @Override
+    public AnimatableInstanceCache getAnimatableInstanceCache() {
+        return this.cache;
+    }
+
+    @Override
+    public void swing(InteractionHand hand) {
+        super.swing(hand);
+
+        triggerAnim("attack", "attack");
+    }
+
+    public void triggerAnim(String controllerName, String animName) {
+        try {
+            var manager = getAnimatableInstanceCache().getManagerForId(this.getId());
+            if (manager != null) {
+                manager.tryTriggerAnimation(controllerName, animName);
+            }
+        } catch (Exception e) {
+            WilisPikmins.LOGGER.error("Error triggering animation", e);
+        }
     }
 }
