@@ -181,9 +181,16 @@ public class BuriedPikminBlock extends BushBlock {
        if (biome.is(ModTags.Biomes.HAS_BLUE_PIKMIN)) {
            return PikminType.BLUE;
        }
-       //TODO: add other pikmin types
-
-        return PikminType.RED;
+       if (biome.is(ModTags.Biomes.HAS_PURPLE_PIKMIN)) {
+           return PikminType.PURPLE;
+       }
+       if (biome.is(ModTags.Biomes.HAS_WHITE_PIKMIN)){
+           return PikminType.WHITE;
+       }
+       if (biome.is(ModTags.Biomes.HAS_WINGED_PIKMIN)) {
+           return PikminType.WINGED;
+       }
+        return PikminType.ROCK;
     }
 
     @Override
