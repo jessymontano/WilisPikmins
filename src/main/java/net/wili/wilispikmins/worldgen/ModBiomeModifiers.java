@@ -1,0 +1,61 @@
+package net.wili.wilispikmins.worldgen;
+
+import net.minecraft.core.Holder;
+import net.minecraft.core.HolderGetter;
+import net.minecraft.core.HolderSet;
+import net.minecraft.core.registries.Registries;
+import net.minecraft.data.worldgen.BootstapContext;
+import net.minecraft.resources.ResourceKey;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.server.packs.resources.Resource;
+import net.minecraft.tags.TagKey;
+import net.minecraft.world.level.biome.Biome;
+import net.minecraft.world.level.levelgen.GenerationStep;
+import net.minecraft.world.level.levelgen.placement.PlacedFeature;
+import net.minecraftforge.common.world.BiomeModifier;
+import net.minecraftforge.common.world.ForgeBiomeModifiers;
+import net.minecraftforge.registries.ForgeRegistries;
+import net.wili.wilispikmins.WilisPikmins;
+import net.wili.wilispikmins.util.ModTags;
+
+public class ModBiomeModifiers {
+    public static final ResourceKey<BiomeModifier> ADD_RED_PIKMIN =
+            registerKey("add_red_pikmin");
+    public static final ResourceKey<BiomeModifier> ADD_YELLOW_PIKMIN =
+            registerKey("add_yellow_pikmin");
+    public static final ResourceKey<BiomeModifier> ADD_BLUE_PIKMIN =
+            registerKey("add_blue_pikmin");
+    public static final ResourceKey<BiomeModifier> ADD_PURPLE_PIKMIN =
+            registerKey("add_purple_pikmin");
+    public static final ResourceKey<BiomeModifier> ADD_WHITE_PIKMIN =
+            registerKey("add_white_pikmin");
+    public static final ResourceKey<BiomeModifier> ADD_WINGED_PIKMIN =
+            registerKey("add_winged_pikmin");
+    public static final ResourceKey<BiomeModifier> ADD_ROCK_PIKMIN =
+            registerKey("add_rock_pikmin");
+
+    public static void bootstrap(BootstapContext<BiomeModifier> context) {
+        HolderGetter<PlacedFeature> placedFeatures = context.lookup(Registries.PLACED_FEATURE);
+        HolderGetter<Biome> biomes = context.lookup(Registries.BIOME);
+
+        registerModifier(context, ADD_RED_PIKMIN, placedFeatures.getOrThrow(ModPlacedFeatures.PATCH_RED_PIKMIN), ModTags.Biomes.HAS_RED_PIKMIN);
+        registerModifier(context, ADD_YELLOW_PIKMIN, placedFeatures.getOrThrow(ModPlacedFeatures.PATCH_YELLOW_PIKMIN), ModTags.Biomes.HAS_YELLOW_PIKMIN);
+        registerModifier(context, ADD_BLUE_PIKMIN, placedFeatures.getOrThrow(ModPlacedFeatures.PATCH_BLUE_PIKMIN), ModTags.Biomes.HAS_BLUE_PIKMIN);
+        registerModifier(context, ADD_PURPLE_PIKMIN, placedFeatures.getOrThrow(ModPlacedFeatures.PATCH_PURPLE_PIKMIN), ModTags.Biomes.HAS_PURPLE_PIKMIN);
+        registerModifier(context, ADD_WHITE_PIKMIN, placedFeatures.getOrThrow(ModPlacedFeatures.PATCH_WHITE_PIKMIN), ModTags.Biomes.HAS_WHITE_PIKMIN);
+        registerModifier(context, ADD_WINGED_PIKMIN, placedFeatures.getOrThrow(ModPlacedFeatures.PATCH_WINGED_PIKMIN), ModTags.Biomes.HAS_WINGED_PIKMIN);
+        registerModifier(context, ADD_ROCK_PIKMIN, placedFeatures.getOrThrow(ModPlacedFeatures.PATCH_ROCK_PIKMIN), ModTags.Biomes.HAS_ROCK_PIKMIN);
+    }
+    private static ResourceKey<BiomeModifier> registerKey(String name) {
+        return ResourceKey.create(ForgeRegistries.Keys.BIOME_MODIFIERS, new ResourceLocation(WilisPikmins.MOD_ID, name));
+    }
+    private static void registerModifier(BootstapContext<BiomeModifier> context, ResourceKey<BiomeModifier> key, Holder<PlacedFeature> feature, TagKey<Biome> biomeTag) {
+        HolderGetter<Biome> biomes = context.lookup(Registries.BIOME);
+
+        context.register(key, new ForgeBiomeModifiers.AddFeaturesBiomeModifier(
+                biomes.getOrThrow(biomeTag),
+                HolderSet.direct(feature),
+                GenerationStep.Decoration.VEGETAL_DECORATION
+        ));
+    }
+}

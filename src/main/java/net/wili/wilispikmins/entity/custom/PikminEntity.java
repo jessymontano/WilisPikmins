@@ -9,6 +9,7 @@ import net.minecraft.network.syncher.SynchedEntityData;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundSource;
+import net.minecraft.util.Mth;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.damagesource.DamageSource;
@@ -32,6 +33,7 @@ import net.wili.wilispikmins.sound.ModSounds;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import software.bernie.geckolib.animatable.GeoEntity;
+import software.bernie.geckolib.core.animatable.GeoAnimatable;
 import software.bernie.geckolib.core.animatable.instance.AnimatableInstanceCache;
 import software.bernie.geckolib.core.animation.AnimatableManager;
 import software.bernie.geckolib.core.animation.AnimationController;
@@ -60,6 +62,14 @@ public class PikminEntity extends TamableAnimal implements GeoEntity {
     private boolean shouldPlayPop = false;
     private int popAnimationTicks = 0;
     private static final int POP_ANIMATION_DURATION = 15;
+
+    // vuelo de pikmin rosa
+    private boolean isFlying = false;
+    private float flyHeight = 0.0f;
+    private int flyCooldown = 0;
+    private Vec3 flyTarget = null;
+    private int spawnTicks = 0;
+    private float zigzagPhase = 0f;
 
     // estados temporales
     private int drowningTicks = 0;
@@ -130,6 +140,14 @@ public class PikminEntity extends TamableAnimal implements GeoEntity {
         return PlayState.STOP;
     }
 
+    protected <E extends PikminEntity> PlayState flyPredicate(AnimationState<E> event) {
+        if (this.getPikminType() == PikminType.WINGED && isFlying) {
+            return event.setAndContinue(RawAnimation.begin()
+                    .thenLoop("animation.pikmin.fly"));
+        }
+        return PlayState.STOP;
+    }
+
     public void triggerPopAnimation() {
         this.shouldPlayPop = true;
         this.setPikminState(PikminState.POPPING);
@@ -152,6 +170,128 @@ public class PikminEntity extends TamableAnimal implements GeoEntity {
         } catch (Exception e) {
             WilisPikmins.LOGGER.error("Error triggering pop animation", e);
         }
+    }
+
+    @Override
+    public void travel(Vec3 pTravelVector) {
+        if (this.getPikminType() == PikminType.WINGED && shouldFly()) {
+            handleWingedMovement(pTravelVector);
+            return;
+        }
+
+        this.isFlying = false;
+        this.setNoGravity(false);
+        super.travel(pTravelVector);
+    }
+
+    private void handleWingedMovement(Vec3 travelVector) {
+        this.isFlying = true;
+        this.setNoGravity(true);
+
+        float targetHeight = calculateFlyHeight();
+
+        double currentY = this.getY();
+        double yDifference = targetHeight - currentY;
+        double verticalMovement = Mth.clamp(yDifference * 0.05, -0.05, 0.05);
+
+        Vec3 horizontalMovement = calculateWingedHorizontalMovement(travelVector);
+        double dampenedY = Mth.lerp(0.2, this.getDeltaMovement().y, verticalMovement);
+
+        this.setDeltaMovement(
+                horizontalMovement.x,
+                dampenedY,
+                horizontalMovement.z
+        );
+
+        Vec3 currentMotion = this.getDeltaMovement();
+        double speed = currentMotion.horizontalDistance();
+        if (speed > 0.5) {
+            Vec3 limitedMotion = currentMotion.normalize().scale(0.5);
+            this.setDeltaMovement(limitedMotion.x, currentMotion.y, limitedMotion.z);
+        }
+
+        this.move(MoverType.SELF, this.getDeltaMovement());
+    }
+
+    private float calculateFlyHeight() {
+        BlockPos groundPos = findGroundPosition();
+        float groundY = groundPos.getY() + 1.0f;
+
+        float baseHeight = switch (getPikminState()) {
+            case IDLE -> groundY + 0.2f;
+            case FOLLOWING -> groundY + 1.2f;
+            default -> groundY + 0.8f;
+        };
+        float bob = Mth.sin(this.tickCount * 0.08f) * 0.06f;
+
+        return baseHeight + bob;
+    }
+
+    private BlockPos findGroundPosition() {
+        BlockPos currentPos = this.blockPosition();
+
+        for (int y = currentPos.getY(); y > this.level().getMinBuildHeight(); y--) {
+            BlockPos checkPos = new BlockPos(currentPos.getX(), y, currentPos.getZ());
+            if (!this.level().isEmptyBlock(checkPos)) {
+                return checkPos;
+            }
+        }
+        return currentPos;
+    }
+
+    private Vec3 calculateWingedHorizontalMovement(Vec3 travelVector) {
+        Vec3 movement = Vec3.ZERO;
+
+        if (getPikminState() == PikminState.FOLLOWING && getOwner() != null) {
+            LivingEntity owner = getOwner();
+            Vec3 toOwner = new Vec3(
+                    owner.getX() - this.getX(),
+                    0,
+                    owner.getZ() - this.getZ()
+            );
+            double distance = toOwner.horizontalDistance();
+
+            if (distance < 1.5) {
+                return Vec3.ZERO;
+            }
+
+           Vec3 forward = toOwner.normalize();
+            Vec3 side = new Vec3(-forward.z, 0, forward.x);
+            float zigzag = Mth.sin(zigzagPhase) * 0.15f;
+
+            return forward.scale(0.22).add(side.scale(zigzag));
+        } else if (getPikminState() == PikminState.IDLE) {
+            movement = getRandomWanderingMovement().scale(0.3);
+        } else {
+            movement = travelVector.scale(this.getSpeed());
+
+        }
+
+        return movement;
+    }
+
+    private Vec3 getRandomWanderingMovement() {
+        float angle = (this.tickCount * 0.1f) % (2 * Mth.PI);
+        float radius = 0.2f + Mth.sin(this.tickCount * 0.05f) * 0.1f;
+
+        return new Vec3(
+                Mth.cos(angle) * radius,
+                0,
+                Mth.sin(angle) * radius
+        );
+    }
+
+    private boolean shouldFly() {
+        if (this.getPikminType() != PikminType.WINGED) return false;
+        if (spawnTicks < 20) return false;
+        if (this.isInWaterOrBubble() || this.isInLava()) return false;
+        if (this.getPikminState() == PikminState.POPPING) return false;
+        if (this.flyCooldown > 0) return false;
+        return true;
+    }
+
+    public boolean isFlying() {
+        return this.isFlying;
     }
 
     @Override
@@ -238,11 +378,11 @@ public class PikminEntity extends TamableAnimal implements GeoEntity {
         };
 
         float baseSpeed = 0.25f;
-       /* if (getPikminType() == PikminType.WHITE) {
+        if (getPikminType() == PikminType.WHITE) {
             baseSpeed = 0.3f;
         } else if (getPikminType() == PikminType.PURPLE) {
             baseSpeed = 0.2f;
-        }*/
+        }
 
         this.getAttribute(Attributes.MOVEMENT_SPEED).setBaseValue(baseSpeed * speedMultiplier);
     }
@@ -285,6 +425,12 @@ public class PikminEntity extends TamableAnimal implements GeoEntity {
     public void tick() {
         super.tick();
 
+        zigzagPhase += 0.08f;
+
+        if (spawnTicks < 20) {
+            spawnTicks++;
+        }
+
         if (this.tickCount % 20 == 0 && this.shouldPlayPop) {
             this.shouldPlayPop = false;
         }
@@ -308,10 +454,35 @@ public class PikminEntity extends TamableAnimal implements GeoEntity {
             return;
         }
 
+        if (this.flyCooldown > 0) {
+            this.flyCooldown--;
+        }
+
+        if (this.getPikminType() == PikminType.WINGED &&
+        this.isFlying &&
+        this.level().isClientSide &&
+        this.tickCount % 3 == 0) {
+            spawnWingParticles();
+        }
+
         if (!this.level().isClientSide()) {
             updateGrowth();
             updateDangerStates();
             updateAIState();
+        }
+    }
+
+    private void spawnWingParticles() {
+        for (int i = 0; i < 2; i++) {
+            double offsetX = (this.random.nextDouble() - 0.5) * 0.3;
+            double offsetY = this.random.nextDouble() * 0.2;
+            double offsetZ = (this.random.nextDouble() - 0.5) * 0.3;
+
+            this.level().addParticle(ParticleTypes.GLOW,
+                    this.getX() + offsetX,
+                    this.getY() + offsetY,
+                    this.getZ() + offsetZ,
+                    0, 0.01, 0);
         }
     }
 
@@ -464,6 +635,7 @@ public class PikminEntity extends TamableAnimal implements GeoEntity {
         controllerRegistrar.add(new AnimationController<>(this, "main", 0, this::predicate));
         controllerRegistrar.add(new AnimationController<>(this, "attack", 0, this::attackPredicate));
         controllerRegistrar.add(new AnimationController<>(this, "pop", 0, this::popPredicate));
+        controllerRegistrar.add(new AnimationController<>(this, "fly", 0, this::flyPredicate));
     }
 
     @Override

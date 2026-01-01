@@ -11,8 +11,23 @@ import software.bernie.geckolib.model.GeoModel;
 public class PikminModel extends GeoModel<PikminEntity> {
     @Override
     public ResourceLocation getModelResource(PikminEntity entity) {
-        return new ResourceLocation(WilisPikmins.MOD_ID,
-                "geo/pikmin.geo.json");
+        if (entity == null) {
+            return new ResourceLocation(WilisPikmins.MOD_ID, "geo/pikmin.geo.json");
+        }
+        return switch (entity.getPikminType()) {
+            case PURPLE -> new ResourceLocation(
+                    WilisPikmins.MOD_ID,
+                    "geo/purple_pikmin.geo.json"
+            );
+            case ROCK -> new ResourceLocation(
+                    WilisPikmins.MOD_ID,
+                    "geo/rock_pikmin.geo.json"
+            );
+            default -> new ResourceLocation(
+                    WilisPikmins.MOD_ID,
+                    "geo/pikmin.geo.json"
+            );
+        };
     }
 
     @Override

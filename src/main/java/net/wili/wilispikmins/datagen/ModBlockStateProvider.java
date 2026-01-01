@@ -1,5 +1,6 @@
 package net.wili.wilispikmins.datagen;
 
+import net.minecraft.core.Direction;
 import net.minecraft.data.PackOutput;
 import net.minecraft.world.level.block.Block;
 import net.minecraftforge.client.model.generators.BlockStateProvider;
@@ -29,28 +30,30 @@ public class ModBlockStateProvider extends BlockStateProvider {
 
     private void makeBuriedPikminBlock() {
         Block block = ModBlocks.BURIED_PIKMIN_BLOCK.get();
-        VariantBlockStateBuilder builder = getVariantBuilder(block);
+        getVariantBuilder(block).forAllStates(state -> {
+            Direction dir = state.getValue(BuriedPikminBlock.FACING);
+            PikminType type = state.getValue(BuriedPikminBlock.PIKMIN_TYPE);
+            GrowthStage stage = state.getValue(BuriedPikminBlock.GROWTH_STAGE);
 
-        for (PikminType type: PikminType.values()) {
-            for (GrowthStage stage : GrowthStage.values()) {
-                String modelName = type.getName() + "_buried_pikmin_" + stage.getName();
+            int rotY = ((int) dir.toYRot()) % 360;
 
-                ModelFile model = models()
-                        .withExistingParent(modelName,
-                                modLoc("block/buried_pikmin_" + stage.getName()))
-                                .texture("pikmin",
-                                        modLoc("block/" + type.getName() + "_buried_pikmin_" + stage.getName()))
-                                        .texture("particle",
-                                                modLoc("block/" + type.getName() + "_buried_pikmin_" + stage.getName()));
-                builder.partialState()
-                        .with(BuriedPikminBlock.PIKMIN_TYPE, type)
-                        .with(BuriedPikminBlock.GROWTH_STAGE, stage)
-                        .modelForState()
-                        .modelFile(model)
-                        .addModel();
-            }
-        }
+            String baseModel = "buried_pikmin_" + stage.getName();
+            String variantModel = type.getName() + "_" + baseModel;
+
+            ModelFile model = models()
+                    .withExistingParent(variantModel,
+                            modLoc("block/" + baseModel))
+                    .texture("pikmin",
+                            modLoc("block/" + variantModel))
+                    .texture("particle",
+                            modLoc("block/" + variantModel));
+            return ConfiguredModel.builder()
+                    .modelFile(model)
+                    .rotationY(rotY)
+                    .build();
+        });
     }
+
 
     private void blockWithItem(RegistryObject<Block> blockRegistryObject) {
         simpleBlockWithItem(blockRegistryObject.get(), cubeAll(blockRegistryObject.get()));
