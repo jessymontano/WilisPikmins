@@ -471,6 +471,116 @@
 					}
 				}
 			}
+		},
+		"animation.pikmin.fly": {
+			"loop": true,
+			"animation_length": 2,
+			"bones": {
+				"body": {
+					"rotation": {
+						"vector": [25, 0, 0]
+					},
+					"position": {
+						"0.0": {
+							"vector": [0, 1, 0]
+						},
+						"1.0": {
+							"vector": [0, 1.5, 0]
+						},
+						"2.0": {
+							"vector": [0, 1, 0]
+						}
+					}
+				},
+				"head": {
+					"rotation": {
+						"vector": [-15, 0, 0]
+					},
+					"position": {
+						"vector": [0, -0.5, 0]
+					}
+				},
+				"right leg": {
+					"rotation": {
+						"vector": [25, 0, 0]
+					},
+					"position": {
+						"0.0": {
+							"vector": [0, 1, -1]
+						},
+						"1.0": {
+							"vector": [0, 1.5, -1]
+						},
+						"2.0": {
+							"vector": [0, 1, -1]
+						}
+					}
+				},
+				"left leg": {
+					"rotation": {
+						"vector": [25, 0, 0]
+					},
+					"position": {
+						"0.0": {
+							"vector": [0, 1, -1]
+						},
+						"1.0": {
+							"vector": [0, 1.5, -1]
+						},
+						"2.0": {
+							"vector": [0, 1, -1]
+						}
+					}
+				},
+				"right arm": {
+					"rotation": {
+						"vector": [-45, 0, -25]
+					}
+				},
+				"left arm": {
+					"rotation": {
+						"vector": [-45, 0, 25]
+					}
+				},
+				"right wing": {
+					"rotation": {
+						"0.0": {
+							"vector": [0, 20, 0]
+						},
+						"0.5": {
+							"vector": [0, 45, 0]
+						},
+						"1.0": {
+							"vector": [0, 20, 0]
+						},
+						"1.5": {
+							"vector": [0, 45, 0]
+						},
+						"1.9583": {
+							"vector": [0, 20, 0]
+						}
+					}
+				},
+				"left wing": {
+					"rotation": {
+						"0.0": {
+							"vector": [0, -20, 0]
+						},
+						"0.5": {
+							"vector": [0, -45, 0]
+						},
+						"1.0": {
+							"vector": [0, -20, 0]
+						},
+						"1.5": {
+							"vector": [0, -45, 0]
+						},
+						"1.9583": {
+							"vector": [0, -20, 0]
+						}
+					}
+				}
+			}
 		}
 	},
 	"geckolib_format_version": 2
