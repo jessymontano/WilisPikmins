@@ -2,10 +2,13 @@ package net.wili.wilispikmins.entity.client;
 
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
+import com.mojang.math.Axis;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.entity.EntityRendererProvider;
+import net.minecraft.util.Mth;
 import net.wili.wilispikmins.entity.custom.PikminEntity;
+import net.wili.wilispikmins.entity.custom.enums.GrowthStage;
 import net.wili.wilispikmins.entity.custom.enums.PikminType;
 import software.bernie.geckolib.cache.object.GeoBone;
 import software.bernie.geckolib.renderer.GeoEntityRenderer;
@@ -14,11 +17,38 @@ public class PikminRenderer extends GeoEntityRenderer<PikminEntity> {
     public PikminRenderer(EntityRendererProvider.Context context) {
         super(context, new PikminModel());
         this.shadowRadius = 0.25f;
+        this.shadowStrength = 0.5f;
     }
 
-   @Override
+    @Override
+    public void render(PikminEntity entity, float entityYaw, float partialTick, PoseStack poseStack, MultiBufferSource bufferSource, int packedLight) {
+        PikminType type = entity.getPikminType();
+        GrowthStage stage = entity.getGrowthStage();
+
+        float scale = getScaleForType(type);
+
+        poseStack.pushPose();
+        poseStack.scale(scale, scale, scale);
+
+        if (type == PikminType.WINGED && entity.isFlying()) {
+            float hoverBob = Mth.sin((entity.tickCount + partialTick) * 0.2f) * 0.05f;
+            poseStack.translate(0, hoverBob, 0);
+
+            if (entity.getDeltaMovement().horizontalDistanceSqr() > 0.01) {
+                float tilt = Mth.lerp(partialTick,
+                        entity.yBodyRotO, entity.yBodyRot) * Mth.DEG_TO_RAD;
+                poseStack.mulPose(Axis.YP.rotation(tilt * 0.1f));
+            }
+        }
+
+        super.render(entity, entityYaw, partialTick, poseStack, bufferSource, packedLight);
+        poseStack.popPose();
+    }
+
+    @Override
     public  void renderRecursively(PoseStack poseStack, PikminEntity entity, GeoBone bone, RenderType renderType, MultiBufferSource bufferSource, VertexConsumer buffer, boolean isReRender, float partialTick, int packedLight, int packedOverlay, float red, float green, float blue, float alpha) {
         PikminType type = entity.getPikminType();
+        GrowthStage stage = entity.getGrowthStage();
         String boneName = bone.getName();
 
         switch (boneName) {
@@ -28,8 +58,36 @@ public class PikminRenderer extends GeoEntityRenderer<PikminEntity> {
             case "ears":
                 bone.setHidden(type != PikminType.YELLOW);
                 break;
+            case "small_eyes":
+                bone.setHidden(type != PikminType.WHITE && type !=PikminType.WINGED);
+                break;
+            case "wings":
+            case "right_wing":
+            case "left_wing":
+                bone.setHidden(type != PikminType.WINGED);
+                break;
+        }
+
+        switch (boneName) {
+            case "leaf":
+                bone.setHidden(stage != GrowthStage.LEAF);
+                break;
+            case "bud":
+                bone.setHidden(stage != GrowthStage.BUD);
+                break;
+            case "flower":
+                bone.setHidden(stage != GrowthStage.FLOWER);
+                break;
         }
 
         super.renderRecursively(poseStack, entity, bone, renderType, bufferSource, buffer, isReRender, partialTick, packedLight, packedOverlay, red, green, blue, alpha);
+   }
+
+   private float getScaleForType(PikminType type) {
+        return switch (type) {
+            case WHITE -> 0.7f;
+            case WINGED -> 0.7f;
+            default -> 1.0f;
+        };
    }
 }

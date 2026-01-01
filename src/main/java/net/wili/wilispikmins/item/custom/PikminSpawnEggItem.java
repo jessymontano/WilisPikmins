@@ -34,10 +34,10 @@ public class PikminSpawnEggItem extends ForgeSpawnEggItem {
             case RED -> 0xE32400;
             case YELLOW -> 0xF6D337;
             case BLUE -> 0x0044ff;
-           /* case PURPLE -> 0x800080;
+           case PURPLE -> 0x800080;
             case WHITE -> 0xFFFFFF;
             case WINGED -> 0xFF69B4;
-            case ROCK -> 0x808080;*/
+            case ROCK -> 0x808080;
         };
     }
 
@@ -46,10 +46,10 @@ public class PikminSpawnEggItem extends ForgeSpawnEggItem {
             case RED -> 0xFF3B1A;
             case YELLOW -> 0xFFE873;
             case BLUE -> 0x0066FF;
-         /*   case PURPLE -> 0xA020F0;
+            case PURPLE -> 0xA020F0;
             case WHITE -> 0xF0F0F0;
             case WINGED -> 0xFFB6C1;
-            case ROCK -> 0xA0A0A0;*/
+            case ROCK -> 0xA0A0A0;
         };
     }
 

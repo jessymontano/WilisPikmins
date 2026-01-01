@@ -2,6 +2,7 @@ package net.wili.wilispikmins.block.custom;
 
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.core.Holder;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.util.RandomSource;
@@ -12,6 +13,7 @@ import net.minecraft.world.item.context.BlockPlaceContext;
 import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelAccessor;
+import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.BushBlock;
 import net.minecraft.world.level.block.RenderShape;
@@ -24,11 +26,13 @@ import net.minecraft.world.level.block.state.properties.IntegerProperty;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.shapes.CollisionContext;
 import net.minecraft.world.phys.shapes.VoxelShape;
+import net.wili.wilispikmins.WilisPikmins;
 import net.wili.wilispikmins.entity.ModEntities;
 import net.wili.wilispikmins.entity.custom.PikminEntity;
 import net.wili.wilispikmins.entity.custom.enums.GrowthStage;
 import net.wili.wilispikmins.entity.custom.enums.PikminType;
 import net.wili.wilispikmins.sound.ModSounds;
+import net.wili.wilispikmins.util.ModTags;
 import org.jetbrains.annotations.Nullable;
 
 public class BuriedPikminBlock extends BushBlock {
@@ -56,6 +60,20 @@ public class BuriedPikminBlock extends BushBlock {
     }
 
     @Override
+    public void onPlace(BlockState pState, Level pLevel, BlockPos pPos, BlockState pOldState, boolean pMovedByPiston) {
+        super.onPlace(pState, pLevel, pPos, pOldState, pMovedByPiston);
+
+        if (!pLevel.isClientSide) {
+            WilisPikmins.LOGGER.info(
+                    "[WORLDGEN] Buried Pikmin placed at {} type={} stage={}",
+                    pPos,
+                    pState.getValue(BuriedPikminBlock.PIKMIN_TYPE),
+                    pState.getValue(BuriedPikminBlock.GROWTH_STAGE)
+            );
+        }
+    }
+
+    @Override
     protected void createBlockStateDefinition(StateDefinition.Builder<Block, BlockState> builder) {
         builder.add(FACING, PIKMIN_TYPE, GROWTH_STAGE, AGE);
     }
@@ -65,7 +83,7 @@ public class BuriedPikminBlock extends BushBlock {
     public BlockState getStateForPlacement(BlockPlaceContext context) {
         return this.defaultBlockState()
                 .setValue(FACING, context.getHorizontalDirection().getOpposite())
-                .setValue(PIKMIN_TYPE, getRandomPikminType(context.getLevel().random))
+                .setValue(PIKMIN_TYPE, getPikminTypeForBiome(context.getLevel(), context.getClickedPos()))
                 .setValue(GROWTH_STAGE, GrowthStage.LEAF)
                 .setValue(AGE, 0);
     }
@@ -150,15 +168,22 @@ public class BuriedPikminBlock extends BushBlock {
     }
 
 
-    private PikminType getRandomPikminType(RandomSource random) {
-        int roll = random.nextInt(100);
-        if (roll < 15) return PikminType.RED;
-        if (roll < 30) return PikminType.YELLOW;
-        /*if (roll < 45)*/ return PikminType.BLUE;
-       /* if (roll < 60) return PikminType.WHITE;
-        if (roll < 75) return PikminType.PURPLE;
-        if (roll < 90) return PikminType.WINGED;
-        return PikminType.ROCK;*/
+    private PikminType getPikminTypeForBiome(LevelAccessor level, BlockPos pos) {
+       Holder<Biome> biome = level.getBiome(pos);
+       RandomSource random  = level.getRandom();
+
+       if (biome.is(ModTags.Biomes.HAS_RED_PIKMIN)) {
+           return PikminType.RED;
+       }
+       if (biome.is(ModTags.Biomes.HAS_YELLOW_PIKMIN)) {
+           return PikminType.YELLOW;
+       }
+       if (biome.is(ModTags.Biomes.HAS_BLUE_PIKMIN)) {
+           return PikminType.BLUE;
+       }
+       //TODO: add other pikmin types
+
+        return PikminType.RED;
     }
 
     @Override

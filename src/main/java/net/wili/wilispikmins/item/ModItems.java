@@ -27,6 +27,14 @@ public class ModItems {
 
     public static final RegistryObject<Item> YELLOW_PIKMIN_SPAWN_EGG = ITEMS.register("yellow_pikmin_spawn_egg", () -> new PikminSpawnEggItem(PikminType.YELLOW));
 
+    public static final RegistryObject<Item> PURPLE_PIKMIN_SPAWN_EGG = ITEMS.register("purple_pikmin_spawn_egg", () -> new PikminSpawnEggItem(PikminType.PURPLE));
+
+    public static final RegistryObject<Item> WHITE_PIKMIN_SPAWN_EGG = ITEMS.register("white_pikmin_spawn_egg", () -> new PikminSpawnEggItem(PikminType.WHITE));
+
+    public static final RegistryObject<Item> WINGED_PIKMIN_SPAWN_EGG = ITEMS.register("winged_pikmin_spawn_egg", () -> new PikminSpawnEggItem(PikminType.WINGED));
+
+    public static final RegistryObject<Item> ROCK_PIKMIN_SPAWN_EGG = ITEMS.register("rock_pikmin_spawn_egg", () -> new PikminSpawnEggItem(PikminType.ROCK));
+
     public static void register(IEventBus eventBus) {
         ITEMS.register(eventBus);
     }

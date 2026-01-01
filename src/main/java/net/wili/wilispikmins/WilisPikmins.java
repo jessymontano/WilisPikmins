@@ -19,6 +19,8 @@ import net.wili.wilispikmins.entity.ModEntities;
 import net.wili.wilispikmins.entity.client.PikminRenderer;
 import net.wili.wilispikmins.item.ModItems;
 import net.wili.wilispikmins.sound.ModSounds;
+import net.wili.wilispikmins.worldgen.ModConfiguredFeatures;
+import net.wili.wilispikmins.worldgen.ModPlacedFeatures;
 import org.slf4j.Logger;
 import software.bernie.geckolib.GeckoLib;
 
@@ -71,6 +73,10 @@ public class WilisPikmins
             event.accept(ModItems.RED_PIKMIN_SPAWN_EGG);
             event.accept(ModItems.BLUE_PIKMIN_SPAWN_EGG);
             event.accept(ModItems.YELLOW_PIKMIN_SPAWN_EGG);
+            event.accept(ModItems.PURPLE_PIKMIN_SPAWN_EGG);
+            event.accept(ModItems.WHITE_PIKMIN_SPAWN_EGG);
+            event.accept(ModItems.WINGED_PIKMIN_SPAWN_EGG);
+            event.accept(ModItems.ROCK_PIKMIN_SPAWN_EGG);
         }
     }
 
