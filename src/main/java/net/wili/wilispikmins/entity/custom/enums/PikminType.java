@@ -1,5 +1,6 @@
 package net.wili.wilispikmins.entity.custom.enums;
 
+import net.minecraft.network.chat.Component;
 import net.minecraft.util.StringRepresentable;
 
 // todos los tipos de pikmin con su nombre y color
@@ -9,8 +10,8 @@ public enum PikminType implements StringRepresentable {
     BLUE("blue", 0x0000FF),
     PURPLE("purple", 0x800080),
     WHITE("white", 0xFFFFFF),
-    ROCK("rock", 0x808080),
-    WINGED("winged", 0xFF69B4);
+    WINGED("winged", 0xFF69B4),
+    ROCK("rock", 0x808080);
 
     private final String name;
     private final int color;
@@ -26,5 +27,9 @@ public enum PikminType implements StringRepresentable {
     @Override
     public String getSerializedName() {
         return this.name;
+    }
+
+    public Component getDisplayName() {
+        return Component.translatable("pikmin_type.wilispikmins." + name().toLowerCase());
     }
 }

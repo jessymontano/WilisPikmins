@@ -2,6 +2,7 @@ package net.wili.wilispikmins;
 
 import com.mojang.logging.LogUtils;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.screens.MenuScreens;
 import net.minecraft.client.renderer.entity.EntityRenderers;
 import net.minecraft.world.item.CreativeModeTabs;
 import net.minecraftforge.api.distmarker.Dist;
@@ -15,9 +16,13 @@ import net.minecraftforge.fml.event.lifecycle.FMLClientSetupEvent;
 import net.minecraftforge.fml.event.lifecycle.FMLCommonSetupEvent;
 import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
 import net.wili.wilispikmins.block.ModBlocks;
+import net.wili.wilispikmins.block.entity.ModBlockEntities;
 import net.wili.wilispikmins.entity.ModEntities;
 import net.wili.wilispikmins.entity.client.PikminRenderer;
 import net.wili.wilispikmins.item.ModItems;
+import net.wili.wilispikmins.network.ModPackets;
+import net.wili.wilispikmins.screen.ModMenuTypes;
+import net.wili.wilispikmins.screen.OnionScreen;
 import net.wili.wilispikmins.sound.ModSounds;
 import net.wili.wilispikmins.worldgen.ModConfiguredFeatures;
 import net.wili.wilispikmins.worldgen.ModPlacedFeatures;
@@ -43,8 +48,17 @@ public class WilisPikmins
         // register mod blocks
         ModBlocks.register(modEventBus);
 
+        // register mod block entities
+        ModBlockEntities.register(modEventBus);
+
         // register mod sounds
         ModSounds.register(modEventBus);
+
+        // register mod menu types
+        ModMenuTypes.register(modEventBus);
+
+        // register mod packets
+        ModPackets.register();
 
         GeckoLib.initialize();
 
@@ -97,6 +111,8 @@ public class WilisPikmins
         {
             // registrar los renderers de las entidades
             EntityRenderers.register(ModEntities.PIKMIN.get(), PikminRenderer::new);
+
+            MenuScreens.register(ModMenuTypes.ONION_MENU.get(), OnionScreen::new);
         }
     }
 }
