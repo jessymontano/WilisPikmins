@@ -1,21 +1,42 @@
 {
-  "itemGroup.wilispikmins": "Example Mod Tab",
-  "block.examplemod.example_block": "Example Block",
-  "item.examplemod.example_item": "Example Item",
-
-  "examplemod.configuration.title": "Example Mod Configs",
-  "examplemod.configuration.section.examplemod.common.toml": "Example Mod Configs",
-  "examplemod.configuration.section.examplemod.common.toml.title": "Example Mod Configs",
-  "examplemod.configuration.items": "Item List",
-  "examplemod.configuration.logDirtBlock": "Log Dirt Block",
-  "examplemod.configuration.magicNumberIntroduction": "Magic Number Text",
-  "examplemod.configuration.magicNumber": "Magic Number",
-
   "item.wilispikmins.red_pikmin_spawn_egg": "Red Pikmin Spawn Egg",
   "item.wilispikmins.blue_pikmin_spawn_egg": "Blue Pikmin Spawn Egg",
   "item.wilispikmins.yellow_pikmin_spawn_egg": "Yellow Pikmin Spawn Egg",
+  "item.wilispikmins.onion_upgrade": "Onion Upgrade",
+
   "entity.wilispikmins.red_pikmin": "Red Pikmin",
   "entity.wilispikmins.yellow_pikmin": "Yellow Pikmin",
   "entity.wilispikmins.blue_pikmin": "Blue Pikmin",
-  "block.wilispikmins.red_buried_pikmin_block": "Red Buried Pikmin Block"
+
+  "block.wilispikmins.red_buried_pikmin_block": "Red Buried Pikmin Block",
+  "block.wilispikmins.onion.main": "Onion",
+  "block.wilispikmins.onion_block": "Onion",
+
+  "pikmin_type.wilispikmins.red": "Red Pikmin",
+  "pikmin_type.wilispikmins.yellow": "Yellow Pikmin",
+  "pikmin_type.wilispikmins.blue": "Blue Pikmin",
+  "pikmin_type.wilispikmins.purple": "Purple Pikmin",
+  "pikmin_type.wilispikmins.white": "White Pikmin",
+  "pikmin_type.wilispikmins.winged": "Winged Pikmin",
+  "pikmin_type.wilispikmins.rock": "Rock Pikmin",
+
+  "tooltip.wilispikmins.onion.confirm": "Confirm all pending changes",
+  "tooltip.wilispikmins.onion.cancel" : "Cancel all pending changes",
+  "tooltip.wilispikmins.onion.recall": "Recall all Pikmin to the Onion",
+  "tooltip.wilispikmins.onion.upgrade": "Insert an upgrade to increase capacity",
+
+  "tooltip.wilispikmins.onion.put_in": "Put in 1 %s",
+  "tooltip.wilispikmins.onion.take_out": "Take out 1 %s",
+
+  "gui.wilispikmins.onion.total": "%s / %s Pikmin outside",
+  "tooltip.wilispikmins.onion.stored": "Stored: %s / Capacity: %s",
+
+  "tooltip.wilispikmins.onion_upgrade.use": "Use on the main Onion to",
+  "tooltip.wilispikmins.onion_upgrade.effect": "increase capacity by %s",
+  "tooltip.wilispikmins.onion_upgrade.source": "Obtained from additional Onions",
+
+  "tooltip.wilispikmins.onion.type": "Type: %s",
+  "tooltip.wilispikmins.onion.place_1": "Place it to establish",
+  "tooltip.wilispikmins.onion.place_2": "your main Onion"
+
 }
