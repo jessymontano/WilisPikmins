@@ -33,6 +33,15 @@ public class ModItemModelProvider extends ItemModelProvider {
 
         withExistingParent(ModBlocks.BURIED_PIKMIN_BLOCK.getId().getPath(),
                 modLoc("block/buried_pikmin_leaf"));
+
+        withExistingParent(
+                ModBlocks.ONION_BLOCK.getId().getPath(),
+                modLoc("block/onion_red"));
+
+        withExistingParent(
+                ModItems.RED_ONION_UPGRADE.getId().getPath(),
+                modLoc("block/onion_red"));
+
     }
 
     private ItemModelBuilder simpleItem(RegistryObject<Item> item) {

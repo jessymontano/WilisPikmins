@@ -13,20 +13,21 @@ import net.minecraft.world.item.context.BlockPlaceContext;
 import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelAccessor;
+import net.minecraft.world.level.LevelReader;
 import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.BushBlock;
 import net.minecraft.world.level.block.RenderShape;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.StateDefinition;
-import net.minecraft.world.level.block.state.properties.BlockStateProperties;
-import net.minecraft.world.level.block.state.properties.DirectionProperty;
-import net.minecraft.world.level.block.state.properties.EnumProperty;
-import net.minecraft.world.level.block.state.properties.IntegerProperty;
+import net.minecraft.world.level.block.state.properties.*;
+import net.minecraft.world.level.material.FluidState;
+import net.minecraft.world.level.material.Fluids;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.shapes.CollisionContext;
 import net.minecraft.world.phys.shapes.VoxelShape;
 import net.wili.wilispikmins.WilisPikmins;
+import net.wili.wilispikmins.capability.OnionCapability;
 import net.wili.wilispikmins.entity.ModEntities;
 import net.wili.wilispikmins.entity.custom.PikminEntity;
 import net.wili.wilispikmins.entity.custom.enums.GrowthStage;
@@ -35,13 +36,14 @@ import net.wili.wilispikmins.sound.ModSounds;
 import net.wili.wilispikmins.util.ModTags;
 import org.jetbrains.annotations.Nullable;
 
-public class BuriedPikminBlock extends BushBlock {
+public class BuriedPikminBlock extends Block {
 
     private static final VoxelShape LEAF_SHAPE = Block.box(4.0, 0.0, 4.0, 12.0, 8.0, 12.0);
     private static final VoxelShape BUD_SHAPE = Block.box(4.0, 0.0, 4.0, 12.0, 10.0, 12.0);
     private static final VoxelShape FLOWER_SHAPE = Block.box(4.0, 0.0, 4.0, 12.0, 12.0, 12.0);
 
     public static final DirectionProperty FACING = BlockStateProperties.HORIZONTAL_FACING;
+    public static final BooleanProperty WATERLOGGED = BlockStateProperties.WATERLOGGED;
 
     public static final EnumProperty<PikminType> PIKMIN_TYPE =
             EnumProperty.create("type", PikminType.class);
@@ -56,36 +58,36 @@ public class BuriedPikminBlock extends BushBlock {
                 .setValue(FACING, Direction.NORTH)
                 .setValue(PIKMIN_TYPE, PikminType.RED)
                 .setValue(GROWTH_STAGE, GrowthStage.LEAF)
-                .setValue(AGE, 0));
+                .setValue(AGE, 0)
+                .setValue(WATERLOGGED, false));
     }
 
     @Override
-    public void onPlace(BlockState pState, Level pLevel, BlockPos pPos, BlockState pOldState, boolean pMovedByPiston) {
-        super.onPlace(pState, pLevel, pPos, pOldState, pMovedByPiston);
+    public boolean canSurvive(BlockState pState, LevelReader pLevel, BlockPos pPos) {
+        BlockPos below = pPos.below();
+        BlockState belowState = pLevel.getBlockState(below);
 
-        if (!pLevel.isClientSide) {
-            WilisPikmins.LOGGER.info(
-                    "[WORLDGEN] Buried Pikmin placed at {} type={} stage={}",
-                    pPos,
-                    pState.getValue(BuriedPikminBlock.PIKMIN_TYPE),
-                    pState.getValue(BuriedPikminBlock.GROWTH_STAGE)
-            );
-        }
+        return belowState.isSolid();
     }
 
     @Override
     protected void createBlockStateDefinition(StateDefinition.Builder<Block, BlockState> builder) {
-        builder.add(FACING, PIKMIN_TYPE, GROWTH_STAGE, AGE);
+        builder.add(FACING, PIKMIN_TYPE, GROWTH_STAGE, AGE, WATERLOGGED);
     }
 
     @Nullable
     @Override
     public BlockState getStateForPlacement(BlockPlaceContext context) {
+       boolean water = context.getLevel()
+               .getFluidState(context.getClickedPos())
+               .getType() == Fluids.WATER;
+
         return this.defaultBlockState()
                 .setValue(FACING, context.getHorizontalDirection().getOpposite())
                 .setValue(PIKMIN_TYPE, getPikminTypeForBiome(context.getLevel(), context.getClickedPos()))
                 .setValue(GROWTH_STAGE, GrowthStage.LEAF)
-                .setValue(AGE, 0);
+                .setValue(AGE, 0)
+                .setValue(WATERLOGGED, water);
     }
 
     @Override
@@ -118,7 +120,15 @@ public class BuriedPikminBlock extends BushBlock {
             GrowthStage stage = pState.getValue(GROWTH_STAGE);
 
             PikminEntity pikmin = ModEntities.PIKMIN.get().create(pLevel);
-            pikmin.setPos(pPos.getX() + 0.5, pPos.getY(), pPos.getZ() + 0.5);
+
+            pikmin.moveTo(
+                    pPos.getX() + 0.5,
+                    pPos.getY(),
+                    pPos.getZ() + 0.5,
+                    pLevel.random.nextFloat() * 360f,
+                    0
+            );
+
             pikmin.setPikminType(type);
             pikmin.setGrowthStage(stage);
             pikmin.setOwnerUUID(pPlayer.getUUID());
@@ -126,10 +136,9 @@ public class BuriedPikminBlock extends BushBlock {
             Direction facing = pState.getValue(FACING);
             pikmin.setYRot(facing.toYRot());
 
-            pLevel.addFreshEntity(pikmin);
-
             // activar animacion de salida
             pikmin.triggerPopAnimation();
+            pLevel.addFreshEntity(pikmin);
 
             return InteractionResult.SUCCESS;
         }
@@ -170,7 +179,6 @@ public class BuriedPikminBlock extends BushBlock {
 
     private PikminType getPikminTypeForBiome(LevelAccessor level, BlockPos pos) {
        Holder<Biome> biome = level.getBiome(pos);
-       RandomSource random  = level.getRandom();
 
        if (biome.is(ModTags.Biomes.HAS_RED_PIKMIN)) {
            return PikminType.RED;
@@ -198,5 +206,12 @@ public class BuriedPikminBlock extends BushBlock {
         return !state.canSurvive(level, pos) ?
                 net.minecraft.world.level.block.Blocks.AIR.defaultBlockState() :
                 super.updateShape(state,direction,neighborState,level,pos,neighborPos);
+    }
+
+    @Override
+    public FluidState getFluidState(BlockState pState) {
+        return pState.getValue(WATERLOGGED)
+                ? Fluids.WATER.getSource(false)
+                : super.getFluidState(pState);
     }
 }
