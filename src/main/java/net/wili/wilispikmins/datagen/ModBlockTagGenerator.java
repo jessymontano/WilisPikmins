@@ -23,28 +23,36 @@ public class ModBlockTagGenerator extends BlockTagsProvider {
                 .add(Blocks.DIRT)
                 .add(Blocks.COARSE_DIRT)
                 .add(Blocks.PODZOL)
-                .add(Blocks.MOSS_BLOCK);
+                .add(Blocks.MOSS_BLOCK)
+                .add(Blocks.ROOTED_DIRT);
         tag(ModTags.Blocks.CAN_SPAWN_YELLOW_PIKMIN)
-                .add(Blocks.GRASS_BLOCK)
-                .add(Blocks.DIRT)
+                .add(Blocks.SAND)
+                .add(Blocks.RED_SAND)
+                .add(Blocks.SANDSTONE)
+                .add(Blocks.TERRACOTTA)
                 .add(Blocks.COARSE_DIRT)
-                .add(Blocks.PODZOL)
-                .add(Blocks.ROOTED_DIRT)
-                .add(Blocks.MUD);
+                .add(Blocks.DIRT)
+                .add(Blocks.GRASS_BLOCK);
         tag(ModTags.Blocks.CAN_SPAWN_BLUE_PIKMIN)
                 .add(Blocks.SAND)
                 .add(Blocks.RED_SAND)
                 .add(Blocks.DIRT)
                 .add(Blocks.MUD)
                 .add(Blocks.CLAY)
-                .add(Blocks.GRAVEL);
+                .add(Blocks.GRAVEL)
+                .add(Blocks.STONE)
+                .add(Blocks.ICE);
         tag(ModTags.Blocks.CAN_SPAWN_PURPLE_PIKMIN)
                 .add(Blocks.SAND)
                 .add(Blocks.RED_SAND)
                 .add(Blocks.TERRACOTTA)
                 .add(Blocks.RED_TERRACOTTA)
                 .add(Blocks.COARSE_DIRT)
-                .add(Blocks.GRAVEL);
+                .add(Blocks.GRAVEL)
+                .add(Blocks.GRASS_BLOCK)
+                .add(Blocks.DIRT)
+                .add(Blocks.BLACKSTONE)
+                .add(Blocks.BASALT);
         tag(ModTags.Blocks.CAN_SPAWN_WHITE_PIKMIN)
                 .add(Blocks.SNOW_BLOCK)
                 .add(Blocks.POWDER_SNOW)
@@ -52,13 +60,20 @@ public class ModBlockTagGenerator extends BlockTagsProvider {
                 .add(Blocks.CALCITE)
                 .add(Blocks.TUFF)
                 .add(Blocks.DRIPSTONE_BLOCK)
-                .add(Blocks.MOSS_BLOCK);
+                .add(Blocks.MOSS_BLOCK)
+                .add(Blocks.DEEPSLATE)
+                .add(Blocks.GRAVEL)
+                .add(Blocks.STONE)
+                .add(Blocks.AMETHYST_BLOCK)
+                .add(Blocks.ICE);
         tag(ModTags.Blocks.CAN_SPAWN_WINGED_PIKMIN)
                 .add(Blocks.GRASS_BLOCK)
                 .add(Blocks.DIRT)
                 .add(Blocks.MOSS_BLOCK)
                 .add(Blocks.STONE)
-                .add(Blocks.GRAVEL);
+                .add(Blocks.GRAVEL)
+                .add(Blocks.STONE)
+                .add(Blocks.SNOW_BLOCK);
         tag(ModTags.Blocks.CAN_SPAWN_ROCK_PIKMIN)
                 .add(Blocks.STONE)
                 .add(Blocks.ANDESITE)
@@ -66,6 +81,11 @@ public class ModBlockTagGenerator extends BlockTagsProvider {
                 .add(Blocks.DIORITE)
                 .add(Blocks.TUFF)
                 .add(Blocks.DRIPSTONE_BLOCK)
-                .add(Blocks.DEEPSLATE);
+                .add(Blocks.DEEPSLATE)
+                .add(Blocks.BLACKSTONE)
+                .add(Blocks.DIRT)
+                .add(Blocks.MOSS_BLOCK)
+                .add(Blocks.GRASS_BLOCK)
+                .add(Blocks.BASALT);
     }
 }

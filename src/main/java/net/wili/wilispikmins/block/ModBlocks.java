@@ -13,6 +13,7 @@ import net.minecraftforge.registries.ForgeRegistries;
 import net.minecraftforge.registries.RegistryObject;
 import net.wili.wilispikmins.WilisPikmins;
 import net.wili.wilispikmins.block.custom.BuriedPikminBlock;
+import net.wili.wilispikmins.block.custom.OnionBlock;
 import net.wili.wilispikmins.item.ModItems;
 
 import java.util.function.Supplier;
@@ -31,6 +32,9 @@ public class ModBlocks {
                     .noOcclusion()
                     .noCollission()
                     .sound(SoundType.GRASS)));
+
+    public static final RegistryObject<Block> ONION_BLOCK = registerBlock("onion_block",
+            () -> new OnionBlock(BlockBehaviour.Properties.copy(Blocks.BROWN_MUSHROOM_BLOCK).noOcclusion()));
 
     private static <T extends Block> RegistryObject<T> registerBlock(String name, Supplier<T> block) {
         RegistryObject<T> toReturn = BLOCKS.register(name, block);

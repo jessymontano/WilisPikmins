@@ -8,10 +8,12 @@ import net.minecraftforge.client.model.generators.ConfiguredModel;
 import net.minecraftforge.client.model.generators.ModelFile;
 import net.minecraftforge.client.model.generators.VariantBlockStateBuilder;
 import net.minecraftforge.common.data.ExistingFileHelper;
+import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.registries.RegistryObject;
 import net.wili.wilispikmins.WilisPikmins;
 import net.wili.wilispikmins.block.ModBlocks;
 import net.wili.wilispikmins.block.custom.BuriedPikminBlock;
+import net.wili.wilispikmins.block.custom.OnionBlock;
 import net.wili.wilispikmins.entity.custom.enums.GrowthStage;
 import net.wili.wilispikmins.entity.custom.enums.PikminType;
 
@@ -26,6 +28,29 @@ public class ModBlockStateProvider extends BlockStateProvider {
     @Override
     protected void registerStatesAndModels() {
         makeBuriedPikminBlock();
+        makeOnionBlock();
+    }
+
+    private void makeOnionBlock() {
+        Block block = ModBlocks.ONION_BLOCK.get();
+
+        getVariantBuilder(block).forAllStates(state -> {
+            PikminType type = state.getValue(OnionBlock.TYPE);
+
+            String typeName = type.getSerializedName();
+            String modelName = "onion_" + typeName;
+
+            ModelFile model = models().cubeBottomTop(
+                    modelName,
+                    modLoc("block/" + typeName + "_onion_side"),
+                    modLoc("block/" + typeName + "_onion_bottom"),
+                    modLoc("block/" + typeName + "_onion_top")
+            );
+
+            return ConfiguredModel.builder()
+                    .modelFile(model)
+                    .build();
+        });
     }
 
     private void makeBuriedPikminBlock() {
