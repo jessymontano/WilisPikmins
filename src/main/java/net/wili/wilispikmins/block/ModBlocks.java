@@ -33,7 +33,11 @@ public class ModBlocks {
                     .sound(SoundType.GRASS)));
 
     public static final Supplier<Block> ONION_BLOCK = registerBlock("onion_block",
-            () -> new OnionBlock(BlockBehaviour.Properties.ofFullCopy(Blocks.BROWN_MUSHROOM_BLOCK).noOcclusion()));
+            () -> new OnionBlock(BlockBehaviour.Properties.of()
+                    .mapColor(MapColor.COLOR_PURPLE)
+                    .strength(0.3f, 3.0f)
+                    .noOcclusion()
+                    .sound(SoundType.FROGLIGHT)));
 
     private static <T extends Block> Supplier<T> registerBlock(String name, Supplier<T> block) {
         Supplier<T> toReturn = BLOCKS.register(name, block);

@@ -7,7 +7,9 @@ import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.SimpleMenuProvider;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.HoeItem;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelReader;
 import net.minecraft.world.level.block.BaseEntityBlock;
@@ -17,6 +19,7 @@ import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.StateDefinition;
 import net.minecraft.world.level.block.state.properties.EnumProperty;
+import net.minecraft.world.level.material.MapColor;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.HitResult;
 import net.wili.wilispikmins.block.entity.OnionBlockEntity;
@@ -225,5 +228,16 @@ public class OnionBlock extends BaseEntityBlock {
         stack.set(OnionComponents.ONION_DATA.get(), itemData);
 
         return stack;
+    }
+
+    @Override
+    protected float getDestroyProgress(@NotNull BlockState state, @NotNull Player player, @NotNull BlockGetter level, @NotNull BlockPos pos) {
+        ItemStack tool = player.getMainHandItem();
+
+        if (tool.getItem() instanceof HoeItem) {
+            return 100.0f;
+        }
+
+        return super.getDestroyProgress(state, player, level, pos);
     }
 }
