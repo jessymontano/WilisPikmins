@@ -246,7 +246,8 @@ public class PikminEntity extends TamableAnimal implements GeoEntity {
                 .add(Attributes.MOVEMENT_SPEED, 0.25)
                 .add(Attributes.ATTACK_DAMAGE, 1.5)
                 .add(Attributes.FOLLOW_RANGE, 32.0)
-                .add(Attributes.ATTACK_KNOCKBACK, 0.1);
+                .add(Attributes.ATTACK_KNOCKBACK, 0.1)
+                .add(Attributes.FALL_DAMAGE_MULTIPLIER, 0.0f);
     }
 
     public PikminType getPikminType() {
@@ -569,5 +570,10 @@ public class PikminEntity extends TamableAnimal implements GeoEntity {
         super.swing(hand);
 
         this.triggerAnim("attack", "attack");
+    }
+
+    @Override
+    public boolean causeFallDamage(float fallDistance, float multiplier, @NotNull DamageSource source) {
+        return false;
     }
 }
