@@ -26,11 +26,11 @@ public class ModTags {
 
         private static TagKey<Biome> create(String name) {
             return TagKey.create(Registries.BIOME,
-                    new ResourceLocation(WilisPikmins.MOD_ID, name));
+                    ResourceLocation.fromNamespaceAndPath(WilisPikmins.MOD_ID, name));
         }
     }
 
-    public class Blocks {
+    public static class Blocks {
         public static final TagKey<Block> CAN_SPAWN_RED_PIKMIN =
                 create("can_spawn_red_pikmin");
         public static final TagKey<Block> CAN_SPAWN_YELLOW_PIKMIN =
@@ -48,7 +48,7 @@ public class ModTags {
 
         private static TagKey<Block> create(String name) {
             return TagKey.create(Registries.BLOCK,
-                    new ResourceLocation(WilisPikmins.MOD_ID, name));
+                    ResourceLocation.fromNamespaceAndPath(WilisPikmins.MOD_ID, name));
         }
     }
 }

@@ -5,25 +5,25 @@ import net.wili.wilispikmins.WilisPikmins;
 import net.wili.wilispikmins.entity.custom.PikminEntity;
 import net.wili.wilispikmins.entity.custom.enums.GrowthStage;
 import net.wili.wilispikmins.entity.custom.enums.PikminType;
-import software.bernie.geckolib.core.animation.AnimationState;
+import software.bernie.geckolib.animation.AnimationState;
 import software.bernie.geckolib.model.GeoModel;
 
 public class PikminModel extends GeoModel<PikminEntity> {
     @Override
     public ResourceLocation getModelResource(PikminEntity entity) {
         if (entity == null) {
-            return new ResourceLocation(WilisPikmins.MOD_ID, "geo/pikmin.geo.json");
+            return ResourceLocation.fromNamespaceAndPath(WilisPikmins.MOD_ID, "geo/pikmin.geo.json");
         }
         return switch (entity.getPikminType()) {
-            case PURPLE -> new ResourceLocation(
+            case PURPLE -> ResourceLocation.fromNamespaceAndPath(
                     WilisPikmins.MOD_ID,
                     "geo/purple_pikmin.geo.json"
             );
-            case ROCK -> new ResourceLocation(
+            case ROCK -> ResourceLocation.fromNamespaceAndPath(
                     WilisPikmins.MOD_ID,
                     "geo/rock_pikmin.geo.json"
             );
-            default -> new ResourceLocation(
+            default -> ResourceLocation.fromNamespaceAndPath(
                     WilisPikmins.MOD_ID,
                     "geo/pikmin.geo.json"
             );
@@ -36,18 +36,18 @@ public class PikminModel extends GeoModel<PikminEntity> {
 
         PikminType type = entity.getPikminType();
 
-        return new ResourceLocation(WilisPikmins.MOD_ID,
+        return ResourceLocation.fromNamespaceAndPath(WilisPikmins.MOD_ID,
                 "textures/entity/" + type.getName().toLowerCase() + "_pikmin.png");
     }
 
     @Override
     public ResourceLocation getAnimationResource(PikminEntity pikmin) {
-        return new ResourceLocation(WilisPikmins.MOD_ID,
+        return ResourceLocation.fromNamespaceAndPath(WilisPikmins.MOD_ID,
                 "animations/pikmin.animation.json");
     }
 
     private ResourceLocation getDefaultTexture() {
-        return new ResourceLocation(WilisPikmins.MOD_ID,
+        return ResourceLocation.fromNamespaceAndPath(WilisPikmins.MOD_ID,
                 "textures/entity/red_pikmin.png");
     }
 
@@ -55,7 +55,7 @@ public class PikminModel extends GeoModel<PikminEntity> {
     public void setCustomAnimations(PikminEntity animatable, long instanceId, AnimationState<PikminEntity> animationState) {
         super.setCustomAnimations(animatable, instanceId, animationState);
 
-        GeoModel model = (GeoModel) this;
+        GeoModel<PikminEntity> model = this;
         var animationProcessor = model.getAnimationProcessor();
 
         if (animationProcessor != null) {

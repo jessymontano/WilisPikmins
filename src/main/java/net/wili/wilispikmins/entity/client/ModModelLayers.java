@@ -6,6 +6,6 @@ import net.wili.wilispikmins.WilisPikmins;
 
 public class ModModelLayers {
     public static final ModelLayerLocation PIKMIN_LAYER = new ModelLayerLocation(
-            new ResourceLocation(WilisPikmins.MOD_ID, "pikmin_layer"), "main");
+            ResourceLocation.fromNamespaceAndPath(WilisPikmins.MOD_ID, "pikmin_layer"), "main");
 
 }

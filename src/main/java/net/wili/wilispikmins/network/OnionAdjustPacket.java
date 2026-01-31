@@ -1,36 +1,41 @@
 package net.wili.wilispikmins.network;
 
-import net.minecraft.network.FriendlyByteBuf;
-import net.minecraft.server.level.ServerPlayer;
-import net.minecraftforge.network.NetworkEvent;
+import io.netty.buffer.ByteBuf;
+import net.minecraft.network.codec.ByteBufCodecs;
+import net.minecraft.network.codec.StreamCodec;
+import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
+import net.neoforged.neoforge.network.handling.IPayloadContext;
 import net.wili.wilispikmins.entity.custom.enums.PikminType;
 import net.wili.wilispikmins.screen.OnionMenu;
+import org.jetbrains.annotations.NotNull;
 
-import java.util.function.Supplier;
+public record OnionAdjustPacket(PikminType pikminType, boolean takeOut) implements CustomPacketPayload {
+    public static final Type<OnionAdjustPacket> TYPE =
+            new Type<>(ModPackets.ONION_ADJUST_ID);
 
-public record OnionAdjustPacket(PikminType type, boolean takeOut) {
-    public static void encode (OnionAdjustPacket msg, FriendlyByteBuf buf) {
-        buf.writeEnum(msg.type);
-        buf.writeBoolean(msg.takeOut);
+    public static final StreamCodec<ByteBuf, OnionAdjustPacket> STREAM_CODEC =
+            StreamCodec.composite(
+                    ByteBufCodecs.STRING_UTF8.map(PikminType::valueOf, Enum::name),
+                    OnionAdjustPacket::pikminType,
+                    ByteBufCodecs.BOOL,
+                    OnionAdjustPacket::takeOut,
+                    OnionAdjustPacket::new
+            );
+
+    @Override
+    public @NotNull Type<? extends CustomPacketPayload> type() {
+        return TYPE;
     }
 
-    public static OnionAdjustPacket decode(FriendlyByteBuf buf) {
-        return new OnionAdjustPacket(buf.readEnum(PikminType.class), buf.readBoolean());
-    }
-
-    public static void handle(OnionAdjustPacket msg, Supplier<NetworkEvent.Context> context) {
-        context.get().enqueueWork(() -> {
-            ServerPlayer player = context.get().getSender();
-            if (player == null) return;
-
-            if (player.containerMenu instanceof OnionMenu menu) {
-               if (msg.takeOut()) {
-                   menu.takeOut(msg.type);
-               } else {
-                   menu.putIn(msg.type);
-               }
+    public static void handle(final OnionAdjustPacket packet, final IPayloadContext context) {
+        context.enqueueWork(() -> {
+            if (context.player().containerMenu instanceof OnionMenu menu) {
+                if (packet.takeOut()) {
+                    menu.takeOut(packet.pikminType());
+                } else {
+                    menu.putIn(packet.pikminType());
+                }
             }
         });
-        context.get().setPacketHandled(true);
     }
 }

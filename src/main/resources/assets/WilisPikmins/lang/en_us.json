@@ -37,6 +37,7 @@
 
   "tooltip.wilispikmins.onion.type": "Type: %s",
   "tooltip.wilispikmins.onion.place_1": "Place it to establish",
-  "tooltip.wilispikmins.onion.place_2": "your main Onion"
+  "tooltip.wilispikmins.onion.place_2": "your main Onion",
+  "tooltip.wilispikmins.onion.main_onion": "Main Onion"
 
 }

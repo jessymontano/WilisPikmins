@@ -3,20 +3,20 @@ package net.wili.wilispikmins.event;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.Entity;
-import net.minecraftforge.event.TickEvent;
-import net.minecraftforge.event.entity.EntityJoinLevelEvent;
-import net.minecraftforge.event.entity.living.LivingDeathEvent;
-import net.minecraftforge.event.entity.player.PlayerEvent;
-import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.fml.common.Mod;
+import net.neoforged.bus.api.SubscribeEvent;
+import net.neoforged.fml.common.EventBusSubscriber;
+import net.neoforged.neoforge.event.entity.EntityJoinLevelEvent;
+import net.neoforged.neoforge.event.entity.living.LivingDeathEvent;
+import net.neoforged.neoforge.event.entity.player.PlayerEvent;
 import net.wili.wilispikmins.WilisPikmins;
-import net.wili.wilispikmins.capability.OnionCapability;
+import net.wili.wilispikmins.data.OnionComponents;
+import net.wili.wilispikmins.data.OnionData;
 import net.wili.wilispikmins.entity.custom.PikminEntity;
 import net.wili.wilispikmins.entity.custom.enums.PikminType;
 
 import java.util.UUID;
 
-@Mod.EventBusSubscriber(modid = WilisPikmins.MOD_ID)
+@EventBusSubscriber(modid = WilisPikmins.MOD_ID)
 public class PikminTrackingEvents {
     @SubscribeEvent
     public static void onPikminSpawn(EntityJoinLevelEvent event) {
@@ -25,10 +25,11 @@ public class PikminTrackingEvents {
                 Entity owner = event.getLevel().getPlayerByUUID(pikmin.getOwnerUUID());
 
                 if (owner instanceof ServerPlayer player) {
-                    player.getCapability(OnionCapability.ONION_DATA).ifPresent(data -> {
-                        PikminType type = pikmin.getPikminType();
-                        data.addOutside(type, 1);
-                    });
+                    OnionData playerData = player.getData(OnionComponents.PLAYER_ONION_DATA);
+                    PikminType type = pikmin.getPikminType();
+
+                    OnionData newData = playerData.addOutside(type, 1);
+                    player.setData(OnionComponents.PLAYER_ONION_DATA, newData);
                 }
             }
         }
@@ -36,13 +37,22 @@ public class PikminTrackingEvents {
 
     @SubscribeEvent
     public static void onPikminDeath(LivingDeathEvent event) {
-        if (!event.getEntity().level().isClientSide() && event.getEntity() instanceof PikminEntity pikmin) {
-            Entity owner = pikmin.level().getPlayerByUUID(pikmin.getOwnerUUID());
-            if (owner instanceof ServerPlayer player) {
-                player.getCapability(OnionCapability.ONION_DATA).ifPresent(data -> {
+        Entity entity = event.getEntity();
+        if (!entity.level().isClientSide() && entity instanceof  PikminEntity pikmin) {
+            UUID ownerUUID = pikmin.getOwnerUUID();
+            if (ownerUUID != null) {
+                Entity owner = entity.level().getPlayerByUUID(ownerUUID);
+
+                if (owner instanceof ServerPlayer player) {
+                    OnionData playerData = player.getData(OnionComponents.PLAYER_ONION_DATA);
                     PikminType type = pikmin.getPikminType();
-                    data.addOutside(type, -1);
-                });
+
+                    int currentOutside = playerData.getOutside(type);
+                    if (currentOutside > 0) {
+                        OnionData newData = playerData.addOutside(type, -1);
+                        player.setData(OnionComponents.PLAYER_ONION_DATA, newData);
+                    }
+                }
             }
         }
     }
@@ -50,32 +60,37 @@ public class PikminTrackingEvents {
     @SubscribeEvent
     public static void onPlayerLogin(PlayerEvent.PlayerLoggedInEvent event) {
         if (!event.getEntity().level().isClientSide() && event.getEntity() instanceof ServerPlayer serverPlayer) {
-            serverPlayer.getCapability(OnionCapability.ONION_DATA).ifPresent(data -> {
+            OnionData playerData = serverPlayer.getData(OnionComponents.PLAYER_ONION_DATA);
 
-                for (PikminType type : PikminType.values()) {
-                    data.setOutside(type, 0);
-                }
+            OnionData newData = playerData;
+            for (PikminType type : PikminType.values()) {
+                newData = newData.withOutside(type, 0);
+            }
 
-                ServerLevel level = serverPlayer.serverLevel();
-                UUID id = serverPlayer.getUUID();
+            if (serverPlayer.level() instanceof ServerLevel level) {
+                UUID playerId = serverPlayer.getUUID();
+                int totalPikmins = 0;
 
                 for (Entity entity : level.getAllEntities()) {
                     if (entity instanceof PikminEntity pikmin) {
-                        if (id.equals(pikmin.getOwnerUUID())) {
-                            data.addOutside(pikmin.getPikminType(), 1);
+                        UUID pikminOwner = pikmin.getOwnerUUID();
+                        if (playerId.equals(pikminOwner)) {
+                            PikminType type = pikmin.getPikminType();
+                            newData = newData.addOutside(type, 1);
+                            totalPikmins++;
                         }
                     }
                 }
-            });
+
+                serverPlayer.setData(OnionComponents.PLAYER_ONION_DATA, newData);
+            }
         }
     }
 
     @SubscribeEvent
     public static void onPlayerLogout(PlayerEvent.PlayerLoggedOutEvent event) {
         if (!event.getEntity().level().isClientSide() && event.getEntity() instanceof ServerPlayer player) {
-            player.getCapability(OnionCapability.ONION_DATA).ifPresent(data -> {
-
-            });
+            // todo: agregar algo aqi
         }
     }
 }

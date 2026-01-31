@@ -1,14 +1,15 @@
 package net.wili.wilispikmins.block.custom;
 
+import com.mojang.serialization.MapCodec;
 import net.minecraft.core.BlockPos;
-import net.minecraft.nbt.CompoundTag;
+import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerPlayer;
-import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
+import net.minecraft.world.SimpleMenuProvider;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.LevelReader;
 import net.minecraft.world.level.block.BaseEntityBlock;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.RenderShape;
@@ -17,9 +18,10 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.StateDefinition;
 import net.minecraft.world.level.block.state.properties.EnumProperty;
 import net.minecraft.world.phys.BlockHitResult;
-import net.minecraftforge.network.NetworkHooks;
+import net.minecraft.world.phys.HitResult;
 import net.wili.wilispikmins.block.entity.OnionBlockEntity;
-import net.wili.wilispikmins.capability.OnionCapability;
+import net.wili.wilispikmins.data.OnionComponents;
+import net.wili.wilispikmins.data.OnionData;
 import net.wili.wilispikmins.entity.custom.enums.PikminType;
 import net.wili.wilispikmins.item.ModItems;
 import org.jetbrains.annotations.NotNull;
@@ -28,6 +30,7 @@ import org.jetbrains.annotations.Nullable;
 public class OnionBlock extends BaseEntityBlock {
     public static final EnumProperty<PikminType> TYPE =
             EnumProperty.create("type", PikminType.class);
+    public static final MapCodec<OnionBlock> CODEC = simpleCodec(OnionBlock::new);
 
     public OnionBlock(Properties pProperties) {
         super(pProperties);
@@ -35,17 +38,22 @@ public class OnionBlock extends BaseEntityBlock {
     }
 
     @Override
-    public @NotNull RenderShape getRenderShape(BlockState pState) {
+    protected @NotNull MapCodec<? extends BaseEntityBlock> codec() {
+        return CODEC;
+    }
+
+    @Override
+    public @NotNull RenderShape getRenderShape(@NotNull BlockState pState) {
         return RenderShape.MODEL;
     }
 
     @Override
-    public @Nullable BlockEntity newBlockEntity(BlockPos blockPos, BlockState blockState) {
+    public @Nullable BlockEntity newBlockEntity(@NotNull BlockPos blockPos, @NotNull BlockState blockState) {
         return new OnionBlockEntity(blockPos, blockState);
     }
 
     @Override
-    public InteractionResult use(BlockState pState, Level pLevel, BlockPos pPos, Player pPlayer, InteractionHand pHand, BlockHitResult pHit) {
+    public @NotNull InteractionResult useWithoutItem(@NotNull BlockState pState, Level pLevel, @NotNull BlockPos pPos, @NotNull Player pPlayer, @NotNull BlockHitResult pHit) {
         if (pLevel.isClientSide) {
             return InteractionResult.SUCCESS;
         }
@@ -61,48 +69,63 @@ public class OnionBlock extends BaseEntityBlock {
 
         PikminType type = pState.getValue(TYPE);
 
-        return serverPlayer.getCapability(OnionCapability.ONION_DATA).map(data -> {
-            if (onionBE.isMainOnion() && serverPlayer.getUUID().equals(onionBE.getOwner())) {
-                NetworkHooks.openScreen(serverPlayer, onionBE, pPos);
+        OnionData playerData = serverPlayer.getData(OnionComponents.PLAYER_ONION_DATA);
+
+        if (onionBE.isMainOnion() && serverPlayer.getUUID().equals(onionBE.getOwner())) {
+            serverPlayer.openMenu(new SimpleMenuProvider(
+                    onionBE,
+                    Component.translatable("block.wilispikmins.onion.main")
+            ), buf ->
+                buf.writeBlockPos(pPos));
+            return InteractionResult.CONSUME;
+        }
+
+        if (!playerData.hasMainOnion() && !onionBE.isMainOnion() && onionBE.getOwner() == null) {
+            onionBE.setOwner(serverPlayer.getUUID());
+            onionBE.setMainOnion(true);
+            onionBE.setPikminType(type);
+
+            OnionData newPlayerData = playerData
+                    .withHasMainOnion(true)
+                    .withUnlockedType(type)
+                    .withCapacity(type, 20);
+
+            serverPlayer.setData(OnionComponents.PLAYER_ONION_DATA, newPlayerData);
+
+            serverPlayer.openMenu(new SimpleMenuProvider(
+                    onionBE,
+                    Component.translatable("block.wilispikmins.onion.main")
+            ), buf ->
+                buf.writeBlockPos(pPos));
+            return InteractionResult.CONSUME;
+        }
+
+        if (playerData.hasMainOnion()) {
+            if (onionBE.getOwner() == null) {
+                if (!playerData.hasUnlocked(type)) {
+                    OnionData unlockedData = playerData.withUnlockedType(type);
+                    serverPlayer.setData(OnionComponents.PLAYER_ONION_DATA, unlockedData);
+                }
+                ItemStack upgradeItem = createUpgradeItem(type);
+                if (!serverPlayer.getInventory().add(upgradeItem)) {
+                    popResource(pLevel, pPos, upgradeItem);
+                }
+
+                pLevel.removeBlock(pPos, false);
                 return InteractionResult.CONSUME;
             }
 
-            if (!data.hasMainOnion() && !onionBE.isMainOnion() && onionBE.getOwner() == null) {
-                onionBE.setOwner(serverPlayer.getUUID());
-                onionBE.setMainOnion(true);
-                onionBE.setPikminType(type);
-
-                data.setHasMainOnion(true);
-                data.unlockType(type);
-                data.setCapacity(type, 20);
-
-                NetworkHooks.openScreen(serverPlayer, onionBE, pPos);
+            if (serverPlayer.getUUID().equals(onionBE.getOwner()) && !onionBE.isMainOnion()) {
+                serverPlayer.openMenu(new SimpleMenuProvider(
+                        onionBE,
+                        Component.translatable("block.wilispikmins.onion.main")
+                ), buf ->
+                    buf.writeBlockPos(pPos));
                 return InteractionResult.CONSUME;
             }
+        }
 
-            if (data.hasMainOnion()) {
-                if (onionBE.getOwner() == null) {
-                    if (!data.hasUnlocked(type)) {
-                        data.unlockType(type);
-                    }
-
-                    ItemStack upgradeItem = createUpgradeItem(type);
-                    if (!serverPlayer.getInventory().add(upgradeItem)) {
-                        popResource(pLevel, pPos, upgradeItem);
-                    }
-
-                    pLevel.removeBlock(pPos, false);
-                    return InteractionResult.CONSUME;
-                }
-
-                if (serverPlayer.getUUID().equals(onionBE.getOwner()) && !onionBE.isMainOnion()) {
-                    NetworkHooks.openScreen(serverPlayer, onionBE, pPos);
-                    return InteractionResult.CONSUME;
-                }
-            }
-
-            return InteractionResult.PASS;
-        }).orElse(InteractionResult.PASS);
+        return InteractionResult.PASS;
     }
 
     @Override
@@ -111,50 +134,60 @@ public class OnionBlock extends BaseEntityBlock {
     }
 
     @Override
-    public void playerWillDestroy(Level pLevel, BlockPos pPos, BlockState pState, Player pPlayer) {
+    public @NotNull BlockState playerWillDestroy(Level pLevel, @NotNull BlockPos pPos, @NotNull BlockState pState, @NotNull Player pPlayer) {
         if (!pLevel.isClientSide && pPlayer instanceof ServerPlayer serverPlayer) {
             PikminType type = pState.getValue(TYPE);
             BlockEntity be = pLevel.getBlockEntity(pPos);
 
             if (be instanceof  OnionBlockEntity onionBE) {
-                serverPlayer.getCapability(OnionCapability.ONION_DATA).ifPresent(data -> {
-                    if (onionBE.isMainOnion() && serverPlayer.getUUID().equals(onionBE.getOwner())) {
-                        data.setHasMainOnion(false);
+                OnionData playerData = serverPlayer.getData(OnionComponents.PLAYER_ONION_DATA);
 
-                        ItemStack onionItem = createMainOnionItem(type);
-                        CompoundTag tag = new CompoundTag();
+                if (onionBE.isMainOnion() && serverPlayer.getUUID().equals(onionBE.getOwner())) {
+                    OnionData newPlayerData = playerData.withHasMainOnion(false);
+                    serverPlayer.setData(OnionComponents.PLAYER_ONION_DATA, newPlayerData);
 
-                        tag.putString("pikmin_type", type.name());
-                        tag.putBoolean("was_main_onion", true);
-                        onionItem.setTag(tag);
+                    ItemStack onionItem = createMainOnionItem(type);
 
-                        popResource(pLevel, pPos, onionItem);
-                    } else if (serverPlayer.getUUID().equals(onionBE.getOwner())) {
-                        ItemStack onionItem = createMainOnionItem(type);
-                        CompoundTag tag = new CompoundTag();
+                    OnionData itemData = new OnionData()
+                            .withHasMainOnion(true)
+                            .withUnlockedType(type);
 
-                        tag.putString("pikmin_type", type.name());
-                        tag.putBoolean("was_main_onion", false);
-                        onionItem.setTag(tag);
+                    onionItem.set(OnionComponents.ONION_DATA.get(), itemData);
 
-                        popResource(pLevel, pPos, onionItem);
-                    } else {
-                        ItemStack upgradeItem = createUpgradeItem(type);
-                        popResource(pLevel, pPos, upgradeItem);
+                    popResource(pLevel, pPos, onionItem);
+                } else if (serverPlayer.getUUID().equals(onionBE.getOwner())) {
+                    ItemStack onionItem = createMainOnionItem(type);
+
+                    OnionData itemData = new OnionData()
+                            .withHasMainOnion(false)
+                            .withUnlockedType(type);
+                    onionItem.set(OnionComponents.ONION_DATA.get(), itemData);
+
+                    popResource(pLevel, pPos, onionItem);
+                } else {
+                    ItemStack upgradeItem = createUpgradeItem(type);
+
+                    if (!playerData.hasUnlocked(type)) {
+                        OnionData upgradeData = new OnionData()
+                                .withUnlockedType(type);
+                        upgradeItem.set(OnionComponents.ONION_DATA.get(), upgradeData);
                     }
-                });
+
+                    popResource(pLevel, pPos, upgradeItem);
+                }
             }
         }
 
-        super.playerWillDestroy(pLevel, pPos, pState, pPlayer);
+        return super.playerWillDestroy(pLevel, pPos, pState, pPlayer);
     }
 
     private ItemStack createMainOnionItem(PikminType type) {
         ItemStack stack = new ItemStack(this);
-        CompoundTag tag = new CompoundTag();
-        tag.putString("pikmin_type", type.name());
-        tag.putBoolean("was_main_onion", true);
-        stack.setTag(tag);
+
+        stack.set(OnionComponents.ONION_DATA.get(), new OnionData()
+                .withUnlockedType(type)
+                .withHasMainOnion(true));
+
         return stack;
     }
 
@@ -168,23 +201,29 @@ public class OnionBlock extends BaseEntityBlock {
             case WINGED -> new ItemStack(ModItems.WINGED_ONION_UPGRADE.get());
             case ROCK -> new ItemStack(ModItems.ROCK_ONION_UPGRADE.get());
         };
-        CompoundTag tag = new CompoundTag();
-        tag.putString("pikmin_type", type.name());
-        upgradeStack.setTag(tag);
+
+        OnionData upgradeData = new OnionData()
+                .withUnlockedType(type);
+        upgradeStack.set(OnionComponents.ONION_DATA.get(), upgradeData);
 
         return upgradeStack;
     }
 
     @Override
-    public ItemStack getCloneItemStack(BlockGetter level, BlockPos pos, BlockState state) {
+    public @NotNull ItemStack getCloneItemStack(BlockState state, @NotNull HitResult target, LevelReader level, @NotNull BlockPos pos, @NotNull Player player) {
         ItemStack stack = new ItemStack(this);
-        CompoundTag tag = new CompoundTag();
-        tag.putString("pikmin_type", state.getValue(TYPE).name());
+        PikminType type = state.getValue(TYPE);
+
+        OnionData itemData = new OnionData()
+                .withUnlockedType(type);
+
         BlockEntity be = level.getBlockEntity(pos);
-        if (be instanceof OnionBlockEntity onionBE && onionBE.isMainOnion()) {
-            tag.putBoolean("was_main_onion", true);
+        if (be instanceof  OnionBlockEntity onionBE && onionBE.isMainOnion()) {
+            itemData = itemData.withHasMainOnion(true);
         }
-        stack.setTag(tag);
+
+        stack.set(OnionComponents.ONION_DATA.get(), itemData);
+
         return stack;
     }
 }

@@ -12,11 +12,11 @@ import net.minecraft.world.inventory.*;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.entity.BlockEntity;
-import net.minecraftforge.common.capabilities.ForgeCapabilities;
-import net.minecraftforge.items.SlotItemHandler;
+import net.neoforged.neoforge.items.ItemStackHandler;
+import net.neoforged.neoforge.items.SlotItemHandler;
 import net.wili.wilispikmins.block.entity.OnionBlockEntity;
-import net.wili.wilispikmins.capability.IOnionData;
-import net.wili.wilispikmins.capability.OnionCapability;
+import net.wili.wilispikmins.data.OnionComponents;
+import net.wili.wilispikmins.data.OnionData;
 import net.wili.wilispikmins.entity.ModEntities;
 import net.wili.wilispikmins.entity.custom.PikminEntity;
 import net.wili.wilispikmins.entity.custom.enums.PikminType;
@@ -51,6 +51,7 @@ public class OnionMenu extends AbstractContainerMenu {
         this.blockEntity = (OnionBlockEntity) entity;
         this.level = inv.player.level();
         this.player = inv.player;
+        ItemStackHandler itemHandler = blockEntity.getItemHandler();
 
         for (PikminType type : PikminType.values()) {
             pendingTakeOut.put(type, 0);
@@ -60,22 +61,19 @@ public class OnionMenu extends AbstractContainerMenu {
         this.data = new SimpleContainerData(DATA_COUNT);
 
         if (!level.isClientSide) {
-            updateDataFromCapability();
+            updateDataFromPlayer();
         }
 
+        this.addSlot(new SlotItemHandler(itemHandler, 0, 152, 87) {
+            @Override
+            public boolean mayPlace(@NotNull ItemStack stack) {
+                return stack.getItem() instanceof OnionUpgradeItem;
+            }
 
-        blockEntity.getCapability(ForgeCapabilities.ITEM_HANDLER).ifPresent(handler -> {
-            this.addSlot(new SlotItemHandler(handler, 0, 152, 87) {
-                @Override
-                public boolean mayPlace(@NotNull ItemStack stack) {
-                    return stack.getItem() instanceof OnionUpgradeItem;
-                }
-
-                @Override
-                public int getMaxStackSize() {
-                    return 64;
-                }
-            });
+            @Override
+            public int getMaxStackSize() {
+                return 64;
+            }
         });
 
         addPlayerInventory(inv);
@@ -86,6 +84,14 @@ public class OnionMenu extends AbstractContainerMenu {
 
     public OnionMenu(int pContainerId, Inventory inv, FriendlyByteBuf buf) {
         this(pContainerId, inv, inv.player.level().getBlockEntity(buf.readBlockPos()));
+    }
+
+    private OnionData getPlayerData() {
+        return player.getData(OnionComponents.PLAYER_ONION_DATA);
+    }
+
+    private OnionData getBlockData() {
+        return blockEntity.getOnionData();
     }
 
     // CREDIT GOES TO: diesieben07 | https://github.com/diesieben07/SevenCommons
@@ -106,9 +112,9 @@ public class OnionMenu extends AbstractContainerMenu {
     // THIS YOU HAVE TO DEFINE!
     private static final int TE_INVENTORY_SLOT_COUNT = 1;  // must be the number of slots you have!
     @Override
-    public ItemStack quickMoveStack(Player playerIn, int pIndex) {
+    public @NotNull ItemStack quickMoveStack(@NotNull Player playerIn, int pIndex) {
         Slot sourceSlot = slots.get(pIndex);
-        if (sourceSlot == null || !sourceSlot.hasItem()) return ItemStack.EMPTY;  //EMPTY_ITEM
+        if (!sourceSlot.hasItem()) return ItemStack.EMPTY;  //EMPTY_ITEM
         ItemStack sourceStack = sourceSlot.getItem();
         ItemStack copyOfSourceStack = sourceStack.copy();
 
@@ -139,7 +145,7 @@ public class OnionMenu extends AbstractContainerMenu {
     }
 
     @Override
-    public boolean stillValid(Player player) {
+    public boolean stillValid(@NotNull Player player) {
         return blockEntity != null
                 && !blockEntity.isRemoved()
                 && player.distanceToSqr(
@@ -163,18 +169,12 @@ public class OnionMenu extends AbstractContainerMenu {
         }
     }
 
-    private IOnionData getData() {
-        return player.getCapability(OnionCapability.ONION_DATA).orElse(null);
-    }
-
     public boolean isUnlocked(PikminType type) {
-       /* if (level.isClientSide) {
-            int index = type.ordinal() * 4;
+       if (level.isClientSide) {
+            int index = type.ordinal() * VALUES_PER_TYPE + OFF_UNLOCKED;
             return data.get(index) == 1;
         }
-        IOnionData onionData = getData();
-        return onionData != null && onionData.hasUnlocked(type);*/
-        return true;
+        return getPlayerData().hasUnlocked(type);
     }
 
     public int getStored(PikminType type) {
@@ -183,8 +183,7 @@ public class OnionMenu extends AbstractContainerMenu {
             return data.get(index);
         }
 
-        IOnionData onionData = getData();
-        return onionData != null ? onionData.getStored(type) : 0;
+        return getBlockData().getStored(type);
     }
 
     public int getCapacity(PikminType type) {
@@ -192,8 +191,7 @@ public class OnionMenu extends AbstractContainerMenu {
             int index = type.ordinal() * VALUES_PER_TYPE + OFF_CAPACITY;
             return data.get(index);
         }
-        IOnionData onionData = getData();
-        return onionData.getCapacity(type);
+        return getPlayerData().getCapacity(type);
     }
 
     public int getOutside(PikminType type) {
@@ -201,18 +199,15 @@ public class OnionMenu extends AbstractContainerMenu {
             int index = type.ordinal() * VALUES_PER_TYPE + OFF_OUTSIDE;
             return data.get(index);
         }
-        IOnionData onionData = getData();
-        if (onionData != null) {
-            return onionData.getOutside(type);
-        }
-        return 0;
+        return getPlayerData().getOutside(type);
     }
 
     public void takeOut(PikminType type) {
-        IOnionData data = getData();
-        if (data == null) return;
+        if (level.isClientSide) return;
 
-        int stored = data.getStored(type);
+        OnionData blockData = getBlockData();
+
+        int stored = blockData.getStored(type);
         int takeOut = pendingTakeOut.get(type);
         int putIn = pendingPutIn.get(type);
 
@@ -227,11 +222,12 @@ public class OnionMenu extends AbstractContainerMenu {
     }
 
     public void putIn(PikminType type) {
-        IOnionData data = getData();
-        if (data == null) return;
+        if (level.isClientSide) return;
 
-        int outside = data.getOutside(type);
-        int capacity = data.getCapacity(type);
+        OnionData playerData = getPlayerData();
+
+        int outside = playerData.getOutside(type);
+        int capacity = playerData.getCapacity(type);
         int takeOut = pendingTakeOut.get(type);
         int putIn = pendingPutIn.get(type);
 
@@ -269,25 +265,50 @@ public class OnionMenu extends AbstractContainerMenu {
     public void confirmOperations() {
         if (level.isClientSide) return;
 
-        IOnionData data = getData();
-        if (data == null) return;
+        OnionData blockData = getBlockData();
+        OnionData playerData = getPlayerData();
 
         for (PikminType type : PikminType.values()) {
             int out = pendingTakeOut.get(type);
             int in  = pendingPutIn.get(type);
 
-            for (int i = 0; i < out; i++) {
-                spawnPikmin(type, 1);
-                data.addStored(type, -1);
+            if (out > 0 && blockData.canTakeOut(type, out)) {
+                OnionData newBlockData = blockData;
+                for (int i = 0; i < out; i++) {
+                    newBlockData = newBlockData.addStored(type, -1);
+                }
+                blockEntity.setOnionData(newBlockData);
+
+                spawnPikmin(type, out);
+
+                OnionData newPlayerData = playerData;
+                for (int i = 0; i < out; i++) {
+                    newPlayerData = newPlayerData.addOutside(type,1 );
+                }
+                player.setData(OnionComponents.PLAYER_ONION_DATA, newPlayerData);
+                playerData = newPlayerData;
             }
 
-            for (int i = 0; i < in; i++) {
-                recallOnePikmin(type);
+            if (in > 0 && playerData.canPutIn(type, in)) {
+                OnionData newPlayerData = playerData;
+                for (int i = 0; i < in; i++) {
+                    newPlayerData = newPlayerData.addOutside(type, -1);
+                }
+                player.setData(OnionComponents.PLAYER_ONION_DATA, newPlayerData);
+                playerData = newPlayerData;
+
+                OnionData newBlockData = blockData;
+                for (int i = 0; i < in; i++) {
+                    newBlockData = newBlockData.addStored(type, 1);
+                }
+                blockEntity.setOnionData(newBlockData);
+
+                recallPikmins(type, in);
             }
         }
 
         clearOperations();
-        updateDataFromCapability();
+        updateDataFromPlayer();
         broadcastChanges();
     }
 
@@ -301,42 +322,65 @@ public class OnionMenu extends AbstractContainerMenu {
 
     private void sync() {
         if (!level.isClientSide) {
-            updateDataFromCapability();
+            updateDataFromPlayer();
             broadcastChanges();
         }
     }
 
     public void recallAllPikmins() {
         if (level.isClientSide) return;
-
-        IOnionData onionData = getData();
-        if (onionData == null) return;
-
         if (!(level instanceof ServerLevel serverLevel)) return;
 
+        OnionData playerData = getPlayerData();
+        OnionData blockData = getBlockData();
         UUID playerId = player.getUUID();
 
-        for (Entity entity : serverLevel.getAllEntities()) {
+        Map<PikminType, Integer> outsideCouts = new EnumMap<>(PikminType.class);
+        for (PikminType type : PikminType.values()) {
+            outsideCouts.put(type, 0);
+        }
+
+        for (Entity entity: serverLevel.getAllEntities()) {
             if (entity instanceof PikminEntity pikmin) {
                 UUID ownerId = pikmin.getOwnerUUID();
                 if (ownerId != null && ownerId.equals(playerId)) {
                     PikminType type = pikmin.getPikminType();
+                    outsideCouts.put(type, outsideCouts.get(type) + 1);
+                }
+            }
+        }
 
-                    if (!onionData.hasUnlocked(type)) {
-                        continue;
-                    }
+        for (PikminType type : PikminType.values()) {
+            if (!playerData.hasUnlocked(type)) continue;
 
-                    int stored = onionData.getStored(type);
-                    int capacity = onionData.getCapacity(type);
+            int toRecall = outsideCouts.get(type);
+            int stored = blockData.getStored(type);
+            int capacity = playerData.getCapacity(type);
+            int canStore = Math.min(toRecall, capacity - stored);
 
-                    if (stored < capacity) {
-                        onionData.addStored(type, 1);
-                        pikmin.discard();
+            if (canStore > 0) {
+                OnionData newBlockData = blockData.addStored(type, canStore);
+                blockEntity.setOnionData(newBlockData);
+                blockData = newBlockData;
+
+                OnionData newPlayerData = playerData.addOutside(type, -canStore);
+                player.setData(OnionComponents.PLAYER_ONION_DATA, newPlayerData);
+                playerData = newPlayerData;
+
+                int recalled = 0;
+                for (Entity entity: serverLevel.getAllEntities()) {
+                    if (recalled >= canStore) break;
+                    if (entity instanceof PikminEntity pikmin) {
+                        UUID ownerId = pikmin.getOwnerUUID();
+                        if (ownerId != null && ownerId.equals(playerId) && pikmin.getPikminType() == type) {
+                            pikmin.discard();
+                            recalled++;
+                        }
                     }
                 }
             }
         }
-        updateDataFromCapability();
+        updateDataFromPlayer();
         broadcastChanges();
     }
 
@@ -360,43 +404,37 @@ public class OnionMenu extends AbstractContainerMenu {
         }
     }
 
-    private void recallOnePikmin(PikminType type) {
+    private void recallPikmins(PikminType type, int amount) {
         if (!(level instanceof ServerLevel serverLevel)) return;
-
-        IOnionData data = getData();
-        if (data == null) return;
-
-        int stored = data.getStored(type);
-        int capacity = data.getCapacity(type);
-
-        if (stored >= capacity) return;
+        if (amount <= 0) return;
 
         UUID ownerId = player.getUUID();
+        int recalled = 0;
 
         for (Entity entity : serverLevel.getAllEntities()) {
+            if (recalled >= amount) break;
+
             if (entity instanceof PikminEntity pikmin) {
                 if (ownerId.equals(pikmin.getOwnerUUID()) && pikmin.getPikminType() == type) {
                     pikmin.discard();
-                    data.addStored(type, 1);
-                    data.addOutside(type, -1);
-                    return;
+                    recalled++;
                 }
             }
         }
     }
 
-    private void updateDataFromCapability() {
-        IOnionData onionData = getData();
-        if (onionData == null) return;
+    private void updateDataFromPlayer() {
+        OnionData playerData = getPlayerData();
+        OnionData blockData = getBlockData();
 
         int index = 0;
         for (PikminType type : PikminType.values()) {
-            data.set(index + OFF_UNLOCKED, onionData.hasUnlocked(type) ? 1 : 0);
-            data.set(index + OFF_STORED, onionData.getStored(type));
-            data.set(index + OFF_OUTSIDE, onionData.getOutside(type));
+            data.set(index + OFF_UNLOCKED, playerData.hasUnlocked(type) ? 1 : 0);
+            data.set(index + OFF_STORED, blockData.getStored(type));
+            data.set(index + OFF_OUTSIDE, playerData.getOutside(type));
             data.set(index + OFF_PENDING_TAKE_OUT, pendingTakeOut.getOrDefault(type, 0));
             data.set(index + OFF_PENDING_PUT_IN, pendingPutIn.getOrDefault(type, 0));
-            data.set(index + OFF_CAPACITY, onionData.getCapacity(type));
+            data.set(index + OFF_CAPACITY, playerData.getCapacity(type));
             index += VALUES_PER_TYPE;
         }
     }
@@ -406,12 +444,12 @@ public class OnionMenu extends AbstractContainerMenu {
         super.broadcastChanges();
 
         if (!level.isClientSide) {
-            updateDataFromCapability();
+            updateDataFromPlayer();
         }
     }
 
     @Override
-    public void slotsChanged(Container pContainer) {
+    public void slotsChanged(@NotNull Container pContainer) {
         super.slotsChanged(pContainer);
         broadcastChanges();
     }
@@ -430,18 +468,17 @@ public class OnionMenu extends AbstractContainerMenu {
             PikminType upgradeType = OnionUpgradeItem.getTypeFromStack(upgradeStack);
             int upgradeCount = upgradeStack.getCount();
 
-            IOnionData data = getData();
-            if (data != null) {
-                data.addCapacity(upgradeType, 20 * upgradeCount);
+            OnionData playerData = getPlayerData();
+            OnionData newPlayerData = playerData.addCapacity(upgradeType, 20 * upgradeCount);
+            player.setData(OnionComponents.PLAYER_ONION_DATA, newPlayerData);
 
-                level.playSound(null, player.blockPosition(),
-                        SoundEvents.PLAYER_LEVELUP, SoundSource.PLAYERS,
-                        1.0f, 1.0f);
+            level.playSound(null, player.blockPosition(),
+                    SoundEvents.PLAYER_LEVELUP, SoundSource.PLAYERS,
+                    1.0f, 1.0f);
 
-                slot.set(ItemStack.EMPTY);
+            slot.set(ItemStack.EMPTY);
 
-                broadcastChanges();
-            }
+            broadcastChanges();
         }
     }
 }

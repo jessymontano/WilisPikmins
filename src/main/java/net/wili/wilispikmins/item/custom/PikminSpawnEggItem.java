@@ -1,8 +1,6 @@
 package net.wili.wilispikmins.item.custom;
 
 import net.minecraft.core.BlockPos;
-import net.minecraft.core.Direction;
-import net.minecraft.server.level.ServerLevel;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
@@ -12,15 +10,16 @@ import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.context.UseOnContext;
 import net.minecraft.world.level.Level;
-import net.minecraftforge.common.ForgeSpawnEggItem;
+import net.neoforged.neoforge.common.DeferredSpawnEggItem;
 import net.wili.wilispikmins.entity.ModEntities;
 import net.wili.wilispikmins.entity.custom.PikminEntity;
 import net.wili.wilispikmins.entity.custom.enums.PikminState;
 import net.wili.wilispikmins.entity.custom.enums.PikminType;
 import net.wili.wilispikmins.sound.ModSounds;
+import org.jetbrains.annotations.NotNull;
 
 
-public class PikminSpawnEggItem extends ForgeSpawnEggItem {
+public class PikminSpawnEggItem extends DeferredSpawnEggItem {
     private final PikminType pikminType;
 
     public PikminSpawnEggItem(PikminType type) {
@@ -54,7 +53,7 @@ public class PikminSpawnEggItem extends ForgeSpawnEggItem {
     }
 
     @Override
-    public InteractionResult interactLivingEntity(ItemStack stack, Player player, LivingEntity entity, InteractionHand hand) {
+    public @NotNull InteractionResult interactLivingEntity(@NotNull ItemStack stack, @NotNull Player player, @NotNull LivingEntity entity, @NotNull InteractionHand hand) {
         if (entity instanceof PikminEntity pikmin && !player.level().isClientSide) {
             pikmin.setPikminType(this.pikminType);
             stack.shrink(1);
@@ -64,17 +63,14 @@ public class PikminSpawnEggItem extends ForgeSpawnEggItem {
     }
 
     @Override
-    public InteractionResult useOn(UseOnContext pContext) {
+    public @NotNull InteractionResult useOn(UseOnContext pContext) {
        Level level = pContext.getLevel();
 
        if (level.isClientSide) {
            return InteractionResult.SUCCESS;
        }
 
-       ServerLevel serverLevel = (ServerLevel) level;
        BlockPos spawnPos = pContext.getClickedPos().relative(pContext.getClickedFace());
-       Player player = pContext.getPlayer();
-
        PikminEntity pikmin = ModEntities.PIKMIN.get().create(level);
 
        if (pikmin != null) {

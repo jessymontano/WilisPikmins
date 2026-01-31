@@ -2,6 +2,7 @@ package net.wili.wilispikmins.entity.custom.enums;
 
 import net.minecraft.network.chat.Component;
 import net.minecraft.util.StringRepresentable;
+import org.jetbrains.annotations.NotNull;
 
 // todos los tipos de pikmin con su nombre y color
 public enum PikminType implements StringRepresentable {
@@ -25,7 +26,7 @@ public enum PikminType implements StringRepresentable {
     public int getColor() {return color;}
 
     @Override
-    public String getSerializedName() {
+    public @NotNull String getSerializedName() {
         return this.name;
     }
 

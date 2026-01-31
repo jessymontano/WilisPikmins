@@ -1,50 +1,54 @@
 package net.wili.wilispikmins.network;
 
-import net.minecraft.network.FriendlyByteBuf;
-import net.minecraft.server.level.ServerPlayer;
+import io.netty.buffer.ByteBuf;
+import net.minecraft.network.codec.StreamCodec;
+import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
+import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
-import net.minecraftforge.network.NetworkEvent;
-import net.wili.wilispikmins.capability.OnionCapability;
+import net.neoforged.neoforge.network.handling.IPayloadContext;
+import net.wili.wilispikmins.data.OnionComponents;
+import net.wili.wilispikmins.data.OnionData;
 import net.wili.wilispikmins.entity.custom.enums.PikminType;
 import net.wili.wilispikmins.item.custom.OnionUpgradeItem;
 import net.wili.wilispikmins.screen.OnionMenu;
+import org.jetbrains.annotations.NotNull;
 
-import java.util.function.Supplier;
+public record OnionUpgradePacket() implements CustomPacketPayload {
+    public static final Type<OnionUpgradePacket> TYPE =
+            new Type<>(ModPackets.ONION_UPGRADE_ID);
 
-public record OnionUpgradePacket() {
+    public static final StreamCodec<ByteBuf, OnionUpgradePacket> STREAM_CODEC =
+            StreamCodec.unit(new OnionUpgradePacket());
 
-    public static void encode(OnionUpgradePacket msg, FriendlyByteBuf buf) {
-
+    @Override
+    public @NotNull Type<? extends CustomPacketPayload> type() {
+        return TYPE;
     }
 
-    public static OnionUpgradePacket decode(FriendlyByteBuf buf) {
-        return  new OnionUpgradePacket();
-    }
-
-    public static void handle(OnionUpgradePacket msg, Supplier<NetworkEvent.Context> context) {
-        context.get().enqueueWork(() -> {
-            ServerPlayer player = context.get().getSender();
-            if (player == null) return;
-
-            if (player.containerMenu instanceof OnionMenu menu) {
+    public static void handle(final OnionUpgradePacket packet, final IPayloadContext context) {
+        context.enqueueWork(() -> {
+            if (context.player().containerMenu instanceof OnionMenu menu) {
                 menu.processUpgrade();
             } else {
-                for (int i = 0; i < player.getInventory().getContainerSize(); i++) {
-                    ItemStack stack = player.getInventory().getItem(i);
-                    if (stack.getItem() instanceof OnionUpgradeItem) {
-                        PikminType type = OnionUpgradeItem.getTypeFromStack(stack);
-                        int count = stack.getCount();
-
-                        player.getCapability(OnionCapability.ONION_DATA).ifPresent(data -> {
-                            data.addCapacity(type, 20 * count);
-                            stack.shrink(count);
-                        });
-                        break;
-                    }
-                }
+                processUpgradeFromInventory(context.player());
             }
         });
+    }
 
-        context.get().setPacketHandled(true);
+    private static void processUpgradeFromInventory(Player player) {
+        for (int i = 0; i < player.getInventory().getContainerSize(); i++) {
+            ItemStack stack = player.getInventory().getItem(i);
+            if (stack.getItem() instanceof OnionUpgradeItem upgradeItem) {
+                PikminType type = upgradeItem.getPikminType();
+                int count = stack.getCount();
+
+                OnionData playerData = player.getData(OnionComponents.PLAYER_ONION_DATA);
+                OnionData newData = playerData.addCapacity(type, 20 * count);
+                player.setData(OnionComponents.PLAYER_ONION_DATA, newData);
+
+                stack.shrink(count);
+                break;
+            }
+        }
     }
 }

@@ -3,12 +3,13 @@ package net.wili.wilispikmins.entity.custom.ai;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.ai.goal.Goal;
-import net.minecraft.world.level.pathfinder.BlockPathTypes;
+import net.minecraft.world.level.pathfinder.PathType;
 import net.minecraft.world.phys.Vec3;
 import net.wili.wilispikmins.entity.custom.PikminEntity;
 import net.wili.wilispikmins.entity.custom.enums.PikminState;
 
 import java.util.EnumSet;
+import java.util.Objects;
 
 public class PikminFollowOwnerGoal extends Goal {
     private final PikminEntity pikmin;
@@ -55,23 +56,24 @@ public class PikminFollowOwnerGoal extends Goal {
         if (pikmin.getNavigation().isDone()) {
             return false;
         }
-        return pikmin.distanceToSqr(pikmin.getOwner()) > (double) (stopDistance * stopDistance);
+        return pikmin.distanceToSqr(Objects.requireNonNull(pikmin.getOwner())) > (double) (stopDistance * stopDistance);
     }
 
     @Override
     public void start() {
-        this.oldWaterCost = pikmin.getPathfindingMalus(BlockPathTypes.WATER);
-        pikmin.setPathfindingMalus(BlockPathTypes.WATER, 0.0F);
+        this.oldWaterCost = pikmin.getPathfindingMalus(PathType.WATER);
+        pikmin.setPathfindingMalus(PathType.WATER, 0.0F);
     }
 
     @Override public void stop() {
         pikmin.getNavigation().stop();
-        pikmin.setPathfindingMalus(BlockPathTypes.WATER, oldWaterCost);
+        pikmin.setPathfindingMalus(PathType.WATER, oldWaterCost);
     }
 
     @Override
     public void tick() {
         LivingEntity owner = pikmin.getOwner();
+        assert owner != null;
         pikmin.getLookControl().setLookAt(owner, 10.0F, (float)pikmin.getMaxHeadXRot());
         if (pikmin.distanceToSqr(owner) >= 144.0D) {
             pikmin.teleportTo(owner.getX(), owner.getY(), owner.getZ());

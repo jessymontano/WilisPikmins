@@ -1,21 +1,21 @@
 package net.wili.wilispikmins.block.entity;
 
 import net.minecraft.core.BlockPos;
-import net.minecraft.core.Direction;
+import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.NbtOps;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.MenuProvider;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.AbstractContainerMenu;
+import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
-import net.minecraftforge.common.capabilities.Capability;
-import net.minecraftforge.common.capabilities.ForgeCapabilities;
-import net.minecraftforge.common.util.LazyOptional;
-import net.minecraftforge.items.IItemHandler;
-import net.minecraftforge.items.ItemStackHandler;
+import net.neoforged.neoforge.items.ItemStackHandler;
+import net.wili.wilispikmins.WilisPikmins;
 import net.wili.wilispikmins.block.custom.OnionBlock;
+import net.wili.wilispikmins.data.OnionData;
 import net.wili.wilispikmins.entity.custom.enums.PikminType;
 import net.wili.wilispikmins.screen.OnionMenu;
 import org.jetbrains.annotations.NotNull;
@@ -24,36 +24,47 @@ import org.jetbrains.annotations.Nullable;
 import java.util.UUID;
 
 public class OnionBlockEntity extends BlockEntity implements MenuProvider {
-    private final ItemStackHandler itemHandler = new ItemStackHandler(1);
+    private final ItemStackHandler itemHandler = new ItemStackHandler(1) {
+        @Override
+        protected void onContentsChanged(int slot) {
+            setChanged();
+        }
+    };
 
-    private LazyOptional<IItemHandler> lazyItemHandler = LazyOptional.empty();
     private UUID owner;
     private boolean isMainOnion = false;
-    private PikminType pikminType = PikminType.RED;
+    private PikminType pikminType;
+
+    private OnionData onionData = new OnionData();
 
     public OnionBlockEntity(BlockPos pPos, BlockState pBlockState) {
         super(ModBlockEntities.ONION_BE.get(), pPos, pBlockState);
         this.pikminType = pBlockState.getValue(OnionBlock.TYPE);
     }
 
-    @Override
-    public void onLoad() {
-        super.onLoad();
-        lazyItemHandler = LazyOptional.of(() -> itemHandler);
+    public OnionData getOnionData() {
+        return onionData;
     }
 
-    @Override
-    public void invalidateCaps() {
-        super.invalidateCaps();
-        lazyItemHandler.invalidate();
+    public void setOnionData(OnionData data) {
+        this.onionData = data;
+        setChanged();
     }
 
-    @Override
-    public @NotNull <T> LazyOptional<T> getCapability(@NotNull Capability<T> cap, @Nullable Direction side) {
-        if (cap == ForgeCapabilities.ITEM_HANDLER){
-            return lazyItemHandler.cast();
-        }
-        return super.getCapability(cap, side);
+    public boolean canTakeOut(PikminType type, int amount) {
+        return onionData.canTakeOut(type, amount);
+    }
+
+    public boolean canPutIn(PikminType type, int amount) {
+        return onionData.canPutIn(type, amount);
+    }
+
+    public int getStored(PikminType type) {
+        return onionData.getStored(type);
+    }
+
+    public void addStored(PikminType type, int amount) {
+        setOnionData(onionData.addStored(type, amount));
     }
 
     public UUID getOwner() {
@@ -71,6 +82,7 @@ public class OnionBlockEntity extends BlockEntity implements MenuProvider {
 
     public void setMainOnion(boolean mainOnion) {
         this.isMainOnion = mainOnion;
+        setOnionData(onionData.withHasMainOnion(mainOnion));
         setChanged();
     }
 
@@ -83,41 +95,60 @@ public class OnionBlockEntity extends BlockEntity implements MenuProvider {
         setChanged();
     }
 
+    public ItemStackHandler getItemHandler() {
+        return itemHandler;
+    }
+
+    public ItemStack getItemInSlot(int slot) {
+        return itemHandler.getStackInSlot(slot);
+    }
+
     @Override
-    protected void saveAdditional(CompoundTag pTag) {
-        super.saveAdditional(pTag);
+    protected void saveAdditional(@NotNull CompoundTag tag, HolderLookup.@NotNull Provider registries) {
+        super.saveAdditional(tag, registries);
         if (owner != null) {
-            pTag.putUUID("owner", owner);
+            tag.putUUID("owner", owner);
         }
-        pTag.put("inventory", itemHandler.serializeNBT());
-        pTag.putBoolean("is_main_onion", isMainOnion);
-        pTag.putString("pikmin_type", pikminType.name());
+        tag.put("inventory", itemHandler.serializeNBT(registries));
+        tag.putBoolean("is_main_onion", isMainOnion);
+        tag.putString("pikmin_type", pikminType.name());
+
+        OnionData.CODEC.encodeStart(registries.createSerializationContext(NbtOps.INSTANCE), onionData)
+                .resultOrPartial(WilisPikmins.LOGGER::error)
+                .ifPresent(dataTag -> tag.put("onion_data", dataTag));
     }
 
     @Override
-    public void load(CompoundTag pTag) {
-        super.load(pTag);
-        itemHandler.deserializeNBT(pTag.getCompound("inventory"));
+    protected void loadAdditional(@NotNull CompoundTag tag, HolderLookup.@NotNull Provider registries) {
+        super.loadAdditional(tag, registries);
+        itemHandler.deserializeNBT(registries, tag.getCompound("inventory"));
 
-        if (pTag.hasUUID("owner")) {
-            owner = pTag.getUUID("owner");
+        if (tag.hasUUID("owner")) {
+            owner = tag.getUUID("owner");
         }
-        if (pTag.contains("is_main_onion")) {
-            isMainOnion = pTag.getBoolean("is_main_onion");
+        if (tag.contains("is_main_onion")) {
+            isMainOnion = tag.getBoolean("is_main_onion");
         }
-        if (pTag.contains("pikmin_type")) {
-            pikminType = PikminType.valueOf(pTag.getString("pikmin_type"));
+        if (tag.contains("pikmin_type")) {
+            pikminType = PikminType.valueOf(tag.getString("pikmin_type"));
+        }
+
+        if (tag.contains("onion_data")) {
+            OnionData.CODEC.parse(registries.createSerializationContext(NbtOps.INSTANCE),
+                    tag.get("onion_data"))
+                    .resultOrPartial(WilisPikmins.LOGGER::error)
+                    .ifPresent(data -> onionData = data);
         }
     }
 
     @Override
-    public Component getDisplayName() {
+    public @NotNull Component getDisplayName() {
         String key = isMainOnion ? "block.wilispikmins.onion.main" : "block.wilispikmins.onion";
         return Component.translatable(key);
     }
 
     @Override
-    public @Nullable AbstractContainerMenu createMenu(int containerId, Inventory inventory, Player player) {
+    public @Nullable AbstractContainerMenu createMenu(int containerId, @NotNull Inventory inventory, @NotNull Player player) {
         return new OnionMenu(containerId, inventory, this);
     }
 

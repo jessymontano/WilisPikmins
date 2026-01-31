@@ -6,9 +6,10 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.TooltipFlag;
-import net.minecraft.world.level.Level;
+import net.wili.wilispikmins.data.OnionComponents;
+import net.wili.wilispikmins.data.OnionData;
 import net.wili.wilispikmins.entity.custom.enums.PikminType;
-import org.jetbrains.annotations.Nullable;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.List;
 
@@ -29,32 +30,31 @@ public class OnionUpgradeItem extends Item{
             return  upgradeItem.getPikminType();
         }
 
-        CompoundTag tag = stack.getTag();
-        if (tag != null && tag.contains("pikmin_type")) {
-            return PikminType.valueOf(tag.getString("pikmin_type"));
+        OnionData data = stack.get(OnionComponents.ONION_DATA.get());
+        if (data != null && !data.unlockedTypes().isEmpty()) {
+            return data.unlockedTypes().iterator().next();
         }
 
         return PikminType.RED;
     }
 
     @Override
-    public void appendHoverText(ItemStack pStack, @Nullable Level pLevel, List<Component> pTooltipComponents, TooltipFlag pIsAdvanced) {
-        super.appendHoverText(pStack, pLevel, pTooltipComponents, pIsAdvanced);
-
-        pTooltipComponents.add(Component.translatable("tooltip.wilispikmins.onion_upgrade.use").withStyle(ChatFormatting.GRAY));
-        pTooltipComponents.add(Component.translatable("tooltip.wilispikmins.onion_upgrade.effect", 20).withStyle(ChatFormatting.GREEN));
-        pTooltipComponents.add(Component.empty());
-        pTooltipComponents.add(Component.translatable("tooltip.wilispikmins.onion_upgrade.source").withStyle(ChatFormatting.DARK_GRAY));
+    public void appendHoverText(@NotNull ItemStack stack, @NotNull TooltipContext context, @NotNull List<Component> tooltipComponents, @NotNull TooltipFlag tooltipFlag) {
+        super.appendHoverText(stack, context, tooltipComponents, tooltipFlag);
+        tooltipComponents.add(Component.translatable("tooltip.wilispikmins.onion_upgrade.use").withStyle(ChatFormatting.GRAY));
+        tooltipComponents.add(Component.translatable("tooltip.wilispikmins.onion_upgrade.effect", 20).withStyle(ChatFormatting.GREEN));
+        tooltipComponents.add(Component.empty());
+        tooltipComponents.add(Component.translatable("tooltip.wilispikmins.onion_upgrade.source").withStyle(ChatFormatting.DARK_GRAY));
     }
 
     @Override
-    public Component getName(ItemStack pStack) {
+    public @NotNull Component getName(@NotNull ItemStack pStack) {
         return Component.translatable("item.wilispikmins.onion_upgrade")
                 .append(" (" + type.getName() + ")");
     }
 
     @Override
-    public boolean isFoil(ItemStack pStack) {
+    public boolean isFoil(@NotNull ItemStack pStack) {
         return true;
     }
 }

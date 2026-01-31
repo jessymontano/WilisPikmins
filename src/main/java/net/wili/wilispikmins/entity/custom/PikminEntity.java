@@ -23,7 +23,6 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.ServerLevelAccessor;
 import net.minecraft.world.phys.Vec3;
-import net.wili.wilispikmins.WilisPikmins;
 import net.wili.wilispikmins.entity.ModEntities;
 import net.wili.wilispikmins.entity.custom.enums.GrowthStage;
 import net.wili.wilispikmins.entity.custom.enums.PikminState;
@@ -33,15 +32,12 @@ import net.wili.wilispikmins.sound.ModSounds;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import software.bernie.geckolib.animatable.GeoEntity;
-import software.bernie.geckolib.core.animatable.GeoAnimatable;
-import software.bernie.geckolib.core.animatable.instance.AnimatableInstanceCache;
-import software.bernie.geckolib.core.animation.AnimatableManager;
-import software.bernie.geckolib.core.animation.AnimationController;
-import software.bernie.geckolib.core.animation.RawAnimation;
-import software.bernie.geckolib.core.object.PlayState;
+import software.bernie.geckolib.animatable.instance.AnimatableInstanceCache;
+import software.bernie.geckolib.animation.*;
+import software.bernie.geckolib.animation.AnimationState;
 import software.bernie.geckolib.util.GeckoLibUtil;
-import software.bernie.geckolib.core.animation.AnimationState;
 
+import java.util.Objects;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -65,9 +61,7 @@ public class PikminEntity extends TamableAnimal implements GeoEntity {
 
     // vuelo de pikmin rosa
     private boolean isFlying = false;
-    private float flyHeight = 0.0f;
     private int flyCooldown = 0;
-    private Vec3 flyTarget = null;
     private int spawnTicks = 0;
     private float zigzagPhase = 0f;
 
@@ -76,19 +70,9 @@ public class PikminEntity extends TamableAnimal implements GeoEntity {
     private int burningTicks = 0;
     private int growthTicks = 0;
 
-    // proximamente seran utiles
-    @Nullable private LivingEntity target;
-    @Nullable private BlockPos onionPos;
-    private int followRange = 10;
-
     // constructorsitos
     public PikminEntity(EntityType<? extends TamableAnimal> pEntityType, Level pLevel) {
         super(pEntityType, pLevel);
-
-        // crear pikmin rojo
-        setPikminType(PikminType.RED);
-        setGrowthStage(GrowthStage.LEAF);
-        setPikminState(PikminState.IDLE);
 
         // rotacion aleatoria al spawnear
         this.setYRot(this.level().random.nextFloat() * 360.0F);
@@ -107,7 +91,13 @@ public class PikminEntity extends TamableAnimal implements GeoEntity {
     }
 
 
-    protected <E extends PikminEntity> PlayState predicate(AnimationState<E> event) {
+    protected PlayState predicate(AnimationState<PikminEntity> event) {
+        if (this.getPikminState() == PikminState.POPPING) {
+            return PlayState.STOP;
+        }
+        if (this.getPikminType() == PikminType.WINGED && this.isFlying) {
+            return PlayState.STOP;
+        }
         if (event.isMoving()) {
             return event.setAndContinue(RawAnimation.begin()
                     .thenLoop("animation.pikmin.walk"));
@@ -117,8 +107,8 @@ public class PikminEntity extends TamableAnimal implements GeoEntity {
         }
     }
 
-    protected <E extends PikminEntity> PlayState attackPredicate(AnimationState<E> event) {
-        if (this.swinging) {
+    protected PlayState attackPredicate(AnimationState<PikminEntity> event) {
+        if (this.swinging && event.getController().getAnimationState() != AnimationController.State.TRANSITIONING) {
             return event.setAndContinue(RawAnimation.begin()
                     .thenPlay("animation.pikmin.attack")
                     .thenLoop("animation.pikmin.idle"));
@@ -126,22 +116,21 @@ public class PikminEntity extends TamableAnimal implements GeoEntity {
         return PlayState.STOP;
     }
 
-    protected <E extends PikminEntity> PlayState popPredicate(AnimationState<E> event) {
+    protected PlayState popPredicate(AnimationState<PikminEntity> event) {
         if (this.shouldPlayPop) {
             this.shouldPlayPop = false;
             return event.setAndContinue(RawAnimation.begin()
-                    .thenPlay("animation.pikmin.pop")
-                    .thenLoop("animation.pikmin.idle"));
+                    .thenPlay("animation.pikmin.pop"));
         }
-        if (this.tickCount < 20) {
+        if (this.tickCount < 20 && this.getPikminState() == PikminState.POPPING) {
             return event.setAndContinue(RawAnimation.begin()
                     .thenPlay("animation.pikmin.pop"));
         }
         return PlayState.STOP;
     }
 
-    protected <E extends PikminEntity> PlayState flyPredicate(AnimationState<E> event) {
-        if (this.getPikminType() == PikminType.WINGED && isFlying) {
+    protected PlayState flyPredicate(AnimationState<PikminEntity> event) {
+        if (this.getPikminType() == PikminType.WINGED && this.isFlying) {
             return event.setAndContinue(RawAnimation.begin()
                     .thenLoop("animation.pikmin.fly"));
         }
@@ -156,24 +145,11 @@ public class PikminEntity extends TamableAnimal implements GeoEntity {
         this.getNavigation().stop();
         this.setDeltaMovement(Vec3.ZERO);
 
-        try {
-            var manager = this.getAnimatableInstanceCache().getManagerForId(this.getId());
-
-            if (manager != null) {
-                var controller = manager.getAnimationControllers().get("pop");
-                if (controller != null) {
-                    controller.forceAnimationReset();
-                    controller.setAnimation(RawAnimation.begin()
-                            .thenPlay("animation.pikmin.pop"));
-                }
-            }
-        } catch (Exception e) {
-            WilisPikmins.LOGGER.error("Error triggering pop animation", e);
-        }
+        this.triggerAnim("pop", "pop");
     }
 
     @Override
-    public void travel(Vec3 pTravelVector) {
+    public void travel(@NotNull Vec3 pTravelVector) {
         if (this.getPikminType() == PikminType.WINGED && shouldFly()) {
             handleWingedMovement(pTravelVector);
             return;
@@ -240,7 +216,7 @@ public class PikminEntity extends TamableAnimal implements GeoEntity {
     }
 
     private Vec3 calculateWingedHorizontalMovement(Vec3 travelVector) {
-        Vec3 movement = Vec3.ZERO;
+        Vec3 movement;
 
         if (getPikminState() == PikminState.FOLLOWING && getOwner() != null) {
             LivingEntity owner = getOwner();
@@ -295,12 +271,12 @@ public class PikminEntity extends TamableAnimal implements GeoEntity {
     }
 
     @Override
-    protected void defineSynchedData() {
-        super.defineSynchedData();
-        this.entityData.define(DATA_TYPE, 0);
-        this.entityData.define(DATA_STAGE, 0);
-        this.entityData.define(DATA_STATE, 0);
-        this.entityData.define(DATA_OWNER_UUID, Optional.empty());
+    protected void defineSynchedData(SynchedEntityData.@NotNull Builder builder) {
+        super.defineSynchedData(builder);
+        builder.define(DATA_TYPE, 0);
+        builder.define(DATA_STAGE, 0);
+        builder.define(DATA_STATE, 0);
+        builder.define(DATA_OWNER_UUID, Optional.empty());
     }
 
     @Override
@@ -384,11 +360,11 @@ public class PikminEntity extends TamableAnimal implements GeoEntity {
             baseSpeed = 0.2f;
         }
 
-        this.getAttribute(Attributes.MOVEMENT_SPEED).setBaseValue(baseSpeed * speedMultiplier);
+        Objects.requireNonNull(this.getAttribute(Attributes.MOVEMENT_SPEED)).setBaseValue(baseSpeed * speedMultiplier);
     }
 
     @Override
-    public @NotNull InteractionResult mobInteract(Player player, InteractionHand hand) {
+    public @NotNull InteractionResult mobInteract(@NotNull Player player, @NotNull InteractionHand hand) {
         if (this.level().isClientSide) {
             return InteractionResult.CONSUME;
         }
@@ -496,7 +472,7 @@ public class PikminEntity extends TamableAnimal implements GeoEntity {
             double y = this.getY() + 0.2;
             double z = this.getZ() + (level.random.nextDouble() - 0.5) * 0.3;
             if (level.isClientSide) {
-                level.addParticle(ParticleTypes.ENTITY_EFFECT, x, y, z,
+                level.addParticle(ParticleTypes.NOTE, x, y, z,
                         ((color >> 16) & 0xFF) / 255.0,
                         ((color >> 8) & 0xFF) / 255.0,
                         (color & 0xFF) / 255.0);
@@ -578,7 +554,7 @@ public class PikminEntity extends TamableAnimal implements GeoEntity {
 
     // guardar y cargar datos
     @Override
-    public void addAdditionalSaveData(CompoundTag tag) {
+    public void addAdditionalSaveData(@NotNull CompoundTag tag) {
         super.addAdditionalSaveData(tag);
         tag.putInt("PikminType", getPikminType().ordinal());
         tag.putInt("GrowthStage", getGrowthStage().ordinal());
@@ -587,7 +563,7 @@ public class PikminEntity extends TamableAnimal implements GeoEntity {
     }
 
     @Override
-    public void readAdditionalSaveData(CompoundTag tag) {
+    public void readAdditionalSaveData(@NotNull CompoundTag tag) {
         super.readAdditionalSaveData(tag);
         if (tag.contains("PikminType")) {
             setPikminType(PikminType.values()[tag.getInt("PikminType")]);
@@ -613,17 +589,17 @@ public class PikminEntity extends TamableAnimal implements GeoEntity {
     }
 
     @Override
-    protected @Nullable SoundEvent getHurtSound(DamageSource pDamageSource) {
+    protected @Nullable SoundEvent getHurtSound(@NotNull DamageSource pDamageSource) {
         return ModSounds.PIKMIN_SCREAM.get();
     }
 
     @Override
-    public boolean isFood(ItemStack pStack) {
+    public boolean isFood(@NotNull ItemStack pStack) {
         return false;
     }
 
     @Override
-    public @Nullable AgeableMob getBreedOffspring(ServerLevel serverLevel, AgeableMob ageableMob) {
+    public @Nullable AgeableMob getBreedOffspring(@NotNull ServerLevel serverLevel, @NotNull AgeableMob ageableMob) {
         PikminEntity parent = (PikminEntity) ageableMob;
         PikminEntity offspring = new PikminEntity(serverLevel, parent.getPikminType());
         offspring.setOwnerUUID(parent.getOwnerUUID());
@@ -644,20 +620,9 @@ public class PikminEntity extends TamableAnimal implements GeoEntity {
     }
 
     @Override
-    public void swing(InteractionHand hand) {
+    public void swing(@NotNull InteractionHand hand) {
         super.swing(hand);
 
-        triggerAnim("attack", "attack");
-    }
-
-    public void triggerAnim(String controllerName, String animName) {
-        try {
-            var manager = getAnimatableInstanceCache().getManagerForId(this.getId());
-            if (manager != null) {
-                manager.tryTriggerAnimation(controllerName, animName);
-            }
-        } catch (Exception e) {
-            WilisPikmins.LOGGER.error("Error triggering animation", e);
-        }
+        this.triggerAnim("attack", "attack");
     }
 }

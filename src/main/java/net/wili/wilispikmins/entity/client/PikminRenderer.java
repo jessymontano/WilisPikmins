@@ -10,6 +10,7 @@ import net.minecraft.util.Mth;
 import net.wili.wilispikmins.entity.custom.PikminEntity;
 import net.wili.wilispikmins.entity.custom.enums.GrowthStage;
 import net.wili.wilispikmins.entity.custom.enums.PikminType;
+import org.jetbrains.annotations.NotNull;
 import software.bernie.geckolib.cache.object.GeoBone;
 import software.bernie.geckolib.renderer.GeoEntityRenderer;
 
@@ -21,9 +22,8 @@ public class PikminRenderer extends GeoEntityRenderer<PikminEntity> {
     }
 
     @Override
-    public void render(PikminEntity entity, float entityYaw, float partialTick, PoseStack poseStack, MultiBufferSource bufferSource, int packedLight) {
+    public void render(PikminEntity entity, float entityYaw, float partialTick, PoseStack poseStack, @NotNull MultiBufferSource bufferSource, int packedLight) {
         PikminType type = entity.getPikminType();
-        GrowthStage stage = entity.getGrowthStage();
 
         float scale = getScaleForType(type);
 
@@ -46,9 +46,9 @@ public class PikminRenderer extends GeoEntityRenderer<PikminEntity> {
     }
 
     @Override
-    public  void renderRecursively(PoseStack poseStack, PikminEntity entity, GeoBone bone, RenderType renderType, MultiBufferSource bufferSource, VertexConsumer buffer, boolean isReRender, float partialTick, int packedLight, int packedOverlay, float red, float green, float blue, float alpha) {
-        PikminType type = entity.getPikminType();
-        GrowthStage stage = entity.getGrowthStage();
+    public void renderRecursively(PoseStack poseStack, PikminEntity animatable, GeoBone bone, RenderType renderType, MultiBufferSource bufferSource, VertexConsumer buffer, boolean isReRender, float partialTick, int packedLight, int packedOverlay, int colour) {
+        PikminType type = animatable.getPikminType();
+        GrowthStage stage = animatable.getGrowthStage();
         String boneName = bone.getName();
 
         switch (boneName) {
@@ -80,13 +80,12 @@ public class PikminRenderer extends GeoEntityRenderer<PikminEntity> {
                 break;
         }
 
-        super.renderRecursively(poseStack, entity, bone, renderType, bufferSource, buffer, isReRender, partialTick, packedLight, packedOverlay, red, green, blue, alpha);
+        super.renderRecursively(poseStack, animatable, bone, renderType, bufferSource, buffer, isReRender, partialTick, packedLight, packedOverlay, colour);
    }
 
    private float getScaleForType(PikminType type) {
         return switch (type) {
-            case WHITE -> 0.7f;
-            case WINGED -> 0.7f;
+            case WHITE, WINGED -> 0.7f;
             default -> 1.0f;
         };
    }

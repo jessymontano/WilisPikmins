@@ -1,35 +1,29 @@
 package net.wili.wilispikmins.network;
 
-import net.minecraft.network.FriendlyByteBuf;
-import net.minecraft.server.level.ServerLevel;
-import net.minecraft.server.level.ServerPlayer;
-import net.minecraft.world.entity.Entity;
-import net.minecraftforge.network.NetworkEvent;
-import net.wili.wilispikmins.capability.OnionCapability;
-import net.wili.wilispikmins.entity.custom.PikminEntity;
-import net.wili.wilispikmins.entity.custom.enums.PikminType;
+import io.netty.buffer.ByteBuf;
+import net.minecraft.network.codec.StreamCodec;
+import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
+import net.neoforged.neoforge.network.handling.IPayloadContext;
 import net.wili.wilispikmins.screen.OnionMenu;
+import org.jetbrains.annotations.NotNull;
 
-import java.util.function.Supplier;
+public record RecallPikminPacket() implements CustomPacketPayload {
+    public static final Type<RecallPikminPacket> TYPE =
+            new Type<>(ModPackets.RECALL_PIKMIN_ID);
 
-public record RecallPikminPacket() {
-    public static void encode(RecallPikminPacket msg, FriendlyByteBuf buf) {
+    public static final StreamCodec<ByteBuf, RecallPikminPacket> STREAM_CODEC =
+            StreamCodec.unit(new RecallPikminPacket());
 
+    @Override
+    public @NotNull Type<? extends CustomPacketPayload> type() {
+        return TYPE;
     }
 
-    public static RecallPikminPacket decode(FriendlyByteBuf buf) {
-        return new RecallPikminPacket();
-    }
-
-    public static void handle(RecallPikminPacket msg, Supplier<NetworkEvent.Context> context) {
-        context.get().enqueueWork(() -> {
-            ServerPlayer player = context.get().getSender();
-            if (player == null) return;
-
-            if (player.containerMenu instanceof OnionMenu menu) {
-                menu.recallAllPikmins();
-            }
+    public static void handle(final RecallPikminPacket packet, final IPayloadContext context) {
+        context.enqueueWork(() -> {
+           if (context.player().containerMenu instanceof OnionMenu menu) {
+               menu.recallAllPikmins();
+           }
         });
-        context.get().setPacketHandled(true);
     }
 }

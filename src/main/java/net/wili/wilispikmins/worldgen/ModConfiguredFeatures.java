@@ -3,7 +3,7 @@ package net.wili.wilispikmins.worldgen;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.registries.Registries;
-import net.minecraft.data.worldgen.BootstapContext;
+import net.minecraft.data.worldgen.BootstrapContext;
 import net.minecraft.data.worldgen.placement.PlacementUtils;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
@@ -70,28 +70,28 @@ public class ModConfiguredFeatures {
     public static final ResourceKey<ConfiguredFeature<?, ?>> ROCK_ONION_CAVE =
             registerKey("rock_onion_cave");
 
-    public static void bootstrap(BootstapContext<ConfiguredFeature<?, ?>> context) {
+    public static void bootstrap(BootstrapContext<ConfiguredFeature<?, ?>> context) {
         // pikmin patches
         register(context, PATCH_RED_PIKMIN, Feature.RANDOM_PATCH,
-                createPikminPatchConfig(PikminType.RED, 5, 4));
+                createPikminPatchConfig(PikminType.RED));
         register(context, PATCH_YELLOW_PIKMIN, Feature.RANDOM_PATCH,
-                createPikminPatchConfig(PikminType.YELLOW, 5, 4));
+                createPikminPatchConfig(PikminType.YELLOW));
         register(context, PATCH_BLUE_PIKMIN, Feature.RANDOM_PATCH,
-                createPikminPatchConfig(PikminType.BLUE, 5, 4));
+                createPikminPatchConfig(PikminType.BLUE));
         register(context, PATCH_BLUE_PIKMIN_WATER, Feature.RANDOM_PATCH,
-                createUnderwaterPikminConfig(PikminType.BLUE, 5, 4));
+                createUnderwaterPikminConfig());
         register(context, PATCH_PURPLE_PIKMIN, Feature.RANDOM_PATCH,
-                createPikminPatchConfig(PikminType.PURPLE, 5, 4));
+                createPikminPatchConfig(PikminType.PURPLE));
         register(context, PATCH_WHITE_PIKMIN, Feature.RANDOM_PATCH,
-                createPikminPatchConfig(PikminType.WHITE, 5, 4));
+                createPikminPatchConfig(PikminType.WHITE));
         register(context, PATCH_WHITE_PIKMIN_CAVE, Feature.RANDOM_PATCH,
-                createCavePikminConfig(PikminType.WHITE, 5, 4));
+                createCavePikminConfig(PikminType.WHITE));
         register(context, PATCH_WINGED_PIKMIN, Feature.RANDOM_PATCH,
-                createPikminPatchConfig(PikminType.WINGED, 5, 4));
+                createPikminPatchConfig(PikminType.WINGED));
         register(context, PATCH_ROCK_PIKMIN, Feature.RANDOM_PATCH,
-                createPikminPatchConfig(PikminType.ROCK, 5, 4));
+                createPikminPatchConfig(PikminType.ROCK));
         register(context, PATCH_ROCK_PIKMIN_CAVE, Feature.RANDOM_PATCH,
-                createCavePikminConfig(PikminType.ROCK, 5, 4));
+                createCavePikminConfig(PikminType.ROCK));
 
         // onions
         register(context, RED_ONION, Feature.SIMPLE_BLOCK, createOnionConfig(PikminType.RED));
@@ -106,10 +106,10 @@ public class ModConfiguredFeatures {
     }
 
     public static ResourceKey<ConfiguredFeature<?, ?>> registerKey(String name) {
-        return ResourceKey.create(Registries.CONFIGURED_FEATURE, new ResourceLocation(WilisPikmins.MOD_ID, name));
+        return ResourceKey.create(Registries.CONFIGURED_FEATURE, ResourceLocation.fromNamespaceAndPath(WilisPikmins.MOD_ID, name));
     }
 
-    private static <FC extends FeatureConfiguration, F extends Feature<FC>> void register (BootstapContext<ConfiguredFeature<?,?>> context, ResourceKey<ConfiguredFeature<?, ?>> key, F feature, FC configuration) {
+    private static <FC extends FeatureConfiguration, F extends Feature<FC>> void register (BootstrapContext<ConfiguredFeature<?,?>> context, ResourceKey<ConfiguredFeature<?, ?>> key, F feature, FC configuration) {
         context.register(key, new ConfiguredFeature<>(feature, configuration));
     }
 
@@ -123,11 +123,11 @@ public class ModConfiguredFeatures {
     }
 
     private static RandomPatchConfiguration createPikminPatchConfig(
-            PikminType type, int tries, int spread) {
+            PikminType type) {
         TagKey<Block> spawnableTag = getSpawnableBlockTag(type);
 
         return new RandomPatchConfiguration(
-                tries, spread, 1,
+                5, 4, 1,
                 PlacementUtils.filtered(
                         Feature.SIMPLE_BLOCK,
                         new SimpleBlockConfiguration(BlockStateProvider.simple(
@@ -153,17 +153,16 @@ public class ModConfiguredFeatures {
     }
 
     private static RandomPatchConfiguration createUnderwaterPikminConfig(
-            PikminType type, int tries, int spread
-    ) {
+            ) {
         return new RandomPatchConfiguration(
-                tries, spread, 2,
+                5, 4, 2,
                 PlacementUtils.filtered(
                         Feature.SIMPLE_BLOCK,
                         new SimpleBlockConfiguration(
                                 BlockStateProvider.simple(
                                         ModBlocks.BURIED_PIKMIN_BLOCK.get()
                                                 .defaultBlockState()
-                                                .setValue(BuriedPikminBlock.PIKMIN_TYPE, type)
+                                                .setValue(BuriedPikminBlock.PIKMIN_TYPE, PikminType.BLUE)
                                                 .setValue(BuriedPikminBlock.GROWTH_STAGE, GrowthStage.LEAF)
                                                 .setValue(BuriedPikminBlock.FACING, Direction.NORTH)
                                 )
@@ -176,11 +175,11 @@ public class ModConfiguredFeatures {
         );
     }
 
-    private static RandomPatchConfiguration createCavePikminConfig(PikminType type, int tries, int spread) {
+    private static RandomPatchConfiguration createCavePikminConfig(PikminType type) {
         TagKey<Block> spawnableTag = getSpawnableBlockTag(type);
 
         return new RandomPatchConfiguration(
-                tries, spread, 2,
+                5, 4, 2,
                 PlacementUtils.filtered(
                         Feature.SIMPLE_BLOCK,
                         new SimpleBlockConfiguration(BlockStateProvider.simple(

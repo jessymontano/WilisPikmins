@@ -6,7 +6,6 @@ import net.minecraft.core.Holder;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.util.RandomSource;
-import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.context.BlockPlaceContext;
@@ -16,7 +15,6 @@ import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.LevelReader;
 import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.block.Block;
-import net.minecraft.world.level.block.BushBlock;
 import net.minecraft.world.level.block.RenderShape;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.StateDefinition;
@@ -26,14 +24,13 @@ import net.minecraft.world.level.material.Fluids;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.shapes.CollisionContext;
 import net.minecraft.world.phys.shapes.VoxelShape;
-import net.wili.wilispikmins.WilisPikmins;
-import net.wili.wilispikmins.capability.OnionCapability;
 import net.wili.wilispikmins.entity.ModEntities;
 import net.wili.wilispikmins.entity.custom.PikminEntity;
 import net.wili.wilispikmins.entity.custom.enums.GrowthStage;
 import net.wili.wilispikmins.entity.custom.enums.PikminType;
 import net.wili.wilispikmins.sound.ModSounds;
 import net.wili.wilispikmins.util.ModTags;
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 public class BuriedPikminBlock extends Block {
@@ -63,11 +60,11 @@ public class BuriedPikminBlock extends Block {
     }
 
     @Override
-    public boolean canSurvive(BlockState pState, LevelReader pLevel, BlockPos pPos) {
+    public boolean canSurvive(@NotNull BlockState pState, LevelReader pLevel, BlockPos pPos) {
         BlockPos below = pPos.below();
         BlockState belowState = pLevel.getBlockState(below);
 
-        return belowState.isSolid();
+        return !belowState.isAir();
     }
 
     @Override
@@ -91,7 +88,7 @@ public class BuriedPikminBlock extends Block {
     }
 
     @Override
-    public VoxelShape getShape(BlockState state, BlockGetter level, BlockPos pos, CollisionContext context) {
+    public @NotNull VoxelShape getShape(BlockState state, @NotNull BlockGetter level, @NotNull BlockPos pos, @NotNull CollisionContext context) {
         GrowthStage stage = state.getValue(GROWTH_STAGE);
         return switch (stage) {
             case LEAF -> LEAF_SHAPE;
@@ -101,14 +98,14 @@ public class BuriedPikminBlock extends Block {
     }
 
     @Override
-    public RenderShape getRenderShape(BlockState pState) {
+    public @NotNull RenderShape getRenderShape(@NotNull BlockState pState) {
         return RenderShape.MODEL;
     }
 
     // interacción con el bloque
     @Override
-    public InteractionResult use(BlockState pState, Level pLevel, BlockPos pPos, Player pPlayer, InteractionHand pHand, BlockHitResult pHit) {
-        if(!pLevel.isClientSide() && pHand == InteractionHand.MAIN_HAND) {
+    protected @NotNull InteractionResult useWithoutItem(@NotNull BlockState pState, Level pLevel, @NotNull BlockPos pPos, @NotNull Player pPlayer, @NotNull BlockHitResult pHit) {
+        if(!pLevel.isClientSide()) {
             // quitar bloque
             pLevel.destroyBlock(pPos, false);
 
@@ -121,6 +118,7 @@ public class BuriedPikminBlock extends Block {
 
             PikminEntity pikmin = ModEntities.PIKMIN.get().create(pLevel);
 
+            assert pikmin != null;
             pikmin.moveTo(
                     pPos.getX() + 0.5,
                     pPos.getY(),
@@ -142,11 +140,11 @@ public class BuriedPikminBlock extends Block {
 
             return InteractionResult.SUCCESS;
         }
-        return super.use(pState, pLevel, pPos, pPlayer, pHand, pHit);
+        return super.useWithoutItem(pState, pLevel, pPos, pPlayer, pHit);
     }
 
     @Override
-    public void randomTick(BlockState state, ServerLevel level, BlockPos pos, RandomSource random) {
+    public void randomTick(@NotNull BlockState state, @NotNull ServerLevel level, @NotNull BlockPos pos, @NotNull RandomSource random) {
         super.randomTick(state, level, pos, random);
 
         if (random.nextInt(25) == 0) {
@@ -202,14 +200,14 @@ public class BuriedPikminBlock extends Block {
     }
 
     @Override
-    public BlockState updateShape(BlockState state, Direction direction, BlockState neighborState, LevelAccessor level, BlockPos pos, BlockPos neighborPos) {
+    public @NotNull BlockState updateShape(BlockState state, @NotNull Direction direction, @NotNull BlockState neighborState, @NotNull LevelAccessor level, @NotNull BlockPos pos, @NotNull BlockPos neighborPos) {
         return !state.canSurvive(level, pos) ?
                 net.minecraft.world.level.block.Blocks.AIR.defaultBlockState() :
                 super.updateShape(state,direction,neighborState,level,pos,neighborPos);
     }
 
     @Override
-    public FluidState getFluidState(BlockState pState) {
+    public @NotNull FluidState getFluidState(BlockState pState) {
         return pState.getValue(WATERLOGGED)
                 ? Fluids.WATER.getSource(false)
                 : super.getFluidState(pState);

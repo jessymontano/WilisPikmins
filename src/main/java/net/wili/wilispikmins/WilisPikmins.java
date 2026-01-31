@@ -1,33 +1,25 @@
 package net.wili.wilispikmins;
 
 import com.mojang.logging.LogUtils;
-import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.screens.MenuScreens;
-import net.minecraft.client.renderer.entity.EntityRenderers;
 import net.minecraft.world.item.CreativeModeTabs;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.common.MinecraftForge;
-import net.minecraftforge.event.BuildCreativeModeTabContentsEvent;
-import net.minecraftforge.event.server.ServerStartingEvent;
-import net.minecraftforge.eventbus.api.IEventBus;
-import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.fml.common.Mod;
-import net.minecraftforge.fml.event.lifecycle.FMLClientSetupEvent;
-import net.minecraftforge.fml.event.lifecycle.FMLCommonSetupEvent;
-import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
+import net.neoforged.bus.api.IEventBus;
+import net.neoforged.bus.api.SubscribeEvent;
+import net.neoforged.fml.ModContainer;
+import net.neoforged.fml.common.Mod;
+import net.neoforged.fml.config.ModConfig;
+import net.neoforged.fml.event.lifecycle.FMLCommonSetupEvent;
+import net.neoforged.neoforge.event.BuildCreativeModeTabContentsEvent;
+import net.neoforged.neoforge.event.server.ServerStartingEvent;
+import net.neoforged.neoforge.network.event.RegisterPayloadHandlersEvent;
 import net.wili.wilispikmins.block.ModBlocks;
 import net.wili.wilispikmins.block.entity.ModBlockEntities;
+import net.wili.wilispikmins.data.OnionComponents;
 import net.wili.wilispikmins.entity.ModEntities;
-import net.wili.wilispikmins.entity.client.PikminRenderer;
 import net.wili.wilispikmins.item.ModItems;
 import net.wili.wilispikmins.network.ModPackets;
 import net.wili.wilispikmins.screen.ModMenuTypes;
-import net.wili.wilispikmins.screen.OnionScreen;
 import net.wili.wilispikmins.sound.ModSounds;
-import net.wili.wilispikmins.worldgen.ModConfiguredFeatures;
-import net.wili.wilispikmins.worldgen.ModPlacedFeatures;
 import org.slf4j.Logger;
-import software.bernie.geckolib.GeckoLib;
 
 // The value here should match an entry in the META-INF/mods.toml file
 @Mod(WilisPikmins.MOD_ID)
@@ -38,9 +30,10 @@ public class WilisPikmins
     // Directly reference a slf4j logger
     public static final Logger LOGGER = LogUtils.getLogger();
 
-    public WilisPikmins(FMLJavaModLoadingContext context)
+    public WilisPikmins(IEventBus modEventBus, ModContainer modContainer)
     {
-        IEventBus modEventBus = context.getModEventBus();
+        // Register the commonSetup method for modloading
+        modEventBus.addListener(this::commonSetup);
 
         // register mod items
         ModItems.register(modEventBus);
@@ -58,21 +51,19 @@ public class WilisPikmins
         ModMenuTypes.register(modEventBus);
 
         // register mod packets
-        ModPackets.register();
-
-        GeckoLib.initialize();
-
-        // Register the commonSetup method for modloading
-        modEventBus.addListener(this::commonSetup);
-
-        // Register ourselves for server and other game events we are interested in
-        MinecraftForge.EVENT_BUS.register(this);
+        modEventBus.addListener(this::registerPackets);
 
         // Register the item to a creative tab
         modEventBus.addListener(this::addCreative);
 
         // register mod entities
         ModEntities.register(modEventBus);
+
+        // register components and attachments
+        OnionComponents.DATA_COMPONENT_TYPES.register(modEventBus);
+        OnionComponents.ATTACHMENT_TYPES.register(modEventBus);
+
+        modContainer.registerConfig(ModConfig.Type.COMMON, Config.SPEC);
     }
 
     private void commonSetup(final FMLCommonSetupEvent event)
@@ -84,13 +75,13 @@ public class WilisPikmins
     {
         // agrega los spawn eggs al menu de modo creativo
         if(event.getTabKey() == CreativeModeTabs.SPAWN_EGGS) {
-            event.accept(ModItems.RED_PIKMIN_SPAWN_EGG);
-            event.accept(ModItems.BLUE_PIKMIN_SPAWN_EGG);
-            event.accept(ModItems.YELLOW_PIKMIN_SPAWN_EGG);
-            event.accept(ModItems.PURPLE_PIKMIN_SPAWN_EGG);
-            event.accept(ModItems.WHITE_PIKMIN_SPAWN_EGG);
-            event.accept(ModItems.WINGED_PIKMIN_SPAWN_EGG);
-            event.accept(ModItems.ROCK_PIKMIN_SPAWN_EGG);
+            event.accept(ModItems.RED_PIKMIN_SPAWN_EGG.get());
+            event.accept(ModItems.BLUE_PIKMIN_SPAWN_EGG.get());
+            event.accept(ModItems.YELLOW_PIKMIN_SPAWN_EGG.get());
+            event.accept(ModItems.PURPLE_PIKMIN_SPAWN_EGG.get());
+            event.accept(ModItems.WHITE_PIKMIN_SPAWN_EGG.get());
+            event.accept(ModItems.WINGED_PIKMIN_SPAWN_EGG.get());
+            event.accept(ModItems.ROCK_PIKMIN_SPAWN_EGG.get());
         }
     }
 
@@ -102,17 +93,7 @@ public class WilisPikmins
         LOGGER.info("HELLO from server starting");
     }
 
-    // You can use EventBusSubscriber to automatically register all static methods in the class annotated with @SubscribeEvent
-    @Mod.EventBusSubscriber(modid = MOD_ID, bus = Mod.EventBusSubscriber.Bus.MOD, value = Dist.CLIENT)
-    public static class ClientModEvents
-    {
-        @SubscribeEvent
-        public static void onClientSetup(FMLClientSetupEvent event)
-        {
-            // registrar los renderers de las entidades
-            EntityRenderers.register(ModEntities.PIKMIN.get(), PikminRenderer::new);
-
-            MenuScreens.register(ModMenuTypes.ONION_MENU.get(), OnionScreen::new);
-        }
+    private void registerPackets(final RegisterPayloadHandlersEvent event) {
+        ModPackets.register(event);
     }
 }

@@ -4,19 +4,17 @@ import net.minecraft.core.Holder;
 import net.minecraft.core.HolderGetter;
 import net.minecraft.core.HolderSet;
 import net.minecraft.core.registries.Registries;
-import net.minecraft.data.worldgen.BootstapContext;
+import net.minecraft.data.worldgen.BootstrapContext;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.server.packs.resources.Resource;
 import net.minecraft.tags.BiomeTags;
 import net.minecraft.tags.TagKey;
 import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.levelgen.GenerationStep;
 import net.minecraft.world.level.levelgen.placement.PlacedFeature;
-import net.minecraftforge.common.Tags;
-import net.minecraftforge.common.world.BiomeModifier;
-import net.minecraftforge.common.world.ForgeBiomeModifiers;
-import net.minecraftforge.registries.ForgeRegistries;
+import net.neoforged.neoforge.common.world.BiomeModifier;
+import net.neoforged.neoforge.common.world.BiomeModifiers;
+import net.neoforged.neoforge.registries.NeoForgeRegistries;
 import net.wili.wilispikmins.WilisPikmins;
 import net.wili.wilispikmins.util.ModTags;
 
@@ -64,7 +62,7 @@ public class ModBiomeModifiers {
     public static final ResourceKey<BiomeModifier> ADD_ROCK_ONION_CAVE =
             registerKey("add_rock_onion_cave");
 
-    public static void bootstrap(BootstapContext<BiomeModifier> context) {
+    public static void bootstrap(BootstrapContext<BiomeModifier> context) {
         HolderGetter<PlacedFeature> placedFeatures = context.lookup(Registries.PLACED_FEATURE);
 
         // pikmin patches
@@ -91,12 +89,12 @@ public class ModBiomeModifiers {
         registerModifier(context, ADD_ROCK_ONION_CAVE, placedFeatures.getOrThrow(ModPlacedFeatures.ROCK_ONION_CAVE), BiomeTags.IS_OVERWORLD);
     }
     private static ResourceKey<BiomeModifier> registerKey(String name) {
-        return ResourceKey.create(ForgeRegistries.Keys.BIOME_MODIFIERS, new ResourceLocation(WilisPikmins.MOD_ID, name));
+        return ResourceKey.create(NeoForgeRegistries.Keys.BIOME_MODIFIERS, ResourceLocation.fromNamespaceAndPath(WilisPikmins.MOD_ID, name));
     }
-    private static void registerModifier(BootstapContext<BiomeModifier> context, ResourceKey<BiomeModifier> key, Holder<PlacedFeature> feature, TagKey<Biome> biomeTag) {
+    private static void registerModifier(BootstrapContext<BiomeModifier> context, ResourceKey<BiomeModifier> key, Holder<PlacedFeature> feature, TagKey<Biome> biomeTag) {
         HolderGetter<Biome> biomes = context.lookup(Registries.BIOME);
 
-        context.register(key, new ForgeBiomeModifiers.AddFeaturesBiomeModifier(
+        context.register(key, new BiomeModifiers.AddFeaturesBiomeModifier(
                 biomes.getOrThrow(biomeTag),
                 HolderSet.direct(feature),
                 GenerationStep.Decoration.VEGETAL_DECORATION

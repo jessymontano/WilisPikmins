@@ -1,53 +1,46 @@
 package net.wili.wilispikmins.network;
 
 import net.minecraft.resources.ResourceLocation;
-import net.minecraftforge.network.NetworkRegistry;
-import net.minecraftforge.network.simple.SimpleChannel;
+import net.neoforged.neoforge.network.event.RegisterPayloadHandlersEvent;
+import net.neoforged.neoforge.network.registration.PayloadRegistrar;
 import net.wili.wilispikmins.WilisPikmins;
+import net.wili.wilispikmins.data.OnionComponents;
 
 public class ModPackets {
-    private static final String PROTOCOL = "1";
-    public static final SimpleChannel CHANNEL = NetworkRegistry.newSimpleChannel(
-            new ResourceLocation(WilisPikmins.MOD_ID, "main"),
-            () -> PROTOCOL,
-            PROTOCOL::equals,
-            PROTOCOL::equals
-    );
+    public static final ResourceLocation ONION_UPGRADE_ID =
+            ResourceLocation.fromNamespaceAndPath(WilisPikmins.MOD_ID, "onion_upgrade");
+    public static final ResourceLocation RECALL_PIKMIN_ID =
+            ResourceLocation.fromNamespaceAndPath(WilisPikmins.MOD_ID, "recall_pikmin");
+    public static final ResourceLocation ONION_ADJUST_ID =
+            ResourceLocation.fromNamespaceAndPath(WilisPikmins.MOD_ID, "onion_adjust");
+    public static final ResourceLocation ONION_CONFIRM_ID =
+            ResourceLocation.fromNamespaceAndPath(WilisPikmins.MOD_ID, "onion_confirm");
 
-    private static int index = 0;
+    public static void register(final RegisterPayloadHandlersEvent event) {
+        final PayloadRegistrar registrar = event.registrar(WilisPikmins.MOD_ID)
+                        .versioned("1.0");
 
-    public static void register() {
-        CHANNEL.registerMessage(
-                index++,
-                OnionUpgradePacket.class,
-                OnionUpgradePacket::encode,
-                OnionUpgradePacket::decode,
-                OnionUpgradePacket::handle
-        );
-        CHANNEL.registerMessage(
-                index++,
-                RecallPikminPacket.class,
-                RecallPikminPacket::encode,
-                RecallPikminPacket::decode,
-                RecallPikminPacket::handle
-        );
-        CHANNEL.registerMessage(
-                index++,
-                OnionAdjustPacket.class,
-                OnionAdjustPacket::encode,
-                OnionAdjustPacket::decode,
+        registrar.playToServer(
+               OnionAdjustPacket.TYPE,
+                OnionAdjustPacket.STREAM_CODEC,
                 OnionAdjustPacket::handle
         );
-        CHANNEL.registerMessage(
-                index++,
-                OnionConfirmPacket.class,
-                OnionConfirmPacket::encode,
-                OnionConfirmPacket::decode,
+        registrar.playToServer(
+                OnionConfirmPacket.TYPE,
+                OnionConfirmPacket.STREAM_CODEC,
                 OnionConfirmPacket::handle
         );
-    }
+        registrar.playToServer(
+                OnionUpgradePacket.TYPE,
+                OnionUpgradePacket.STREAM_CODEC,
+                OnionUpgradePacket::handle
+        );
+        registrar.playToServer(
+                RecallPikminPacket.TYPE,
+                RecallPikminPacket.STREAM_CODEC,
+                RecallPikminPacket::handle
+        );
 
-    public static void sendToServer(Object msg) {
-        CHANNEL.sendToServer(msg);
+        WilisPikmins.LOGGER.info("Mod packets registered");
     }
 }

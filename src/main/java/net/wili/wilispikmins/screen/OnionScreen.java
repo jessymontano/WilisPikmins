@@ -8,15 +8,15 @@ import net.minecraft.client.renderer.GameRenderer;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.player.Inventory;
+import net.neoforged.neoforge.network.PacketDistributor;
 import net.wili.wilispikmins.WilisPikmins;
 import net.wili.wilispikmins.entity.custom.enums.PikminType;
 import net.wili.wilispikmins.network.*;
-
-import java.util.Map;
+import org.jetbrains.annotations.NotNull;
 
 public class OnionScreen extends AbstractContainerScreen<OnionMenu> {
     private static final ResourceLocation TEXTURE =
-            new ResourceLocation(WilisPikmins.MOD_ID, "textures/gui/onion_gui.png");
+            ResourceLocation.fromNamespaceAndPath(WilisPikmins.MOD_ID, "textures/gui/onion_gui.png");
 
     private static final int GUI_X = 0;
     private static final int GUI_Y = 0;
@@ -110,7 +110,6 @@ public class OnionScreen extends AbstractContainerScreen<OnionMenu> {
 
     private void initPikminButtons() {
         for (PikminType type : PikminType.values()) {
-            if (!menu.isUnlocked(type)) continue;
 
             int index = type.ordinal();
             int col = index % COLUMNS;
@@ -125,43 +124,53 @@ public class OnionScreen extends AbstractContainerScreen<OnionMenu> {
                     Component.literal("▲"),
                     b -> transferPikmin(finalType, false)
             ).bounds(x + 7, y + 30, ARROW_WIDTH, ARROW_HEIGHT).tooltip(net.minecraft.client.gui.components.Tooltip.create(
-                    Component.translatable("tooltip.wilispikmins.onion.take_out", finalType.getDisplayName())
+                    Component.translatable("tooltip.wilispikmins.onion.put_in", finalType.getDisplayName())
             )).build());
 
             addRenderableWidget(Button.builder(
                     Component.literal("▼"),
                     b -> transferPikmin(finalType, true)
             ).bounds(x + 7, y + 40, ARROW_WIDTH, ARROW_HEIGHT).tooltip(net.minecraft.client.gui.components.Tooltip.create(
-                    Component.translatable("tooltip.wilispikmins.onion.put_in", finalType.getDisplayName())
+                    Component.translatable("tooltip.wilispikmins.onion.take_out", finalType.getDisplayName())
             )).build());
         }
     }
 
     private void transferPikmin(PikminType type, boolean takeOut) {
-        ModPackets.sendToServer(new OnionAdjustPacket(type, takeOut));
+        OnionAdjustPacket packet = new OnionAdjustPacket(type, takeOut);
+        PacketDistributor.sendToServer(packet);
+
         updateButtons();
         updateTotal();
     }
 
     private void confirmOperations() {
-            ModPackets.sendToServer(new OnionConfirmPacket());
+            OnionConfirmPacket packet = new OnionConfirmPacket();
+            PacketDistributor.sendToServer(packet);
+
             updateButtons();
             updateTotal();
     }
 
     private void clearOperations() {
         menu.clearOperations();
+        updateButtons();
+        updateTotal();
     }
 
     private void upgradeCapacity() {
         if (menu.hasUpgradeItem()) {
-            ModPackets.sendToServer(new OnionUpgradePacket());
+            OnionUpgradePacket packet = new OnionUpgradePacket();
+            PacketDistributor.sendToServer(packet);
+
             updateButtons();
         }
     }
 
     private void recallPikmin() {
-        ModPackets.sendToServer(new RecallPikminPacket());
+        RecallPikminPacket packet = new RecallPikminPacket();
+        PacketDistributor.sendToServer(packet);
+
         updateTotal();
     }
 
@@ -309,8 +318,8 @@ public class OnionScreen extends AbstractContainerScreen<OnionMenu> {
     }
 
     @Override
-    public void render(GuiGraphics pGuiGraphics, int pMouseX, int pMouseY, float delta) {
-        renderBackground(pGuiGraphics);
+    public void render(@NotNull GuiGraphics pGuiGraphics, int pMouseX, int pMouseY, float delta) {
+        renderBackground(pGuiGraphics, pMouseX, pMouseY, delta);
         super.render(pGuiGraphics, pMouseX, pMouseY, delta);
         renderTooltip(pGuiGraphics, pMouseX, pMouseY);
 
@@ -330,7 +339,7 @@ public class OnionScreen extends AbstractContainerScreen<OnionMenu> {
             int x = leftPos + FIRST_COL_X + (col * COLUMN_WIDTH);
             int y = topPos + FIRST_ROW_Y + (row * ROW_HEIGHT);
 
-            if (isMouseOverArrow(mouseX, mouseY, x, y, COLUMN_WIDTH, 20)) {
+            if (isMouseOverArrow(mouseX, mouseY, x, y)) {
                 int stored = menu.getStored(type);
                 int capacity = menu.getCapacity(type);
                 int pending = menu.getPendingPutIn(type);
@@ -347,8 +356,8 @@ public class OnionScreen extends AbstractContainerScreen<OnionMenu> {
         }
     }
 
-    private  boolean isMouseOverArrow(int mouseX, int mouseY, int x, int y, int width, int height) {
-        return mouseX >= x && mouseX < x + width && mouseY >= y && mouseY < y + height;
+    private  boolean isMouseOverArrow(int mouseX, int mouseY, int x, int y) {
+        return mouseX >= x && mouseX < x + OnionScreen.COLUMN_WIDTH && mouseY >= y && mouseY < y + 20;
     }
 
     @Override
