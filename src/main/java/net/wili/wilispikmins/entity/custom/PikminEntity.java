@@ -17,6 +17,7 @@ import net.minecraft.world.entity.*;
 import net.minecraft.world.entity.ai.attributes.AttributeSupplier;
 import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.ai.goal.*;
+import net.minecraft.world.entity.ai.goal.target.HurtByTargetGoal;
 import net.minecraft.world.entity.animal.Animal;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
@@ -24,6 +25,8 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.level.ServerLevelAccessor;
 import net.minecraft.world.phys.Vec3;
 import net.wili.wilispikmins.entity.ModEntities;
+import net.wili.wilispikmins.entity.custom.ai.PikminDefendOwnerGoal;
+import net.wili.wilispikmins.entity.custom.ai.PikminSquadBehaviorGoal;
 import net.wili.wilispikmins.entity.custom.ai.WingedPikminFlightSystem;
 import net.wili.wilispikmins.entity.custom.enums.GrowthStage;
 import net.wili.wilispikmins.entity.custom.enums.PikminState;
@@ -75,6 +78,8 @@ public class PikminEntity extends TamableAnimal implements GeoEntity {
     private int damageAccumulator = 0;
     private static final int DAMAGE_THRESHOLD = 4;
 
+    private int attackAnimCooldown = 0;
+
     // constructorsitos
     public PikminEntity(EntityType<? extends TamableAnimal> pEntityType, Level pLevel) {
         super(pEntityType, pLevel);
@@ -113,11 +118,18 @@ public class PikminEntity extends TamableAnimal implements GeoEntity {
     }
 
     protected PlayState attackPredicate(AnimationState<PikminEntity> event) {
-        if (this.swinging && event.getController().getAnimationState() != AnimationController.State.TRANSITIONING) {
-            return event.setAndContinue(RawAnimation.begin()
-                    .thenPlay("animation.pikmin.attack")
-                    .thenLoop("animation.pikmin.idle"));
-        }
+       if (this.swinging && event.getController().getAnimationState().equals(AnimationController.State.STOPPED)) {
+           event.setAndContinue(RawAnimation.begin()
+                   .then("animation.pikmin.attack", Animation.LoopType.PLAY_ONCE)
+                   .then("animation.pikmin.walk", Animation.LoopType.LOOP));
+           //this.swinging = false;
+           return PlayState.CONTINUE;
+       }
+       if (event.getController().getAnimationState() == AnimationController.State.RUNNING) {
+           return PlayState.CONTINUE;
+       }
+
+
         return PlayState.STOP;
     }
 
@@ -230,7 +242,14 @@ public class PikminEntity extends TamableAnimal implements GeoEntity {
         this.goalSelector.addGoal(0, new FloatGoal(this));
         this.goalSelector.addGoal(1, new PanicGoal(this, 2.0));
         this.goalSelector.addGoal(2, new PikminFollowOwnerGoal(this, 1.2, 10.0f, 2.0f, 3.0f));
-        this.goalSelector.addGoal(3, new MeleeAttackGoal(this, 1.0, true));
+        this.goalSelector.addGoal(3, new MeleeAttackGoal(this, 1.0, true) {
+            @Override
+            public boolean canUse() {
+                return (PikminEntity.this.getOwner() != null ||
+                        PikminEntity.this.getLastHurtByMob() != null) &&
+                        super.canUse();
+            }
+        });
         this.goalSelector.addGoal(4, new WaterAvoidingRandomStrollGoal(this, 1.0));
         this.goalSelector.addGoal(5, new LookAtPlayerGoal(this, Player.class, 6.0F) {
             @Override
@@ -244,6 +263,10 @@ public class PikminEntity extends TamableAnimal implements GeoEntity {
                 return getPikminState() != PikminState.POPPING && super.canUse();
             }
         });
+        this.goalSelector.addGoal(7, new PikminSquadBehaviorGoal(this));
+
+        this.targetSelector.addGoal(1, new PikminDefendOwnerGoal(this));
+        this.targetSelector.addGoal(2, new HurtByTargetGoal(this));
     }
 
     public static AttributeSupplier.Builder createAttributes() {
@@ -599,7 +622,7 @@ public class PikminEntity extends TamableAnimal implements GeoEntity {
     }
 
     @Override
-    public boolean hurt(DamageSource source, float amount) {
+    public boolean hurt(@NotNull DamageSource source, float amount) {
         boolean hurt = super.hurt(source, amount);
 
         if (hurt && !this.level().isClientSide) {
@@ -641,5 +664,51 @@ public class PikminEntity extends TamableAnimal implements GeoEntity {
                         0, 0.5, 0);
             }
         }
+    }
+
+    @Override
+    public boolean doHurtTarget(@NotNull Entity entity) {
+        float baseDamage = (float) this.getAttributeValue(Attributes.ATTACK_DAMAGE);
+
+        float damageMultiplier = this.getGrowthStage().getDamageMultiplier();
+        float finalDamage = baseDamage * damageMultiplier;
+
+        boolean attacked = entity.hurt(this.damageSources().mobAttack(this), finalDamage);
+
+        if (attacked) {
+            this.swinging = true;
+            if (!this.level().isClientSide()) {
+                Level level = this.level();
+                level.playSound(null, this.getX(), this.getY(), this.getZ(),
+                        ModSounds.PIKMIN_ATTACK.get(), SoundSource.NEUTRAL,
+                        0.5f, 0.9f + level.random.nextFloat() * 0.2f);
+            }
+        }
+
+        return attacked;
+    }
+
+    @Override
+    public void setTarget(@Nullable LivingEntity target) {
+        if (target == null && this.getPikminState() == PikminState.ATTACKING) {
+            this.setPikminState(
+                    this.getOwner() != null ?
+                            PikminState.FOLLOWING : PikminState.IDLE
+            );
+        } else if (target != null && this.canAttack(target)) {
+            this.setPikminState(PikminState.ATTACKING);
+        }
+
+        super.setTarget(target);
+    }
+
+    @Override
+    public boolean isAlliedTo(@NotNull Entity entity) {
+        if (entity instanceof PikminEntity pikmin) {
+            if (pikmin.getOwnerUUID() == this.getOwnerUUID()) {
+                return true;
+            }
+        }
+        return super.isAlliedTo(entity);
     }
 }

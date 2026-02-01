@@ -30,7 +30,8 @@ public class PikminFollowOwnerGoal extends Goal {
 
     @Override
     public boolean canUse() {
-        if (pikmin.getPikminState() == PikminState.POPPING) {
+        if (pikmin.getPikminState() == PikminState.POPPING ||
+        pikmin.getPikminState() == PikminState.ATTACKING) {
             return false;
         }
         if (pikmin.getPikminState() != PikminState.FOLLOWING) {
@@ -47,7 +48,8 @@ public class PikminFollowOwnerGoal extends Goal {
 
     @Override
     public boolean canContinueToUse() {
-        if (pikmin.getPikminState() == PikminState.POPPING) {
+        if (pikmin.getPikminState() == PikminState.POPPING ||
+        pikmin.getPikminState() == PikminState.ATTACKING) {
             return false;
         }
         if (pikmin.getPikminState() != PikminState.FOLLOWING) {
@@ -75,7 +77,7 @@ public class PikminFollowOwnerGoal extends Goal {
         LivingEntity owner = pikmin.getOwner();
         assert owner != null;
         pikmin.getLookControl().setLookAt(owner, 10.0F, (float)pikmin.getMaxHeadXRot());
-        if (pikmin.distanceToSqr(owner) >= 144.0D) {
+        if (pikmin.distanceToSqr(owner) >= 256.0D) {
             pikmin.teleportTo(owner.getX(), owner.getY(), owner.getZ());
         } else if (pikmin.distanceToSqr(owner) < (double) (minDistance * minDistance)) {
             Vec3 awayVector = pikmin.position()

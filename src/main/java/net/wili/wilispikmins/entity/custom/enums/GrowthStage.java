@@ -4,14 +4,16 @@ import net.minecraft.util.StringRepresentable;
 import org.jetbrains.annotations.NotNull;
 
 public enum GrowthStage implements StringRepresentable {
-    LEAF("leaf"),
-    BUD("bud"),
-    FLOWER("flower");
+    LEAF("leaf", 1.0f),
+    BUD("bud", 1.5f),
+    FLOWER("flower", 2.0f);
 
     private final String name;
+    private final float damageMultiplier;
 
-    GrowthStage(String name) {
+    GrowthStage(String name, float damageMultiplier) {
         this.name = name;
+        this.damageMultiplier = damageMultiplier;
     }
 
     public String getName() {return name;}
@@ -19,5 +21,9 @@ public enum GrowthStage implements StringRepresentable {
     @Override
     public @NotNull String getSerializedName() {
         return this.name;
+    }
+
+    public float getDamageMultiplier() {
+        return damageMultiplier;
     }
 }
