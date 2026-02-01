@@ -111,6 +111,7 @@ public class BuriedPikminBlock extends Block {
 
             // activar sonido
             pLevel.playSound(null, pPos, ModSounds.PIKMIN_GREETING.get(), SoundSource.NEUTRAL, 0.5f, 1.0f);
+            pLevel.playSound(null, pPos, ModSounds.PIKMIN_PLUCK.get(), SoundSource.BLOCKS, 0.5f, 1.0f);
             
             // spawnear pikmin con el tipo y etapa correctos
             PikminType type = pState.getValue(PIKMIN_TYPE);
