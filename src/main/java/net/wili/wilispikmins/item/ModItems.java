@@ -7,6 +7,7 @@ import net.wili.wilispikmins.WilisPikmins;
 import net.wili.wilispikmins.block.ModBlocks;
 import net.neoforged.neoforge.registries.DeferredRegister;
 import net.wili.wilispikmins.entity.custom.enums.PikminType;
+import net.wili.wilispikmins.item.custom.NectarItem;
 import net.wili.wilispikmins.item.custom.OnionBlockItem;
 import net.wili.wilispikmins.item.custom.OnionUpgradeItem;
 import net.wili.wilispikmins.item.custom.PikminSpawnEggItem;
@@ -49,6 +50,10 @@ public class ModItems {
                     .stacksTo(64)));
     public static final Supplier<Item> ROCK_ONION_UPGRADE = ITEMS.register("rock_onion_upgrade",
             () -> new OnionUpgradeItem(PikminType.ROCK, new Item.Properties()
+                    .stacksTo(64)));
+
+    public static final Supplier<Item> NECTAR = ITEMS.register("nectar",
+            () -> new NectarItem(new Item.Properties()
                     .stacksTo(64)));
 
     public static void register(IEventBus eventBus) {

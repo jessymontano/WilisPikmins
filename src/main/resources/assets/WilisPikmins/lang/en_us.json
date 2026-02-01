@@ -7,10 +7,15 @@
   "entity.wilispikmins.red_pikmin": "Red Pikmin",
   "entity.wilispikmins.yellow_pikmin": "Yellow Pikmin",
   "entity.wilispikmins.blue_pikmin": "Blue Pikmin",
+  "entity.wilispikmins.purple_pikmin": "Purple Pikmin",
+  "entity.wilispikmins.white_pikmin": "White Pikmin",
+  "entity.wilispikmins.winged_pikmin": "Winged Pikmin",
+  "entity.wilispikmins.rock_pikmin": "Rock Pikmin",
 
   "block.wilispikmins.red_buried_pikmin_block": "Red Buried Pikmin Block",
-  "block.wilispikmins.onion.main": "Onion",
+  "block.wilispikmins.onion.main": "Main Onion",
   "block.wilispikmins.onion_block": "Onion",
+  "block.wilispikmins.nectar_egg_block": "Nectar Egg",
 
   "pikmin_type.wilispikmins.red": "Red Pikmin",
   "pikmin_type.wilispikmins.yellow": "Yellow Pikmin",
@@ -39,5 +44,4 @@
   "tooltip.wilispikmins.onion.place_1": "Place it to establish",
   "tooltip.wilispikmins.onion.place_2": "your main Onion",
   "tooltip.wilispikmins.onion.main_onion": "Main Onion"
-
 }

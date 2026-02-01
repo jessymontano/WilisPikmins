@@ -2,6 +2,7 @@ package net.wili.wilispikmins.datagen;
 
 import net.minecraft.core.Direction;
 import net.minecraft.data.PackOutput;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.level.block.Block;
 import net.neoforged.neoforge.client.model.generators.BlockStateProvider;
 import net.neoforged.neoforge.client.model.generators.ConfiguredModel;
@@ -27,6 +28,7 @@ public class ModBlockStateProvider extends BlockStateProvider {
     protected void registerStatesAndModels() {
         makeBuriedPikminBlock();
         makeOnionBlock();
+        makeNectarEggBlock();
     }
 
     private void makeOnionBlock() {
@@ -77,8 +79,12 @@ public class ModBlockStateProvider extends BlockStateProvider {
         });
     }
 
+    private void makeNectarEggBlock() {
+        ModelFile.UncheckedModelFile model = new ModelFile.UncheckedModelFile(
+                ResourceLocation.fromNamespaceAndPath(WilisPikmins.MOD_ID, "block/nectar_egg")
+        );
 
-    private void blockWithItem(DeferredBlock<Block> blockRegistryObject) {
-        simpleBlockWithItem(blockRegistryObject.get(), cubeAll(blockRegistryObject.get()));
+        simpleBlock(ModBlocks.NECTAR_EGG_BLOCK.get(), model);
+        simpleBlockItem(ModBlocks.NECTAR_EGG_BLOCK.get(), model);
     }
 }

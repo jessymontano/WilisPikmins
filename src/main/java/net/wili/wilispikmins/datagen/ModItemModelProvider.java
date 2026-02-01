@@ -40,7 +40,26 @@ public class ModItemModelProvider extends ItemModelProvider {
         withExistingParent(
                 getItemPath(ModItems.RED_ONION_UPGRADE),
                 modLoc("block/onion_red"));
+        withExistingParent(
+                getItemPath(ModItems.YELLOW_ONION_UPGRADE),
+                modLoc("block/onion_yellow"));
+        withExistingParent(
+                getItemPath(ModItems.BLUE_ONION_UPGRADE),
+                modLoc("block/onion_blue"));
+        withExistingParent(
+                getItemPath(ModItems.PURPLE_ONION_UPGRADE),
+                modLoc("block/onion_purple"));
+        withExistingParent(
+                getItemPath(ModItems.WHITE_ONION_UPGRADE),
+                modLoc("block/onion_white"));
+        withExistingParent(
+                getItemPath(ModItems.WINGED_ONION_UPGRADE),
+                modLoc("block/onion_winged"));
+        withExistingParent(
+                getItemPath(ModItems.ROCK_ONION_UPGRADE),
+                modLoc("block/onion_rock"));
 
+        basicItem(ModItems.NECTAR.get());
     }
 
     private ItemModelBuilder simpleItem(Supplier<Item> item) {

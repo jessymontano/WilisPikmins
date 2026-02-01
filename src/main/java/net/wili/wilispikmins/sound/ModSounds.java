@@ -18,6 +18,9 @@ public class ModSounds {
     public static final DeferredHolder<SoundEvent, SoundEvent> PIKMIN_SCREAM = registerSoundEvents("pikmin_scream");
     public static final DeferredHolder<SoundEvent, SoundEvent> PIKMIN_DROWNING = registerSoundEvents("pikmin_drowning");
     public static final DeferredHolder<SoundEvent, SoundEvent> PIKMIN_ENTER_IDLE = registerSoundEvents("pikmin_enter_idle");
+    public static final DeferredHolder<SoundEvent, SoundEvent> PIKMIN_ATTACK = registerSoundEvents("pikmin_attack");
+    public static final DeferredHolder<SoundEvent, SoundEvent> PIKMIN_DRINK_NECTAR = registerSoundEvents("pikmin_drink_nectar");
+    public static final DeferredHolder<SoundEvent, SoundEvent> PIKMIN_PLUCK = registerSoundEvents("pikmin_pluck");
 
     private static DeferredHolder<SoundEvent, SoundEvent> registerSoundEvents(String name) {
         return SOUND_EVENTS.register(name, () -> SoundEvent.createVariableRangeEvent(ResourceLocation.fromNamespaceAndPath(WilisPikmins.MOD_ID, name)));

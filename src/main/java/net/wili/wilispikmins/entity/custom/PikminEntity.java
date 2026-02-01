@@ -29,6 +29,8 @@ import net.wili.wilispikmins.entity.custom.enums.GrowthStage;
 import net.wili.wilispikmins.entity.custom.enums.PikminState;
 import net.wili.wilispikmins.entity.custom.enums.PikminType;
 import net.wili.wilispikmins.entity.custom.ai.PikminFollowOwnerGoal;
+import net.wili.wilispikmins.item.ModItems;
+import net.wili.wilispikmins.item.custom.NectarItem;
 import net.wili.wilispikmins.sound.ModSounds;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -68,6 +70,10 @@ public class PikminEntity extends TamableAnimal implements GeoEntity {
     private int drowningTicks = 0;
     private int burningTicks = 0;
     private int growthTicks = 0;
+
+    // variables para daño
+    private int damageAccumulator = 0;
+    private static final int DAMAGE_THRESHOLD = 4;
 
     // constructorsitos
     public PikminEntity(EntityType<? extends TamableAnimal> pEntityType, Level pLevel) {
@@ -306,6 +312,12 @@ public class PikminEntity extends TamableAnimal implements GeoEntity {
 
     @Override
     public @NotNull InteractionResult mobInteract(@NotNull Player player, @NotNull InteractionHand hand) {
+        ItemStack itemStack = player.getItemInHand(hand);
+
+        if (itemStack.getItem() instanceof NectarItem) {
+            return InteractionResult.PASS;
+        }
+
         if (this.level().isClientSide) {
             return InteractionResult.CONSUME;
         }
@@ -498,6 +510,7 @@ public class PikminEntity extends TamableAnimal implements GeoEntity {
         if (flightSystem != null) {
             tag.putFloat("PersonalOffset", flightSystem.getPersonalOffset());
         }
+        tag.putInt("DamageAccumulator", damageAccumulator);
     }
 
     @Override
@@ -523,6 +536,9 @@ public class PikminEntity extends TamableAnimal implements GeoEntity {
                 flightSystem.setPersonalOffset(tag.getFloat("PersonalOffset"));
             }
         }
+        if (tag.contains("DamageAccumulator")) {
+            damageAccumulator = tag.getInt("DamageAccumulator");
+        }
     }
 
     public static boolean checkPikminSpawnRules(EntityType<PikminEntity> type, ServerLevelAccessor level, MobSpawnType spawnType, BlockPos pos, net.minecraft.util.RandomSource random) {
@@ -541,7 +557,12 @@ public class PikminEntity extends TamableAnimal implements GeoEntity {
 
     @Override
     public boolean isFood(@NotNull ItemStack pStack) {
-        return false;
+        return pStack.is(ModItems.NECTAR.get());
+    }
+
+    @Override
+    public @NotNull SoundEvent getEatingSound(@NotNull ItemStack stack) {
+        return ModSounds.PIKMIN_DRINK_NECTAR.get();
     }
 
     @Override
@@ -575,5 +596,50 @@ public class PikminEntity extends TamableAnimal implements GeoEntity {
     @Override
     public boolean causeFallDamage(float fallDistance, float multiplier, @NotNull DamageSource source) {
         return false;
+    }
+
+    @Override
+    public boolean hurt(DamageSource source, float amount) {
+        boolean hurt = super.hurt(source, amount);
+
+        if (hurt && !this.level().isClientSide) {
+            if (this.getHealth() > 0) {
+                processDamageForGrowthStage(amount);
+            }
+        }
+        return hurt;
+    }
+
+    private void processDamageForGrowthStage(float amount) {
+        GrowthStage currentStage = this.getGrowthStage();
+        if (currentStage == GrowthStage.LEAF) {
+            return;
+        }
+
+        damageAccumulator += (int) Math.ceil(amount);
+
+        if (damageAccumulator >= DAMAGE_THRESHOLD) {
+            damageAccumulator = 0;
+
+            GrowthStage previousStage = GrowthStage.values()[currentStage.ordinal() - 1];
+            this.setGrowthStage(previousStage);
+
+            triggerDamageGrowthStageEffect();
+        }
+    }
+
+    private void triggerDamageGrowthStageEffect() {
+        Level level = this.level();
+        if (level.isClientSide) {
+            for (int i = 0; i < 8; i++) {
+                double x = this.getX() + (level.random.nextDouble() - 0.5) * 0.5;
+                double y = this.getY() + 0.3;
+                double z = this.getZ() + (level.random.nextDouble() - 0.5) * 0.5;
+
+                level.addParticle(ParticleTypes.FALLING_NECTAR,
+                        x, y, z,
+                        0, 0.5, 0);
+            }
+        }
     }
 }

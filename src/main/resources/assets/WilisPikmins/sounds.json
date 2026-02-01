@@ -14,7 +14,6 @@
       "wilispikmins:pikmin_greeting_4",
       "wilispikmins:pikmin_greeting_5",
       "wilispikmins:pikmin_greeting_6"
-
     ]
   },
   "pikmin_join_squad": {
@@ -33,6 +32,31 @@
     "subtitle": "sounds.wilispikmins.pikmin_drowning",
     "sounds": [
       "wilispikmins:pikmin_drowning"
+    ]
+  },
+  "pikmin_enter_idle": {
+    "subtitle": "sounds.wilispikmins.pikmin_enter_idle",
+    "sounds": [
+      "wilispikmins:pikmin_enter_idle"
+    ]
+  },
+  "pikmin_pluck": {
+    "subtitle": "sounds.wilispikmins.pikmin_pluck",
+    "sounds": [
+      "wilispikmins:pikmin_pluck",
+      "wilispikmins:pikmin_pluck_2"
+    ]
+  },
+  "pikmin_attack": {
+    "subtitle": "sounds.wilispikmins.pikmin_attack",
+    "sounds": [
+      "wilispikmins:pikmin_attack"
+    ]
+  },
+  "pikmin_drink_nectar": {
+    "subtitle": "sounds.wilispikmins.pikmin_drink_nectar",
+    "sounds": [
+      "wilispikmins:pikmin_drink_nectar"
     ]
   }
 }

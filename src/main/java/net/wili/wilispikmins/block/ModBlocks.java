@@ -12,6 +12,7 @@ import net.neoforged.bus.api.IEventBus;
 import net.neoforged.neoforge.registries.DeferredRegister;
 import net.wili.wilispikmins.WilisPikmins;
 import net.wili.wilispikmins.block.custom.BuriedPikminBlock;
+import net.wili.wilispikmins.block.custom.NectarEggBlock;
 import net.wili.wilispikmins.block.custom.OnionBlock;
 import net.wili.wilispikmins.item.ModItems;
 
@@ -38,6 +39,13 @@ public class ModBlocks {
                     .strength(0.3f, 3.0f)
                     .noOcclusion()
                     .sound(SoundType.FROGLIGHT)));
+
+    public static final Supplier<Block> NECTAR_EGG_BLOCK = registerBlock("nectar_egg_block",
+            () -> new NectarEggBlock(BlockBehaviour.Properties.of()
+                    .mapColor(MapColor.COLOR_YELLOW)
+                    .strength(0.8f, 1.0f)
+                    .sound(SoundType.BAMBOO)
+                    .noOcclusion()));
 
     private static <T extends Block> Supplier<T> registerBlock(String name, Supplier<T> block) {
         Supplier<T> toReturn = BLOCKS.register(name, block);
