@@ -3,6 +3,7 @@ package net.wili.wilispikmins.data;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import io.netty.buffer.ByteBuf;
+import net.minecraft.core.BlockPos;
 import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.network.codec.StreamCodec;
 import net.wili.wilispikmins.entity.custom.enums.PikminType;
@@ -19,8 +20,24 @@ public record OnionData(
         Map<PikminType, Integer> outside
 ){
    public OnionData() {
-       this(false, EnumSet.allOf(PikminType.class), createDefaultMap(0), createDefaultMap(20), createDefaultMap(0));
+       this(
+               false,
+               EnumSet.allOf(PikminType.class),
+               createDefaultMap(0),
+               createDefaultMap(20),
+               createDefaultMap(0));
    }
+
+    public OnionData withMainOnion(UUID onionId, BlockPos pos) {
+
+        return new OnionData(
+                true,
+                unlockedTypes,
+                stored,
+                capacity,
+                outside
+        );
+    }
 
     public OnionData withHasMainOnion(boolean value) {
         return new OnionData(value, this.unlockedTypes, this.stored, this.capacity, this.outside);
@@ -112,24 +129,34 @@ public record OnionData(
                             .fieldOf("outside").forGetter(OnionData::outside)
             ).apply(onionDataInstance, OnionData::new));
 
-    public static final StreamCodec<ByteBuf, OnionData> STREAM_CODEC = StreamCodec.composite(
-            ByteBufCodecs.BOOL, OnionData::hasMainOnion,
+    private static final StreamCodec<ByteBuf, Set<PikminType>> UNLOCKED_TYPES_CODEC =
             ByteBufCodecs.collection(ArrayList::new, ByteBufCodecs.STRING_UTF8)
                     .map(list -> list.stream()
-                            .map(PikminType::valueOf)
-                            .collect(Collectors.toSet()),
-                            set -> new ArrayList<>(set.stream()
+                                    .map(PikminType::valueOf)
+                                    .collect(Collectors.toSet()),
+                            (Set<PikminType> set) -> set.stream()
                                     .map(Enum::name)
-                                    .toList())),
+                                    .collect(Collectors.toCollection(ArrayList::new))
+                    );
+
+    public static final StreamCodec<ByteBuf, OnionData> STREAM_CODEC = StreamCodec.composite(
+            ByteBufCodecs.BOOL,
+            OnionData::hasMainOnion,
+
+            UNLOCKED_TYPES_CODEC,
             OnionData::unlockedTypes,
+
             createMapStreamCodec(),
             OnionData::stored,
+
             createMapStreamCodec(),
             OnionData::capacity,
+
             createMapStreamCodec(),
             OnionData::outside,
+
             OnionData::new
-    );
+        );
 
     private static StreamCodec<ByteBuf, Map<PikminType, Integer>> createMapStreamCodec() {
         return new StreamCodec<>() {

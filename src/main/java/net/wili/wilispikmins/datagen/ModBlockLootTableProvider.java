@@ -27,7 +27,8 @@ public class ModBlockLootTableProvider extends BlockLootSubProvider {
 
     @Override
     protected void generate() {
-        dropSelf(ModBlocks.ONION_BLOCK.get());
+        add(ModBlocks.ONION_BLOCK.get(),
+                block -> noDrop());
         add(ModBlocks.NECTAR_EGG_BLOCK.get(),
                 block -> createMultipleOreDrops(ModBlocks.NECTAR_EGG_BLOCK.get(), ModItems.NECTAR.get(), 2, 5));
         add(ModBlocks.BURIED_PIKMIN_BLOCK.get(),

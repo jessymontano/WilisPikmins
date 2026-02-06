@@ -36,16 +36,31 @@ public class ModBlockStateProvider extends BlockStateProvider {
 
         getVariantBuilder(block).forAllStates(state -> {
             PikminType type = state.getValue(OnionBlock.TYPE);
+            boolean isMain = state.getValue(OnionBlock.MAIN);
 
-            String typeName = type.getSerializedName();
-            String modelName = "onion_" + typeName;
+            ModelFile model;
 
-            ModelFile model = models().cubeBottomTop(
-                    modelName,
-                    modLoc("block/" + typeName + "_onion_side"),
-                    modLoc("block/" + typeName + "_onion_bottom"),
-                    modLoc("block/" + typeName + "_onion_top")
-            );
+            if (isMain) {
+                model = models().cube(
+                        "onion_main",
+                        modLoc("block/onion_main_down"),
+                        modLoc("block/onion_main_up"),
+                        modLoc("block/onion_main_north"),
+                        modLoc("block/onion_main_south"),
+                        modLoc("block/onion_main_east"),
+                        modLoc("block/onion_main_west")
+                ).texture("particle", "block/onion_main_up");
+            } else {
+                String typeName = type.getSerializedName();
+                String modelName = "onion_" + typeName;
+
+                model = models().cubeBottomTop(
+                        modelName,
+                        modLoc("block/" + typeName + "_onion_side"),
+                        modLoc("block/" + typeName + "_onion_bottom"),
+                        modLoc("block/" + typeName + "_onion_top")
+                );
+            }
 
             return ConfiguredModel.builder()
                     .modelFile(model)

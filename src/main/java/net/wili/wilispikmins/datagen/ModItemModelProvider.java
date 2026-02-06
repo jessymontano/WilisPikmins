@@ -58,6 +58,10 @@ public class ModItemModelProvider extends ItemModelProvider {
         withExistingParent(
                 getItemPath(ModItems.ROCK_ONION_UPGRADE),
                 modLoc("block/onion_rock"));
+        withExistingParent(
+                getItemPath(ModItems.MAIN_ONION),
+                modLoc("block/onion_main")
+        );
 
         basicItem(ModItems.NECTAR.get());
     }

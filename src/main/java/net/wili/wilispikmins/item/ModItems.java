@@ -7,10 +7,7 @@ import net.wili.wilispikmins.WilisPikmins;
 import net.wili.wilispikmins.block.ModBlocks;
 import net.neoforged.neoforge.registries.DeferredRegister;
 import net.wili.wilispikmins.entity.custom.enums.PikminType;
-import net.wili.wilispikmins.item.custom.NectarItem;
-import net.wili.wilispikmins.item.custom.OnionBlockItem;
-import net.wili.wilispikmins.item.custom.OnionUpgradeItem;
-import net.wili.wilispikmins.item.custom.PikminSpawnEggItem;
+import net.wili.wilispikmins.item.custom.*;
 
 import java.util.function.Supplier;
 
@@ -29,6 +26,9 @@ public class ModItems {
 
     public static final Supplier<Item> ONION = ITEMS.register("onion",
             () -> new OnionBlockItem(ModBlocks.ONION_BLOCK.get(),
+                    new Item.Properties()));
+    public static final Supplier<Item> MAIN_ONION = ITEMS.register("main_onion",
+            () -> new MainOnionBlockItem(ModBlocks.ONION_BLOCK.get(),
                     new Item.Properties()));
     public static final Supplier<Item> RED_ONION_UPGRADE = ITEMS.register("red_onion_upgrade",
             () -> new OnionUpgradeItem(PikminType.RED, new Item.Properties()

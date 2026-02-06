@@ -264,48 +264,33 @@ public class OnionMenu extends AbstractContainerMenu {
 
     public void confirmOperations() {
         if (level.isClientSide) return;
-
-        OnionData blockData = getBlockData();
         OnionData playerData = getPlayerData();
+        OnionData updatedPlayerData = playerData;
 
         for (PikminType type : PikminType.values()) {
             int out = pendingTakeOut.get(type);
             int in  = pendingPutIn.get(type);
 
-            if (out > 0 && blockData.canTakeOut(type, out)) {
-                OnionData newBlockData = blockData;
-                for (int i = 0; i < out; i++) {
-                    newBlockData = newBlockData.addStored(type, -1);
-                }
-                blockEntity.setOnionData(newBlockData);
+            if (out > 0 && playerData.canTakeOut(type, out)) {
+                updatedPlayerData = updatedPlayerData
+                        .addOutside(type, out)
+                        .addStored(type, -out);
 
                 spawnPikmin(type, out);
-
-                OnionData newPlayerData = playerData;
-                for (int i = 0; i < out; i++) {
-                    newPlayerData = newPlayerData.addOutside(type,1 );
-                }
-                player.setData(OnionComponents.PLAYER_ONION_DATA, newPlayerData);
-                playerData = newPlayerData;
             }
 
             if (in > 0 && playerData.canPutIn(type, in)) {
-                OnionData newPlayerData = playerData;
-                for (int i = 0; i < in; i++) {
-                    newPlayerData = newPlayerData.addOutside(type, -1);
-                }
-                player.setData(OnionComponents.PLAYER_ONION_DATA, newPlayerData);
-                playerData = newPlayerData;
-
-                OnionData newBlockData = blockData;
-                for (int i = 0; i < in; i++) {
-                    newBlockData = newBlockData.addStored(type, 1);
-                }
-                blockEntity.setOnionData(newBlockData);
+                updatedPlayerData = updatedPlayerData
+                        .addOutside(type, -in)
+                        .addStored(type, in);
 
                 recallPikmins(type, in);
             }
         }
+
+        player.setData(OnionComponents.PLAYER_ONION_DATA, updatedPlayerData);
+
+        blockEntity.setOnionData(updatedPlayerData);
 
         clearOperations();
         updateDataFromPlayer();
