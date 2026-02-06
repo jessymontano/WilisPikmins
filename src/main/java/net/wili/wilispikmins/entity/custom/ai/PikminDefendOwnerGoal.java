@@ -36,7 +36,8 @@ public class PikminDefendOwnerGoal extends TargetGoal {
         if (this.ownerLastHurtBy != null &&
         this.ownerLastHurtBy != owner &&
         this.ownerLastHurtBy.isAlive() &&
-        !this.pikmin.isAlliedTo(this.ownerLastHurtBy)) {
+        !this.pikmin.isAlliedTo(this.ownerLastHurtBy) &&
+                !(this.ownerLastHurtBy instanceof PikminEntity pikminEntity && owner.getUUID().equals(pikminEntity.getOwnerUUID()))) {
             int lastHurtTimestamp = owner.getLastHurtByMobTimestamp();
             if (lastHurtTimestamp != this.timestamp) {
                 return true;
@@ -46,7 +47,8 @@ public class PikminDefendOwnerGoal extends TargetGoal {
         if (this.ownerLastHurt != null &&
         this.ownerLastHurt != owner &&
         this.ownerLastHurt.isAlive() &&
-        !this.pikmin.isAlliedTo(this.ownerLastHurt)) {
+        !this.pikmin.isAlliedTo(this.ownerLastHurt) &&
+                !(this.ownerLastHurt instanceof PikminEntity pikminEntity && owner.getUUID().equals(pikminEntity.getOwnerUUID()))) {
             return true;
         }
 

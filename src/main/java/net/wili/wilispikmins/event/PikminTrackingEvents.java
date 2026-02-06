@@ -69,7 +69,6 @@ public class PikminTrackingEvents {
 
             if (serverPlayer.level() instanceof ServerLevel level) {
                 UUID playerId = serverPlayer.getUUID();
-                int totalPikmins = 0;
 
                 for (Entity entity : level.getAllEntities()) {
                     if (entity instanceof PikminEntity pikmin) {
@@ -77,7 +76,6 @@ public class PikminTrackingEvents {
                         if (playerId.equals(pikminOwner)) {
                             PikminType type = pikmin.getPikminType();
                             newData = newData.addOutside(type, 1);
-                            totalPikmins++;
                         }
                     }
                 }

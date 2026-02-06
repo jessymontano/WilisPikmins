@@ -118,19 +118,12 @@ public class PikminEntity extends TamableAnimal implements GeoEntity {
     }
 
     protected PlayState attackPredicate(AnimationState<PikminEntity> event) {
-       if (this.swinging && event.getController().getAnimationState().equals(AnimationController.State.STOPPED)) {
-           event.setAndContinue(RawAnimation.begin()
-                   .then("animation.pikmin.attack", Animation.LoopType.PLAY_ONCE)
-                   .then("animation.pikmin.walk", Animation.LoopType.LOOP));
-           //this.swinging = false;
-           return PlayState.CONTINUE;
+       if (this.swinging) {
+           return event.setAndContinue(RawAnimation.begin()
+                   .then("animation.pikmin.attack", Animation.LoopType.PLAY_ONCE));
        }
-       if (event.getController().getAnimationState() == AnimationController.State.RUNNING) {
-           return PlayState.CONTINUE;
-       }
-
-
-        return PlayState.STOP;
+       event.resetCurrentAnimation();
+       return PlayState.STOP;
     }
 
     protected PlayState popPredicate(AnimationState<PikminEntity> event) {
@@ -241,7 +234,7 @@ public class PikminEntity extends TamableAnimal implements GeoEntity {
     protected void registerGoals() {
         this.goalSelector.addGoal(0, new FloatGoal(this));
         this.goalSelector.addGoal(1, new PanicGoal(this, 2.0));
-        this.goalSelector.addGoal(2, new PikminFollowOwnerGoal(this, 1.2, 10.0f, 2.0f, 3.0f));
+        this.goalSelector.addGoal(2, new PikminFollowOwnerGoal(this, 1.2, 10.0f, 2.0f, 5.0f));
         this.goalSelector.addGoal(3, new MeleeAttackGoal(this, 1.0, true) {
             @Override
             public boolean canUse() {
@@ -598,10 +591,10 @@ public class PikminEntity extends TamableAnimal implements GeoEntity {
 
     @Override
     public void registerControllers(AnimatableManager.ControllerRegistrar controllerRegistrar) {
-        controllerRegistrar.add(new AnimationController<>(this, "main", 0, this::predicate));
-        controllerRegistrar.add(new AnimationController<>(this, "attack", 0, this::attackPredicate));
-        controllerRegistrar.add(new AnimationController<>(this, "pop", 0, this::popPredicate));
-        controllerRegistrar.add(new AnimationController<>(this, "fly", 0, this::flyPredicate));
+        controllerRegistrar.add(new AnimationController<>(this, "main",  this::predicate));
+        controllerRegistrar.add(new AnimationController<>(this, "attack",  this::attackPredicate));
+        controllerRegistrar.add(new AnimationController<>(this, "pop",  this::popPredicate));
+        controllerRegistrar.add(new AnimationController<>(this, "fly",  this::flyPredicate));
     }
 
     @Override
