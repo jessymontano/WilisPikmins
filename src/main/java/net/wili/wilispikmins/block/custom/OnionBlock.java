@@ -23,6 +23,7 @@ import net.minecraft.world.level.block.state.properties.EnumProperty;
 import net.minecraft.world.level.storage.loot.LootParams;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.HitResult;
+import net.wili.wilispikmins.advancement.ModTriggers;
 import net.wili.wilispikmins.block.entity.OnionBlockEntity;
 import net.wili.wilispikmins.data.OnionComponents;
 import net.wili.wilispikmins.data.OnionData;
@@ -138,6 +139,8 @@ public class OnionBlock extends BaseEntityBlock {
             );
             player.setData(OnionComponents.PLAYER_ONION_DATA, mergedData);
         }
+
+        ModTriggers.ONION_INTERACT.get().trigger(player);
 
         player.openMenu(new SimpleMenuProvider(
                 onionBE,

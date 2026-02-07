@@ -4,6 +4,7 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.Holder;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.InteractionResult;
@@ -24,6 +25,7 @@ import net.minecraft.world.level.material.Fluids;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.shapes.CollisionContext;
 import net.minecraft.world.phys.shapes.VoxelShape;
+import net.wili.wilispikmins.advancement.ModTriggers;
 import net.wili.wilispikmins.entity.ModEntities;
 import net.wili.wilispikmins.entity.custom.PikminEntity;
 import net.wili.wilispikmins.entity.custom.enums.GrowthStage;
@@ -138,6 +140,10 @@ public class BuriedPikminBlock extends Block {
             // activar animacion de salida
             pikmin.triggerPopAnimation();
             pLevel.addFreshEntity(pikmin);
+
+            if (pPlayer instanceof ServerPlayer serverPlayer) {
+                ModTriggers.PIKMIN_OBTAINED.get().trigger(serverPlayer, type);
+            }
 
             return InteractionResult.SUCCESS;
         }

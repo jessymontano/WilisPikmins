@@ -1,5 +1,6 @@
 package net.wili.wilispikmins.entity.custom.enums;
 
+import com.mojang.serialization.Codec;
 import net.minecraft.network.chat.Component;
 import net.minecraft.util.StringRepresentable;
 import org.jetbrains.annotations.NotNull;
@@ -33,4 +34,9 @@ public enum PikminType implements StringRepresentable {
     public Component getDisplayName() {
         return Component.translatable("pikmin_type.wilispikmins." + name().toLowerCase());
     }
+
+    public static final Codec<PikminType> CODEC = Codec.STRING.xmap(
+            PikminType::valueOf,
+            PikminType::name
+    );
 }

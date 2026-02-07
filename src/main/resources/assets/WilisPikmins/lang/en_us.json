@@ -3,7 +3,9 @@
   "item.wilispikmins.blue_pikmin_spawn_egg": "Blue Pikmin Spawn Egg",
   "item.wilispikmins.yellow_pikmin_spawn_egg": "Yellow Pikmin Spawn Egg",
   "item.wilispikmins.onion_upgrade": "Onion Upgrade",
+  "item.wilispikmins.nectar": "Nectar",
 
+  "entity.wilispikmins.pikmin": "Pikmin",
   "entity.wilispikmins.red_pikmin": "Red Pikmin",
   "entity.wilispikmins.yellow_pikmin": "Yellow Pikmin",
   "entity.wilispikmins.blue_pikmin": "Blue Pikmin",
@@ -12,7 +14,7 @@
   "entity.wilispikmins.winged_pikmin": "Winged Pikmin",
   "entity.wilispikmins.rock_pikmin": "Rock Pikmin",
 
-  "block.wilispikmins.red_buried_pikmin_block": "Red Buried Pikmin Block",
+  "block.wilispikmins.buried_pikmin_block": "Buried Pikmin",
   "block.wilispikmins.onion.main": "Main Onion",
   "block.wilispikmins.onion_block": "Onion",
   "block.wilispikmins.nectar_egg_block": "Nectar Egg",
@@ -43,5 +45,32 @@
   "tooltip.wilispikmins.onion.type": "Type: %s",
   "tooltip.wilispikmins.onion.place_1": "Place it to establish",
   "tooltip.wilispikmins.onion.place_2": "your main Onion",
-  "tooltip.wilispikmins.onion.main_onion": "Main Onion"
+  "tooltip.wilispikmins.onion.main_onion": "Main Onion",
+
+  "sounds.wilispikmins.pikmin_death": "Pikmin dies",
+  "sounds.wilispikmins.pikmin_greeting": "Pikmin greets",
+  "sounds.wilispikmins.pikmin_join_squad": "Pikmin joins squad",
+  "sounds.wilispikmins.pikmin_scream": "Pikmin screams",
+  "sounds.wilispikmins.pikmin_drowning": "Pikmin drowns",
+  "sounds.wilispikmins.pikmin_enter_idle": "Pikmin becomes idle",
+  "sounds.wilispikmins.pikmin_pluck": "Pikmin plucked",
+  "sounds.wilispikmins.pikmin_attack": "Pikmin attacks",
+  "sounds.wilispikmins.pikmin_drink_nectar": "Drinking nectar",
+
+  "advancement.wilispikmins.root.title": "Wili's Pikmins",
+  "advancement.wilispikmins.root.description": "Begin your pikmin adventure :)",
+  "advancement.wilispikmins.first_pikmin_title": "Congrats! It's a Pikmin",
+  "advancement.wilispikmins.first_pikmin.description": "Pluck your first Pikmin from the ground",
+  "advancement.wilispikmins.first_nectar.title": "PISS!",
+  "advancement.wilispikmins.first_nectar.description": "Drink nectar for the first time",
+  "advancement.wilispikmins.find_onion.title": "So many layers",
+  "advancement.wilispikmins.first_onion.description": "Discover and interact with an Onion",
+  "advancement.wilispikmins.all_pikmin.title": "Gotta catch 'em all!",
+  "advancement.wilispikmins.all_pikmin.description": "Collect at least one of each Pikmin type",
+  "advancement.wilispikmins.pikmin_flower.title": "A blooming friendship",
+  "advancement.wilispikmins.pikmin_flower.description": "Feed nectar to a pikmin to make its flower bloom",
+  "advancement.wilispikmins.defeat_enemy.title": "Personal bodyguard",
+  "advancement.wilispikmins.defeat_enemy.description": "Defeat an enemy using Pikmin",
+  "advancement.wilispikmins.hundred_pikmin.title": "World domination",
+  "advancement.wilispikmins.hundred_pikmin.description": "Grow an army of 100 Pikmin"
 }

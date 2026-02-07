@@ -1,8 +1,8 @@
 package net.wili.wilispikmins.item.custom;
 
 import net.minecraft.core.particles.ParticleTypes;
+import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvent;
-import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
@@ -12,6 +12,7 @@ import net.minecraft.world.food.FoodProperties;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
+import net.wili.wilispikmins.advancement.ModTriggers;
 import net.wili.wilispikmins.entity.custom.PikminEntity;
 import net.wili.wilispikmins.entity.custom.enums.GrowthStage;
 import net.wili.wilispikmins.sound.ModSounds;
@@ -59,6 +60,10 @@ public class NectarItem extends Item {
 
         GrowthStage nextStage = GrowthStage.values()[currentStage.ordinal() + 1];
         pikmin.setGrowthStage(nextStage);
+
+        if (!level.isClientSide() && player instanceof ServerPlayer serverPlayer) {
+            ModTriggers.PIKMIN_GROW.get().trigger(serverPlayer, nextStage);
+        }
 
         if (level.isClientSide()) {
             spawnNectarParticles(level, pikmin);

@@ -1,5 +1,6 @@
 package net.wili.wilispikmins.entity.custom.enums;
 
+import com.mojang.serialization.Codec;
 import net.minecraft.util.StringRepresentable;
 import org.jetbrains.annotations.NotNull;
 
@@ -26,4 +27,9 @@ public enum GrowthStage implements StringRepresentable {
     public float getDamageMultiplier() {
         return damageMultiplier;
     }
+
+    public static final Codec<GrowthStage> CODEC = Codec.STRING.xmap(
+            GrowthStage::valueOf,
+            GrowthStage::name
+    );
 }

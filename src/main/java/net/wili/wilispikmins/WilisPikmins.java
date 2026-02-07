@@ -11,6 +11,7 @@ import net.neoforged.fml.event.lifecycle.FMLCommonSetupEvent;
 import net.neoforged.neoforge.event.BuildCreativeModeTabContentsEvent;
 import net.neoforged.neoforge.event.server.ServerStartingEvent;
 import net.neoforged.neoforge.network.event.RegisterPayloadHandlersEvent;
+import net.wili.wilispikmins.advancement.ModTriggers;
 import net.wili.wilispikmins.block.ModBlocks;
 import net.wili.wilispikmins.block.entity.ModBlockEntities;
 import net.wili.wilispikmins.data.OnionComponents;
@@ -58,6 +59,9 @@ public class WilisPikmins
 
         // register mod entities
         ModEntities.register(modEventBus);
+
+        // register triggers
+        ModTriggers.register(modEventBus);
 
         // register components and attachments
         OnionComponents.DATA_COMPONENT_TYPES.register(modEventBus);

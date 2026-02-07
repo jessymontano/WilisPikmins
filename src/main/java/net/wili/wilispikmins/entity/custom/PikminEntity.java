@@ -78,8 +78,6 @@ public class PikminEntity extends TamableAnimal implements GeoEntity {
     private int damageAccumulator = 0;
     private static final int DAMAGE_THRESHOLD = 4;
 
-    private int attackAnimCooldown = 0;
-
     // constructorsitos
     public PikminEntity(EntityType<? extends TamableAnimal> pEntityType, Level pLevel) {
         super(pEntityType, pLevel);
@@ -319,10 +317,7 @@ public class PikminEntity extends TamableAnimal implements GeoEntity {
         float baseSpeed = 0.25f;
         if (getPikminType() == PikminType.WHITE) {
             baseSpeed = 0.3f;
-        } else if (getPikminType() == PikminType.PURPLE) {
-            baseSpeed = 0.2f;
         }
-
         Objects.requireNonNull(this.getAttribute(Attributes.MOVEMENT_SPEED)).setBaseValue(baseSpeed * speedMultiplier);
     }
 
@@ -347,6 +342,7 @@ public class PikminEntity extends TamableAnimal implements GeoEntity {
             setOwnerUUID(player.getUUID());
             setPersistenceRequired();
             player.swing(hand);
+
             return InteractionResult.SUCCESS;
         }
 
