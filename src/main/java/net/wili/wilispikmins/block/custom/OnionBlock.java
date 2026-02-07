@@ -110,7 +110,9 @@ public class OnionBlock extends BaseEntityBlock {
         onionBE.setOnionId(onionId);
         onionBE.setOwner(player.getUUID());
 
-        OnionData initialData = new OnionData()
+        OnionData playerData = player.getData(OnionComponents.PLAYER_ONION_DATA);
+
+        OnionData initialData = playerData
                 .withUnlockedType(type)
                 .withHasMainOnion(true);
         onionBE.setOnionData(initialData);
@@ -118,7 +120,6 @@ public class OnionBlock extends BaseEntityBlock {
 
         level.setBlock(pos, state.setValue(MAIN, true), Block.UPDATE_ALL);
 
-        OnionData playerData = player.getData(OnionComponents.PLAYER_ONION_DATA);
         OnionData newData = playerData
                 .withMainOnion(onionId, pos)
                 .withHasMainOnion(true)

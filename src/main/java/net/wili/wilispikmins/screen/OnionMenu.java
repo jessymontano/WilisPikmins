@@ -317,12 +317,11 @@ public class OnionMenu extends AbstractContainerMenu {
         if (!(level instanceof ServerLevel serverLevel)) return;
 
         OnionData playerData = getPlayerData();
-        OnionData blockData = getBlockData();
         UUID playerId = player.getUUID();
 
-        Map<PikminType, Integer> outsideCouts = new EnumMap<>(PikminType.class);
+        Map<PikminType, Integer> outsideCounts = new EnumMap<>(PikminType.class);
         for (PikminType type : PikminType.values()) {
-            outsideCouts.put(type, 0);
+            outsideCounts.put(type, 0);
         }
 
         for (Entity entity: serverLevel.getAllEntities()) {
@@ -330,7 +329,7 @@ public class OnionMenu extends AbstractContainerMenu {
                 UUID ownerId = pikmin.getOwnerUUID();
                 if (ownerId != null && ownerId.equals(playerId)) {
                     PikminType type = pikmin.getPikminType();
-                    outsideCouts.put(type, outsideCouts.get(type) + 1);
+                    outsideCounts.put(type, outsideCounts.get(type) + 1);
                 }
             }
         }
@@ -338,19 +337,17 @@ public class OnionMenu extends AbstractContainerMenu {
         for (PikminType type : PikminType.values()) {
             if (!playerData.hasUnlocked(type)) continue;
 
-            int toRecall = outsideCouts.get(type);
-            int stored = blockData.getStored(type);
+            int toRecall = outsideCounts.get(type);
+            int stored = playerData.getStored(type);
             int capacity = playerData.getCapacity(type);
             int canStore = Math.min(toRecall, capacity - stored);
 
             if (canStore > 0) {
-                OnionData newBlockData = blockData.addStored(type, canStore);
-                blockEntity.setOnionData(newBlockData);
-                blockData = newBlockData;
-
-                OnionData newPlayerData = playerData.addOutside(type, -canStore);
+                OnionData newPlayerData = playerData
+                        .addOutside(type, -canStore)
+                        .addStored(type, canStore);
                 player.setData(OnionComponents.PLAYER_ONION_DATA, newPlayerData);
-                playerData = newPlayerData;
+                blockEntity.setOnionData(newPlayerData);
 
                 int recalled = 0;
                 for (Entity entity: serverLevel.getAllEntities()) {
