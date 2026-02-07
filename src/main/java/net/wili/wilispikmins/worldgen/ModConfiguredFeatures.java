@@ -70,6 +70,16 @@ public class ModConfiguredFeatures {
     public static final ResourceKey<ConfiguredFeature<?, ?>> ROCK_ONION_CAVE =
             registerKey("rock_onion_cave");
 
+    // egg
+    public static final ResourceKey<ConfiguredFeature<?, ?>> PATCH_NECTAR_EGG_COMMON =
+            registerKey("patch_nectar_egg_common");
+    public static final ResourceKey<ConfiguredFeature<?, ?>> PATCH_NECTAR_EGG_FOREST =
+            registerKey("patch_nectar_egg_forest");
+    public static final ResourceKey<ConfiguredFeature<?, ?>> PATCH_NECTAR_EGG_FLOWER =
+            registerKey("patch_nectar_egg_flower");
+    public static final ResourceKey<ConfiguredFeature<?, ?>> PATCH_NECTAR_EGG_CAVE =
+            registerKey("patch_nectar_egg_cave");
+
     public static void bootstrap(BootstrapContext<ConfiguredFeature<?, ?>> context) {
         // pikmin patches
         register(context, PATCH_RED_PIKMIN, Feature.RANDOM_PATCH,
@@ -103,6 +113,16 @@ public class ModConfiguredFeatures {
         register(context, WINGED_ONION, Feature.SIMPLE_BLOCK, createOnionConfig(PikminType.WINGED));
         register(context, ROCK_ONION, Feature.SIMPLE_BLOCK, createOnionConfig(PikminType.ROCK));
         register(context, ROCK_ONION_CAVE, Feature.SIMPLE_BLOCK, createOnionConfig(PikminType.ROCK));
+
+        // egg
+        register(context, PATCH_NECTAR_EGG_COMMON, Feature.RANDOM_PATCH,
+                createNectarEggPatchConfig(8, 2));
+        register(context, PATCH_NECTAR_EGG_FOREST, Feature.RANDOM_PATCH,
+                createNectarEggPatchConfig(10, 3));
+        register(context, PATCH_NECTAR_EGG_FLOWER, Feature.RANDOM_PATCH,
+                createNectarEggPatchConfig(12, 4));
+        register(context, PATCH_NECTAR_EGG_CAVE, Feature.RANDOM_PATCH,
+                createCaveNectarEggPatchConfig());
     }
 
     public static ResourceKey<ConfiguredFeature<?, ?>> registerKey(String name) {
@@ -122,12 +142,68 @@ public class ModConfiguredFeatures {
         );
     }
 
+   private static RandomPatchConfiguration createNectarEggPatchConfig( int tries, int spread) {
+        return new RandomPatchConfiguration(
+                tries, spread, 0,
+                PlacementUtils.filtered(
+                        Feature.SIMPLE_BLOCK,
+                        new SimpleBlockConfiguration(
+                                BlockStateProvider.simple(
+                                        ModBlocks.NECTAR_EGG_BLOCK.get().defaultBlockState()
+                                )
+                        ),
+                        BlockPredicate.allOf(
+                                BlockPredicate.ONLY_IN_AIR_PREDICATE,
+                                BlockPredicate.matchesTag(
+                                        new BlockPos(0, -1, 0),
+                                        ModTags.Blocks.CAN_SPAWN_RED_PIKMIN
+                                ),
+                                BlockPredicate.matchesBlocks(
+                                        new BlockPos(0, 1,  0),
+                                        Blocks.AIR
+                                ),
+                                BlockPredicate.hasSturdyFace(new BlockPos(0, -1, 0),
+                                        Direction.UP)
+                        )
+                )
+        );
+   }
+
+   private static RandomPatchConfiguration createCaveNectarEggPatchConfig() {
+        return new RandomPatchConfiguration(
+                8, 4, 0,
+                PlacementUtils.filtered(
+                        Feature.SIMPLE_BLOCK,
+                        new SimpleBlockConfiguration(
+                                BlockStateProvider.simple(
+                                        ModBlocks.NECTAR_EGG_BLOCK.get().defaultBlockState()
+                                )
+                        ),
+                        BlockPredicate.allOf(
+                                BlockPredicate.ONLY_IN_AIR_PREDICATE,
+                                BlockPredicate.matchesTag(
+                                        new BlockPos(0, -1, 0),
+                                        ModTags.Blocks.CAN_SPAWN_ROCK_PIKMIN
+                                ),
+                                BlockPredicate.matchesBlocks(
+                                        new BlockPos(0, 1, 0),
+                                        Blocks.AIR
+                                ),
+                                BlockPredicate.anyOf(
+                                        BlockPredicate.hasSturdyFace(new BlockPos(0, -1, 0), Direction.UP),
+                                        BlockPredicate.hasSturdyFace(new BlockPos(0, 1, 0), Direction.DOWN)
+                                )
+                        )
+                )
+        );
+   }
+
     private static RandomPatchConfiguration createPikminPatchConfig(
             PikminType type) {
         TagKey<Block> spawnableTag = getSpawnableBlockTag(type);
 
         return new RandomPatchConfiguration(
-                5, 4, 1,
+                6, 2, 0,
                 PlacementUtils.filtered(
                         Feature.SIMPLE_BLOCK,
                         new SimpleBlockConfiguration(BlockStateProvider.simple(
@@ -146,6 +222,10 @@ public class ModConfiguredFeatures {
                                 BlockPredicate.matchesBlocks(
                                         new BlockPos(0, 1, 0),
                                         Blocks.AIR
+                                ),
+                                BlockPredicate.hasSturdyFace(
+                                        new BlockPos(0, -1, 0),
+                                        Direction.UP
                                 )
                         )
                 )
@@ -155,7 +235,7 @@ public class ModConfiguredFeatures {
     private static RandomPatchConfiguration createUnderwaterPikminConfig(
             ) {
         return new RandomPatchConfiguration(
-                5, 4, 2,
+                10, 3, 0,
                 PlacementUtils.filtered(
                         Feature.SIMPLE_BLOCK,
                         new SimpleBlockConfiguration(

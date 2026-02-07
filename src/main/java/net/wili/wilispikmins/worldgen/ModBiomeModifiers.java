@@ -62,6 +62,16 @@ public class ModBiomeModifiers {
     public static final ResourceKey<BiomeModifier> ADD_ROCK_ONION_CAVE =
             registerKey("add_rock_onion_cave");
 
+    // egg
+    public static final ResourceKey<BiomeModifier> ADD_NECTAR_EGG_COMMON =
+            registerKey("add_nectar_egg_common");
+    public static final ResourceKey<BiomeModifier> ADD_NECTAR_EGG_FOREST =
+            registerKey("add_nectar_egg_forest");
+    public static final ResourceKey<BiomeModifier> ADD_NECTAR_EGG_FLOWER =
+            registerKey("add_nectar_egg_flower");
+    public static final ResourceKey<BiomeModifier> ADD_NECTAR_EGG_CAVE =
+            registerKey("add_nectar_egg_cave");
+
     public static void bootstrap(BootstrapContext<BiomeModifier> context) {
         HolderGetter<PlacedFeature> placedFeatures = context.lookup(Registries.PLACED_FEATURE);
 
@@ -87,6 +97,12 @@ public class ModBiomeModifiers {
         registerModifier(context, ADD_WINGED_ONION, placedFeatures.getOrThrow(ModPlacedFeatures.WINGED_ONION), ModTags.Biomes.HAS_WINGED_PIKMIN);
         registerModifier(context, ADD_ROCK_ONION, placedFeatures.getOrThrow(ModPlacedFeatures.ROCK_ONION), ModTags.Biomes.HAS_ROCK_PIKMIN);
         registerModifier(context, ADD_ROCK_ONION_CAVE, placedFeatures.getOrThrow(ModPlacedFeatures.ROCK_ONION_CAVE), BiomeTags.IS_OVERWORLD);
+
+        // egg
+        registerModifier(context, ADD_NECTAR_EGG_COMMON, placedFeatures.getOrThrow(ModPlacedFeatures.PATCH_NECTAR_EGG_COMMON), BiomeTags.IS_OVERWORLD);
+        registerModifier(context, ADD_NECTAR_EGG_FOREST, placedFeatures.getOrThrow(ModPlacedFeatures.PATCH_NECTAR_EGG_FOREST), ModTags.Biomes.HAS_NECTAR_EGG_FOREST);
+        registerModifier(context, ADD_NECTAR_EGG_FLOWER, placedFeatures.getOrThrow(ModPlacedFeatures.PATCH_NECTAR_EGG_FLOWER), ModTags.Biomes.HAS_NECTAR_EGG_FLOWER);
+        registerModifier(context, ADD_NECTAR_EGG_CAVE, placedFeatures.getOrThrow(ModPlacedFeatures.PATCH_NECTAR_EGG_CAVE), BiomeTags.IS_OVERWORLD);
     }
     private static ResourceKey<BiomeModifier> registerKey(String name) {
         return ResourceKey.create(NeoForgeRegistries.Keys.BIOME_MODIFIERS, ResourceLocation.fromNamespaceAndPath(WilisPikmins.MOD_ID, name));

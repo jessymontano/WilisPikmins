@@ -23,6 +23,10 @@ public class ModTags {
                 create("has_feature/winged_pikmin");
         public static final TagKey<Biome> HAS_ROCK_PIKMIN =
                 create("has_feature/rock_pikmin");
+        public static final TagKey<Biome> HAS_NECTAR_EGG_FOREST =
+                create("has_feature/nectar_egg_forest");
+        public static final TagKey<Biome> HAS_NECTAR_EGG_FLOWER =
+                create("has_feature/nectar_egg_flower");
 
         private static TagKey<Biome> create(String name) {
             return TagKey.create(Registries.BIOME,
@@ -31,6 +35,16 @@ public class ModTags {
     }
 
     public static class Blocks {
+        public static final TagKey<Block> GRASSY_BLOCKS =
+                create("grassy_blocks");
+        public static final TagKey<Block> SANDY_BLOCKS =
+                create("sandy_blocks");
+        public static final TagKey<Block> ROCKY_BLOCKS =
+                create("rocky_blocks");
+        public static final TagKey<Block> SNOWY_BLOCKS =
+                create("snowy_blocks");
+        public static final TagKey<Block> WATERY_BLOCKS =
+                create("watery_blocks");
         public static final TagKey<Block> CAN_SPAWN_RED_PIKMIN =
                 create("can_spawn_red_pikmin");
         public static final TagKey<Block> CAN_SPAWN_YELLOW_PIKMIN =

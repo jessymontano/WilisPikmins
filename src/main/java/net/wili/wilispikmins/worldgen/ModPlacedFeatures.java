@@ -1,6 +1,7 @@
 package net.wili.wilispikmins.worldgen;
 
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
 import net.minecraft.core.Holder;
 import net.minecraft.core.HolderGetter;
 import net.minecraft.core.registries.Registries;
@@ -62,6 +63,16 @@ public class ModPlacedFeatures {
     public static final ResourceKey<PlacedFeature> ROCK_ONION_CAVE =
             registerKey("rock_onion_cave");
 
+    // egg
+    public static final ResourceKey<PlacedFeature> PATCH_NECTAR_EGG_COMMON =
+            registerKey("patch_nectar_egg_common_placed");
+    public static final ResourceKey<PlacedFeature> PATCH_NECTAR_EGG_FOREST =
+            registerKey("patch_nectar_egg_forest_placed");
+    public static final ResourceKey<PlacedFeature> PATCH_NECTAR_EGG_FLOWER =
+            registerKey("patch_nectar_egg_flower_placed");
+    public static final ResourceKey<PlacedFeature> PATCH_NECTAR_EGG_CAVE =
+            registerKey("patch_nectar_egg_cave_placed");
+
     public static void bootstrap(BootstrapContext<PlacedFeature> context) {
         HolderGetter<ConfiguredFeature<?, ?>> configuredFeatures =
                 context.lookup(Registries.CONFIGURED_FEATURE);
@@ -91,7 +102,7 @@ public class ModPlacedFeatures {
         register(context, PATCH_RED_PIKMIN, redPatch,
                 List.of(
                         CountPlacement.of(2),
-                        RarityFilter.onAverageOnceEvery(32),
+                        RarityFilter.onAverageOnceEvery(48),
                         InSquarePlacement.spread(),
                         PlacementUtils.HEIGHTMAP_WORLD_SURFACE,
                         BiomeFilter.biome()
@@ -99,7 +110,7 @@ public class ModPlacedFeatures {
         register(context, PATCH_YELLOW_PIKMIN, yellowPatch,
                 List.of(
                         CountPlacement.of(2),
-                        RarityFilter.onAverageOnceEvery(32),
+                        RarityFilter.onAverageOnceEvery(48),
                         InSquarePlacement.spread(),
                         PlacementUtils.HEIGHTMAP_WORLD_SURFACE,
                         BiomeFilter.biome()
@@ -107,7 +118,7 @@ public class ModPlacedFeatures {
         register(context, PATCH_BLUE_PIKMIN, bluePatch,
                 List.of(
                         CountPlacement.of(2),
-                        RarityFilter.onAverageOnceEvery(32),
+                        RarityFilter.onAverageOnceEvery(48),
                         InSquarePlacement.spread(),
                         PlacementUtils.HEIGHTMAP_WORLD_SURFACE,
                         BiomeFilter.biome()
@@ -123,7 +134,7 @@ public class ModPlacedFeatures {
         register(context, PATCH_PURPLE_PIKMIN, purplePatch,
                 List.of(
                         CountPlacement.of(2),
-                        RarityFilter.onAverageOnceEvery(32),
+                        RarityFilter.onAverageOnceEvery(48),
                         InSquarePlacement.spread(),
                         PlacementUtils.HEIGHTMAP_WORLD_SURFACE,
                         BiomeFilter.biome()
@@ -133,16 +144,23 @@ public class ModPlacedFeatures {
                         CountPlacement.of(2),
                         RarityFilter.onAverageOnceEvery(32),
                         InSquarePlacement.spread(),
+                        PlacementUtils.RANGE_BOTTOM_TO_MAX_TERRAIN_HEIGHT,
                         HeightRangePlacement.uniform(
                                 VerticalAnchor.bottom(),
                                 VerticalAnchor.absolute(70)
+                        ),
+                        EnvironmentScanPlacement.scanningFor(
+                                Direction.DOWN,
+                                BlockPredicate.solid(),
+                                BlockPredicate.ONLY_IN_AIR_PREDICATE,
+                                12
                         ),
                         BiomeFilter.biome()
                 ));
         register(context, PATCH_WHITE_PIKMIN, whitePatch,
                 List.of(
                         CountPlacement.of(2),
-                        RarityFilter.onAverageOnceEvery(32),
+                        RarityFilter.onAverageOnceEvery(48),
                         InSquarePlacement.spread(),
                         PlacementUtils.HEIGHTMAP_WORLD_SURFACE,
                         BiomeFilter.biome()
@@ -150,7 +168,7 @@ public class ModPlacedFeatures {
         register(context, PATCH_WINGED_PIKMIN, wingedPatch,
                 List.of(
                         CountPlacement.of(2),
-                        RarityFilter.onAverageOnceEvery(32),
+                        RarityFilter.onAverageOnceEvery(48),
                         InSquarePlacement.spread(),
                         PlacementUtils.HEIGHTMAP_WORLD_SURFACE,
                         BiomeFilter.biome()
@@ -158,7 +176,7 @@ public class ModPlacedFeatures {
         register(context, PATCH_ROCK_PIKMIN, rockPatch,
                 List.of(
                         CountPlacement.of(2),
-                        RarityFilter.onAverageOnceEvery(32),
+                        RarityFilter.onAverageOnceEvery(48),
                         InSquarePlacement.spread(),
                         PlacementUtils.HEIGHTMAP_WORLD_SURFACE,
                         BiomeFilter.biome()
@@ -168,9 +186,16 @@ public class ModPlacedFeatures {
                         CountPlacement.of(2),
                         RarityFilter.onAverageOnceEvery(32),
                         InSquarePlacement.spread(),
+                        PlacementUtils.RANGE_BOTTOM_TO_MAX_TERRAIN_HEIGHT,
                         HeightRangePlacement.uniform(
                                 VerticalAnchor.bottom(),
                                 VerticalAnchor.absolute(70)
+                        ),
+                        EnvironmentScanPlacement.scanningFor(
+                                Direction.DOWN,
+                                BlockPredicate.solid(),
+                                BlockPredicate.ONLY_IN_AIR_PREDICATE,
+                                12
                         ),
                         BiomeFilter.biome()
                 ));
@@ -207,7 +232,7 @@ public class ModPlacedFeatures {
         register(context, RED_ONION, redOnion,
                 List.of(
                         CountPlacement.of(1),
-                        RarityFilter.onAverageOnceEvery(48),
+                        RarityFilter.onAverageOnceEvery(68),
                         InSquarePlacement.spread(),
                         PlacementUtils.HEIGHTMAP_WORLD_SURFACE,
                         BlockPredicateFilter.forPredicate(
@@ -224,7 +249,8 @@ public class ModPlacedFeatures {
                 ));
         register(context, YELLOW_ONION, yellowOnion,
                 List.of(
-                        RarityFilter.onAverageOnceEvery(96),
+                        CountPlacement.of(1),
+                        RarityFilter.onAverageOnceEvery(68),
                         InSquarePlacement.spread(),
                         PlacementUtils.HEIGHTMAP_WORLD_SURFACE,
                         BlockPredicateFilter.forPredicate(
@@ -241,7 +267,8 @@ public class ModPlacedFeatures {
                 ));
         register(context, BLUE_ONION, blueOnion,
                 List.of(
-                        RarityFilter.onAverageOnceEvery(96),
+                        CountPlacement.of(1),
+                        RarityFilter.onAverageOnceEvery(68),
                         InSquarePlacement.spread(),
                         PlacementUtils.HEIGHTMAP_OCEAN_FLOOR,
                         BlockPredicateFilter.forPredicate(
@@ -257,7 +284,8 @@ public class ModPlacedFeatures {
                 ));
         register(context, PURPLE_ONION, purpleOnion,
                 List.of(
-                        RarityFilter.onAverageOnceEvery(96),
+                        CountPlacement.of(1),
+                        RarityFilter.onAverageOnceEvery(68),
                         InSquarePlacement.spread(),
                         PlacementUtils.HEIGHTMAP_WORLD_SURFACE,
                         BlockPredicateFilter.forPredicate(
@@ -274,7 +302,8 @@ public class ModPlacedFeatures {
                 ));
         register(context, WHITE_ONION, whiteOnion,
                 List.of(
-                        RarityFilter.onAverageOnceEvery(96),
+                        CountPlacement.of(1),
+                        RarityFilter.onAverageOnceEvery(68),
                         InSquarePlacement.spread(),
                         PlacementUtils.HEIGHTMAP_WORLD_SURFACE,
                         BlockPredicateFilter.forPredicate(
@@ -291,11 +320,19 @@ public class ModPlacedFeatures {
                 ));
         register(context, WHITE_ONION_CAVE, whiteOnionCave,
                 List.of(
-                        RarityFilter.onAverageOnceEvery(96),
+                        CountPlacement.of(1),
+                        RarityFilter.onAverageOnceEvery(48),
                         InSquarePlacement.spread(),
+                        PlacementUtils.RANGE_BOTTOM_TO_MAX_TERRAIN_HEIGHT,
                         HeightRangePlacement.uniform(
                                 VerticalAnchor.bottom(),
                                 VerticalAnchor.absolute(70)
+                        ),
+                        EnvironmentScanPlacement.scanningFor(
+                                Direction.DOWN,
+                                BlockPredicate.solid(),
+                                BlockPredicate.ONLY_IN_AIR_PREDICATE,
+                                12
                         ),
                         BlockPredicateFilter.forPredicate(
                                 BlockPredicate.allOf(
@@ -311,7 +348,8 @@ public class ModPlacedFeatures {
                 ));
         register(context, WINGED_ONION, wingedOnion,
                 List.of(
-                        RarityFilter.onAverageOnceEvery(96),
+                        CountPlacement.of(1),
+                        RarityFilter.onAverageOnceEvery(68),
                         InSquarePlacement.spread(),
                         PlacementUtils.HEIGHTMAP_WORLD_SURFACE,
                         BlockPredicateFilter.forPredicate(
@@ -328,7 +366,8 @@ public class ModPlacedFeatures {
                 ));
         register(context, ROCK_ONION, rockOnion,
                 List.of(
-                        RarityFilter.onAverageOnceEvery(96),
+                        CountPlacement.of(1),
+                        RarityFilter.onAverageOnceEvery(68),
                         InSquarePlacement.spread(),
                         PlacementUtils.HEIGHTMAP_WORLD_SURFACE,
                         HeightRangePlacement.uniform(
@@ -349,11 +388,19 @@ public class ModPlacedFeatures {
                 ));
         register(context, ROCK_ONION_CAVE, rockOnionCave,
                 List.of(
-                        RarityFilter.onAverageOnceEvery(96),
+                        CountPlacement.of(1),
+                        RarityFilter.onAverageOnceEvery(48),
                         InSquarePlacement.spread(),
+                        PlacementUtils.RANGE_BOTTOM_TO_MAX_TERRAIN_HEIGHT,
                         HeightRangePlacement.uniform(
                                 VerticalAnchor.bottom(),
                                 VerticalAnchor.absolute(70)
+                        ),
+                        EnvironmentScanPlacement.scanningFor(
+                                Direction.DOWN,
+                                BlockPredicate.solid(),
+                                BlockPredicate.ONLY_IN_AIR_PREDICATE,
+                                12
                         ),
                         BlockPredicateFilter.forPredicate(
                                 BlockPredicate.allOf(
@@ -366,6 +413,59 @@ public class ModPlacedFeatures {
                                 )
                         ),
                         BiomeFilter.biome()
+                ));
+
+        // egg
+        Holder<ConfiguredFeature<?, ?>> nectarEggCommon = configuredFeatures.getOrThrow(
+                ModConfiguredFeatures.PATCH_NECTAR_EGG_COMMON
+        );
+        Holder<ConfiguredFeature<?, ?>> nectarEggForest = configuredFeatures.getOrThrow(
+                ModConfiguredFeatures.PATCH_NECTAR_EGG_FOREST
+        );
+        Holder<ConfiguredFeature<?, ?>> nectarEggFlower = configuredFeatures.getOrThrow(
+                ModConfiguredFeatures.PATCH_NECTAR_EGG_FLOWER
+        );
+        Holder<ConfiguredFeature<?, ?>> nectarEggCave = configuredFeatures.getOrThrow(
+                ModConfiguredFeatures.PATCH_NECTAR_EGG_CAVE
+        );
+
+        register(context, PATCH_NECTAR_EGG_COMMON, nectarEggCommon,
+                List.of(
+                        RarityFilter.onAverageOnceEvery(32),
+                        InSquarePlacement.spread(),
+                        PlacementUtils.HEIGHTMAP_WORLD_SURFACE,
+                        BiomeFilter.biome()
+                ));
+        register(context, PATCH_NECTAR_EGG_FOREST, nectarEggForest,
+                List.of(
+                        RarityFilter.onAverageOnceEvery(32),
+                        InSquarePlacement.spread(),
+                        PlacementUtils.HEIGHTMAP_WORLD_SURFACE,
+                        BiomeFilter.biome()
+                ));
+        register(context, PATCH_NECTAR_EGG_FLOWER, nectarEggFlower,
+                List.of(
+                        RarityFilter.onAverageOnceEvery(16),
+                        InSquarePlacement.spread(),
+                        PlacementUtils.HEIGHTMAP_WORLD_SURFACE,
+                        BiomeFilter.biome()
+                ));
+        register(context, PATCH_NECTAR_EGG_CAVE, nectarEggCave,
+                List.of(
+                        RarityFilter.onAverageOnceEvery(32),
+                        InSquarePlacement.spread(),
+                        PlacementUtils.RANGE_BOTTOM_TO_MAX_TERRAIN_HEIGHT,
+                        HeightRangePlacement.uniform(
+                                VerticalAnchor.bottom(),
+                                VerticalAnchor.absolute(60)
+                        ),
+                        BiomeFilter.biome(),
+                        EnvironmentScanPlacement.scanningFor(
+                                Direction.DOWN,
+                                BlockPredicate.solid(),
+                                BlockPredicate.ONLY_IN_AIR_PREDICATE,
+                                12
+                        )
                 ));
     }
     private static ResourceKey<PlacedFeature> registerKey(String name) {
