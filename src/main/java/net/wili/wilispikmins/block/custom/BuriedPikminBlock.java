@@ -7,8 +7,11 @@ import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.util.RandomSource;
+import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
+import net.minecraft.world.ItemInteractionResult;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.context.BlockPlaceContext;
 import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.Level;
@@ -108,7 +111,18 @@ public class BuriedPikminBlock extends Block {
 
     // interacción con el bloque
     @Override
-    protected @NotNull InteractionResult useWithoutItem(@NotNull BlockState pState, Level pLevel, @NotNull BlockPos pPos, @NotNull Player pPlayer, @NotNull BlockHitResult pHit) {
+    protected @NotNull InteractionResult useWithoutItem(@NotNull BlockState pState, @NotNull Level pLevel, @NotNull BlockPos pPos, @NotNull Player pPlayer, @NotNull BlockHitResult pHit) {
+        pluckPikmin(pState, pLevel, pPos, pPlayer);
+        return InteractionResult.sidedSuccess(pLevel.isClientSide());
+    }
+
+    @Override
+    protected @NotNull ItemInteractionResult useItemOn(@NotNull ItemStack stack, @NotNull BlockState state, @NotNull Level level, @NotNull BlockPos pos, @NotNull Player player, @NotNull InteractionHand hand, @NotNull BlockHitResult hitResult) {
+        pluckPikmin(state, level, pos, player);
+        return ItemInteractionResult.sidedSuccess(level.isClientSide);
+    }
+
+    private void pluckPikmin(BlockState pState, Level pLevel, BlockPos pPos, Player pPlayer) {
         if(!pLevel.isClientSide()) {
             // quitar bloque
             pLevel.destroyBlock(pPos, false);
@@ -116,7 +130,7 @@ public class BuriedPikminBlock extends Block {
             // activar sonido
             pLevel.playSound(null, pPos, ModSounds.PIKMIN_GREETING.get(), SoundSource.NEUTRAL, 0.5f, 1.0f);
             pLevel.playSound(null, pPos, ModSounds.PIKMIN_PLUCK.get(), SoundSource.BLOCKS, 0.5f, 1.0f);
-            
+
             // spawnear pikmin con el tipo y etapa correctos
             PikminType type = pState.getValue(PIKMIN_TYPE);
             GrowthStage stage = pState.getValue(GROWTH_STAGE);
@@ -150,10 +164,7 @@ public class BuriedPikminBlock extends Block {
                 OnionData newData = playerData.addOutside(type, 1);
                 OnionData.updateAndSync(serverPlayer, newData);
             }
-
-            return InteractionResult.SUCCESS;
         }
-        return super.useWithoutItem(pState, pLevel, pPos, pPlayer, pHit);
     }
 
     @Override
