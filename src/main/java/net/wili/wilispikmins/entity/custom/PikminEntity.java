@@ -116,12 +116,12 @@ public class PikminEntity extends TamableAnimal implements GeoEntity {
     }
 
     protected PlayState attackPredicate(AnimationState<PikminEntity> event) {
-       if (this.swinging) {
+       /*if (this.swinging) {
            return event.setAndContinue(RawAnimation.begin()
                    .then("animation.pikmin.attack", Animation.LoopType.PLAY_ONCE));
        }
-       event.resetCurrentAnimation();
-       return PlayState.STOP;
+       event.resetCurrentAnimation();*/
+       return PlayState.CONTINUE;
     }
 
     protected PlayState popPredicate(AnimationState<PikminEntity> event) {
@@ -588,7 +588,8 @@ public class PikminEntity extends TamableAnimal implements GeoEntity {
     @Override
     public void registerControllers(AnimatableManager.ControllerRegistrar controllerRegistrar) {
         controllerRegistrar.add(new AnimationController<>(this, "main",  this::predicate));
-        controllerRegistrar.add(new AnimationController<>(this, "attack",  this::attackPredicate));
+        controllerRegistrar.add(new AnimationController<>(this, "attack",  0, state -> PlayState.STOP)
+                .triggerableAnim("attackTrigger", RawAnimation.begin().then("animation.pikmin.attack", Animation.LoopType.PLAY_ONCE)));
         controllerRegistrar.add(new AnimationController<>(this, "pop",  this::popPredicate));
         controllerRegistrar.add(new AnimationController<>(this, "fly",  this::flyPredicate));
     }
@@ -602,7 +603,9 @@ public class PikminEntity extends TamableAnimal implements GeoEntity {
     public void swing(@NotNull InteractionHand hand) {
         super.swing(hand);
 
-        this.triggerAnim("attack", "attack");
+        if (!this.level().isClientSide()) {
+            this.triggerAnim("attack", "attackTrigger");
+        }
     }
 
     @Override
@@ -699,5 +702,11 @@ public class PikminEntity extends TamableAnimal implements GeoEntity {
             }
         }
         return super.isAlliedTo(entity);
+    }
+
+    @Override
+    public void swing(InteractionHand hand, boolean updateSelf) {
+        super.swing(hand, updateSelf);
+        this.triggerAnim("attack", "attack");
     }
 }
