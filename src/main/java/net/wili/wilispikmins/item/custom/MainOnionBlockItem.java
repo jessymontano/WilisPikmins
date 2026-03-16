@@ -34,16 +34,14 @@ public class MainOnionBlockItem extends BlockItem {
         BlockEntity be = context.getLevel().getBlockEntity(context.getClickedPos());
         if (!(be instanceof OnionBlockEntity onionBE)) return placed;
 
-        OnionData data = context.getItemInHand().get(OnionComponents.ONION_DATA.get());
-        if (data == null) {
-            data = new OnionData();
-        }
-
         onionBE.setMainOnion(true);
         onionBE.setOwner(context.getPlayer().getUUID());
 
-        if (!data.equals(new OnionData())) {
-            onionBE.setOnionData(data);
+        if (context.getPlayer() instanceof ServerPlayer serverPlayer) {
+            OnionData currentPlayerData = serverPlayer.getData(OnionComponents.PLAYER_ONION_DATA);
+
+            OnionData updatedData = currentPlayerData.withHasMainOnion(true);
+            serverPlayer.setData(OnionComponents.PLAYER_ONION_DATA, updatedData);
         }
 
         return placed;

@@ -26,6 +26,8 @@ import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.shapes.CollisionContext;
 import net.minecraft.world.phys.shapes.VoxelShape;
 import net.wili.wilispikmins.advancement.ModTriggers;
+import net.wili.wilispikmins.data.OnionComponents;
+import net.wili.wilispikmins.data.OnionData;
 import net.wili.wilispikmins.entity.ModEntities;
 import net.wili.wilispikmins.entity.custom.PikminEntity;
 import net.wili.wilispikmins.entity.custom.enums.GrowthStage;
@@ -143,6 +145,10 @@ public class BuriedPikminBlock extends Block {
 
             if (pPlayer instanceof ServerPlayer serverPlayer) {
                 ModTriggers.PIKMIN_OBTAINED.get().trigger(serverPlayer, type);
+
+                OnionData playerData = serverPlayer.getData(OnionComponents.PLAYER_ONION_DATA);
+                OnionData newData = playerData.addOutside(type, 1);
+                OnionData.updateAndSync(serverPlayer, newData);
             }
 
             return InteractionResult.SUCCESS;

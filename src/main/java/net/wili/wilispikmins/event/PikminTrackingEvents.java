@@ -21,24 +21,6 @@ import java.util.UUID;
 
 @EventBusSubscriber(modid = WilisPikmins.MOD_ID)
 public class PikminTrackingEvents {
-    @SubscribeEvent
-    public static void onPikminSpawn(EntityJoinLevelEvent event) {
-        if (!event.getLevel().isClientSide && event.getEntity() instanceof PikminEntity pikmin) {
-            if (pikmin.getOwnerUUID() != null) {
-                Entity owner = event.getLevel().getPlayerByUUID(pikmin.getOwnerUUID());
-
-                if (owner instanceof ServerPlayer player) {
-                    OnionData playerData = player.getData(OnionComponents.PLAYER_ONION_DATA);
-                    PikminType type = pikmin.getPikminType();
-
-                   OnionData newData = playerData.addOutside(type, 1);
-                   player.setData(OnionComponents.PLAYER_ONION_DATA, newData);
-
-                   checkTotalPikminAchievement(player, newData);
-                }
-            }
-        }
-    }
 
     @SubscribeEvent
     public static void onPikminDeath(LivingDeathEvent event) {
@@ -55,7 +37,9 @@ public class PikminTrackingEvents {
                     int currentOutside = playerData.getOutside(type);
                     if (currentOutside > 0) {
                         OnionData newData = playerData.addOutside(type, -1);
-                        player.setData(OnionComponents.PLAYER_ONION_DATA, newData);
+                        if (player instanceof ServerPlayer serverPlayer) {
+                            OnionData.updateAndSync(serverPlayer, newData);
+                        }
 
                         checkTotalPikminAchievement(player, newData);
                     }
@@ -74,33 +58,6 @@ public class PikminTrackingEvents {
 
         if (totalPikmin >= 100) {
          ModTriggers.TOTAL_PIKMIN.get().trigger(player, 100);
-        }
-    }
-
-    @SubscribeEvent
-    public static void onPlayerLogin(PlayerEvent.PlayerLoggedInEvent event) {
-        if (!event.getEntity().level().isClientSide() && event.getEntity() instanceof ServerPlayer serverPlayer) {
-
-            OnionData newData = serverPlayer.getData(OnionComponents.PLAYER_ONION_DATA);
-            for (PikminType type : PikminType.values()) {
-                newData = newData.withOutside(type, 0);
-            }
-
-            if (serverPlayer.level() instanceof ServerLevel level) {
-                UUID playerId = serverPlayer.getUUID();
-
-                for (Entity entity : level.getAllEntities()) {
-                    if (entity instanceof PikminEntity pikmin) {
-                        UUID pikminOwner = pikmin.getOwnerUUID();
-                        if (playerId.equals(pikminOwner)) {
-                            PikminType type = pikmin.getPikminType();
-                            newData = newData.addOutside(type, 1);
-                        }
-                    }
-                }
-
-                serverPlayer.setData(OnionComponents.PLAYER_ONION_DATA, newData);
-            }
         }
     }
 

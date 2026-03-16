@@ -126,7 +126,9 @@ public class OnionBlock extends BaseEntityBlock {
                 .withHasMainOnion(true)
                 .withUnlockedType(type);
 
-        player.setData(OnionComponents.PLAYER_ONION_DATA, newData);
+        if (player instanceof ServerPlayer serverPlayer) {
+            OnionData.updateAndSync(serverPlayer, newData);
+        }
 
         OnionData blockData = onionBE.getOnionData();
         if (!blockData.equals(new OnionData())) {
@@ -137,7 +139,9 @@ public class OnionBlock extends BaseEntityBlock {
                     newData.capacity(),
                     newData.outside()
             );
-            player.setData(OnionComponents.PLAYER_ONION_DATA, mergedData);
+            if (player instanceof ServerPlayer serverPlayer) {
+                OnionData.updateAndSync(serverPlayer, mergedData);
+            }
         }
 
         ModTriggers.ONION_INTERACT.get().trigger(player);
@@ -153,7 +157,9 @@ public class OnionBlock extends BaseEntityBlock {
     private InteractionResult harvestAsUpgrade(ServerPlayer player, Level level, BlockPos pos, PikminType type, OnionData playerData) {
         if (!playerData.hasUnlocked(type)) {
             OnionData unlockedData = playerData.withUnlockedType(type);
-            player.setData(OnionComponents.PLAYER_ONION_DATA, unlockedData);
+            if (player instanceof ServerPlayer serverPlayer) {
+                OnionData.updateAndSync(serverPlayer, unlockedData);
+            }
         }
 
         ItemStack upgradeItem = createUpgradeItem(type);
@@ -182,7 +188,7 @@ public class OnionBlock extends BaseEntityBlock {
             ItemStack mainItem = createMainOnionItem(onionBE.getOnionId(), pos, serverPlayer);
 
             OnionData data = serverPlayer.getData(OnionComponents.PLAYER_ONION_DATA);
-            serverPlayer.setData(OnionComponents.PLAYER_ONION_DATA, data);
+            OnionData.updateAndSync(serverPlayer, data);
 
             popResource(level, pos, mainItem);
             return;

@@ -40,6 +40,11 @@ public class ModPackets {
                 RecallPikminPacket.STREAM_CODEC,
                 RecallPikminPacket::handle
         );
+        registrar.playToClient(
+                SyncOnionDataPacket.TYPE,
+                SyncOnionDataPacket.STREAM_CODEC,
+                ClientPacketHandler::handleOnionDataSync
+        );
 
         WilisPikmins.LOGGER.info("Mod packets registered");
     }

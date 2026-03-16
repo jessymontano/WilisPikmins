@@ -3,6 +3,7 @@ package net.wili.wilispikmins.network;
 import io.netty.buffer.ByteBuf;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
+import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.neoforged.neoforge.network.handling.IPayloadContext;
@@ -44,7 +45,10 @@ public record OnionUpgradePacket() implements CustomPacketPayload {
 
                 OnionData playerData = player.getData(OnionComponents.PLAYER_ONION_DATA);
                 OnionData newData = playerData.addCapacity(type, 20 * count);
-                player.setData(OnionComponents.PLAYER_ONION_DATA, newData);
+
+                if (player instanceof ServerPlayer serverPlayer) {
+                    OnionData.updateAndSync(serverPlayer, newData);
+                }
 
                 stack.shrink(count);
                 break;

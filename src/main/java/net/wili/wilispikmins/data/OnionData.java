@@ -6,7 +6,10 @@ import io.netty.buffer.ByteBuf;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.network.codec.StreamCodec;
+import net.minecraft.server.level.ServerPlayer;
+import net.neoforged.neoforge.network.PacketDistributor;
 import net.wili.wilispikmins.entity.custom.enums.PikminType;
+import net.wili.wilispikmins.network.SyncOnionDataPacket;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.*;
@@ -181,5 +184,10 @@ public record OnionData(
                 }
             }
         };
+    }
+
+    public static void updateAndSync(ServerPlayer player, OnionData newData) {
+        player.setData(OnionComponents.PLAYER_ONION_DATA, newData);
+        PacketDistributor.sendToPlayer(player, new SyncOnionDataPacket(newData));
     }
 }

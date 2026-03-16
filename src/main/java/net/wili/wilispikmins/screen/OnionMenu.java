@@ -2,6 +2,7 @@ package net.wili.wilispikmins.screen;
 
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.Container;
@@ -288,7 +289,9 @@ public class OnionMenu extends AbstractContainerMenu {
             }
         }
 
-        player.setData(OnionComponents.PLAYER_ONION_DATA, updatedPlayerData);
+        if (player instanceof ServerPlayer serverPlayer) {
+            OnionData.updateAndSync(serverPlayer, updatedPlayerData);
+        }
 
         blockEntity.setOnionData(updatedPlayerData);
 
@@ -346,7 +349,10 @@ public class OnionMenu extends AbstractContainerMenu {
                 OnionData newPlayerData = playerData
                         .addOutside(type, -canStore)
                         .addStored(type, canStore);
-                player.setData(OnionComponents.PLAYER_ONION_DATA, newPlayerData);
+                if (player instanceof ServerPlayer serverPlayer) {
+                    OnionData.updateAndSync(serverPlayer, newPlayerData);
+                }
+
                 blockEntity.setOnionData(newPlayerData);
 
                 int recalled = 0;
@@ -452,7 +458,10 @@ public class OnionMenu extends AbstractContainerMenu {
 
             OnionData playerData = getPlayerData();
             OnionData newPlayerData = playerData.addCapacity(upgradeType, 20 * upgradeCount);
-            player.setData(OnionComponents.PLAYER_ONION_DATA, newPlayerData);
+
+            if (player instanceof ServerPlayer serverPlayer) {
+                OnionData.updateAndSync(serverPlayer, newPlayerData);
+            }
 
             level.playSound(null, player.blockPosition(),
                     SoundEvents.PLAYER_LEVELUP, SoundSource.PLAYERS,
