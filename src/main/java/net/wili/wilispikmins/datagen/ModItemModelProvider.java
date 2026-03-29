@@ -5,7 +5,6 @@ import net.minecraft.data.PackOutput;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.level.block.Block;
-import net.neoforged.neoforge.client.model.generators.ItemModelBuilder;
 import net.neoforged.neoforge.client.model.generators.ItemModelProvider;
 import net.neoforged.neoforge.common.data.ExistingFileHelper;
 import net.wili.wilispikmins.WilisPikmins;
@@ -64,18 +63,8 @@ public class ModItemModelProvider extends ItemModelProvider {
         );
 
         basicItem(ModItems.NECTAR.get());
-    }
 
-    private ItemModelBuilder simpleItem(Supplier<Item> item) {
-        return withExistingParent(getItemPath(item),
-                ResourceLocation.parse("item/generated")).texture("layer0",
-                ResourceLocation.fromNamespaceAndPath(WilisPikmins.MOD_ID, "item/" + getItemPath(item)));
-    }
-
-    private ItemModelBuilder simpleBlockItem(Supplier<Block> item) {
-        return withExistingParent(getBlockPath(item),
-                ResourceLocation.parse("item/generated")).texture("layer0",
-                ResourceLocation.fromNamespaceAndPath(WilisPikmins.MOD_ID, "item/" + getBlockPath(item)));
+        basicItem(ModItems.WHISTLE.get());
     }
 
     private String getItemPath(Supplier<Item> itemSupplier) {

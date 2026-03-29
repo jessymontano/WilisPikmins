@@ -24,9 +24,6 @@ public class ModItems {
     public static final Supplier<Item> WINGED_PIKMIN_SPAWN_EGG = ITEMS.register("winged_pikmin_spawn_egg", () -> new PikminSpawnEggItem(PikminType.WINGED));
     public static final Supplier<Item> ROCK_PIKMIN_SPAWN_EGG = ITEMS.register("rock_pikmin_spawn_egg", () -> new PikminSpawnEggItem(PikminType.ROCK));
 
-    public static final Supplier<Item> ONION = ITEMS.register("onion",
-            () -> new OnionBlockItem(ModBlocks.ONION_BLOCK.get(),
-                    new Item.Properties()));
     public static final Supplier<Item> MAIN_ONION = ITEMS.register("main_onion",
             () -> new MainOnionBlockItem(ModBlocks.ONION_BLOCK.get(),
                     new Item.Properties()));
@@ -55,6 +52,10 @@ public class ModItems {
     public static final Supplier<Item> NECTAR = ITEMS.register("nectar",
             () -> new NectarItem(new Item.Properties()
                     .stacksTo(64)));
+
+    public static final Supplier<Item> WHISTLE = ITEMS.register("whistle",
+            () -> new WhistleItem(new Item.Properties()
+                    .stacksTo(1)));
 
     public static void register(IEventBus eventBus) {
         ITEMS.register(eventBus);
