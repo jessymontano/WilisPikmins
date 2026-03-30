@@ -64,5 +64,11 @@
     "sounds": [
       "wilispikmins:whistle"
     ]
+  },
+  "charging_horn": {
+    "subtitle": "sounds.wilispikmins.charging_horn",
+    "sounds": [
+      "wilispikmins:charging_horn"
+    ]
   }
 }

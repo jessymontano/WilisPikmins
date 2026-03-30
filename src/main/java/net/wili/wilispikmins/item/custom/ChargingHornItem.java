@@ -17,6 +17,7 @@ import net.minecraft.world.phys.EntityHitResult;
 import net.minecraft.world.phys.Vec3;
 import net.wili.wilispikmins.entity.custom.PikminEntity;
 import net.wili.wilispikmins.entity.custom.enums.PikminState;
+import net.wili.wilispikmins.sound.ModSounds;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.List;
@@ -36,7 +37,7 @@ public class ChargingHornItem extends Item {
             Vec3 viewVector = player.getViewVector(1.0F);
             Vec3 endPos = eyePos.add(viewVector.x * maxReach, viewVector.y * maxReach, viewVector.z * maxReach);
 
-            AABB searchBox = player.getBoundingBox().expandTowards(viewVector.x * maxReach, viewVector.y * maxReach, viewVector.z * maxReach);
+            AABB searchBox = player.getBoundingBox().expandTowards(viewVector.scale(maxReach)).inflate(1.0D, 1.0D, 1.0D);
 
             EntityHitResult hitResult = ProjectileUtil.getEntityHitResult(level, player, eyePos, endPos, searchBox, entity -> entity instanceof LivingEntity && !entity.isSpectator() && entity.isPickable() && !(entity instanceof PikminEntity));
 
@@ -61,7 +62,7 @@ public class ChargingHornItem extends Item {
 
                     serverLevel.sendParticles(ParticleTypes.ANGRY_VILLAGER,
                             target.getX(), target.getY() + target.getBbHeight() + 0.5, target.getZ(), 5, 0.3D, 0.2D, 0.3D, 0.0D);
-                    level.playSound(null, player.blockPosition(), SoundEvents.GOAT_HORN_SOUND_VARIANTS.getFirst().value(), SoundSource.PLAYERS, 1.0F, 1.0F);
+                    level.playSound(null, player.blockPosition(), ModSounds.CHARGING_HORN.get(), SoundSource.PLAYERS, 1.0F, 1.0F);
                     player.getCooldowns().addCooldown(this, 40);
                 }
             }
