@@ -198,38 +198,6 @@ public class OnionBlock extends BaseEntityBlock {
         popResource(level, pos, upgrade);
     }
 
-    //    @Override
-//    public @NotNull BlockState playerWillDestroy(Level pLevel, @NotNull BlockPos pPos, @NotNull BlockState pState, @NotNull Player pPlayer) {
-//        if (!pLevel.isClientSide && pPlayer instanceof ServerPlayer serverPlayer) {
-//            PikminType type = pState.getValue(TYPE);
-//            BlockEntity be = pLevel.getBlockEntity(pPos);
-//
-//            if (be instanceof  OnionBlockEntity onionBE) {
-//
-//                // only owner can break main onion
-//               if (onionBE.getOwner() != null && !serverPlayer.getUUID().equals(onionBE.getOwner())) {
-//                   pLevel.setBlock(pPos, pState, Block.UPDATE_ALL);
-//                   return pState;
-//               }
-//
-//                if (onionBE.isMainOnion() && serverPlayer.getUUID().equals(onionBE.getOwner())) {
-//                     ItemStack mainOnionItem = createMainOnionItem(onionBE.getOnionId(), pPos, serverPlayer);
-//
-//                     OnionData playerData = serverPlayer.getData(OnionComponents.PLAYER_ONION_DATA);
-//                     OnionData newData = playerData.updateMainOnionPosition(null);
-//                     serverPlayer.setData(OnionComponents.PLAYER_ONION_DATA, newData);
-//
-//                     popResource(pLevel, pPos, mainOnionItem);
-//                } else {
-//                    ItemStack upgradeItem = createUpgradeItem(type);
-//                    popResource(pLevel, pPos, upgradeItem);
-//                }
-//            }
-//        }
-//
-//        return super.playerWillDestroy(pLevel, pPos, pState, pPlayer);
-//    }
-
     private ItemStack createMainOnionItem(UUID onionId, BlockPos pos, ServerPlayer player) {
         ItemStack stack = new ItemStack(ModItems.MAIN_ONION.get());
 
