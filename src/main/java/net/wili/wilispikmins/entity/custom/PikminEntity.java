@@ -1,7 +1,7 @@
 package net.wili.wilispikmins.entity.custom;
 
-import net.minecraft.core.BlockPos;
 import net.minecraft.core.particles.ParticleTypes;
+import net.minecraft.core.particles.SimpleParticleType;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.network.syncher.EntityDataSerializers;
@@ -18,11 +18,9 @@ import net.minecraft.world.entity.ai.attributes.AttributeSupplier;
 import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.ai.goal.*;
 import net.minecraft.world.entity.ai.goal.target.HurtByTargetGoal;
-import net.minecraft.world.entity.animal.Animal;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
-import net.minecraft.world.level.ServerLevelAccessor;
 import net.minecraft.world.phys.Vec3;
 import net.wili.wilispikmins.entity.ModEntities;
 import net.wili.wilispikmins.entity.custom.ai.PikminDefendOwnerGoal;
@@ -34,6 +32,7 @@ import net.wili.wilispikmins.entity.custom.enums.PikminType;
 import net.wili.wilispikmins.entity.custom.ai.PikminFollowOwnerGoal;
 import net.wili.wilispikmins.item.ModItems;
 import net.wili.wilispikmins.item.custom.NectarItem;
+import net.wili.wilispikmins.particle.ModParticles;
 import net.wili.wilispikmins.sound.ModSounds;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -78,6 +77,10 @@ public class PikminEntity extends TamableAnimal implements GeoEntity {
     private int damageAccumulator = 0;
     private static final int DAMAGE_THRESHOLD = 4;
 
+    // muerte
+    private static final byte DEATH_SOUL_EVENT_ID = 60;
+    private boolean isSoulBroadcasted = false;
+
     // constructorsitos
     public PikminEntity(EntityType<? extends TamableAnimal> pEntityType, Level pLevel) {
         super(pEntityType, pLevel);
@@ -113,15 +116,6 @@ public class PikminEntity extends TamableAnimal implements GeoEntity {
             return event.setAndContinue(RawAnimation.begin()
                     .thenLoop("animation.pikmin.idle"));
         }
-    }
-
-    protected PlayState attackPredicate(AnimationState<PikminEntity> event) {
-       /*if (this.swinging) {
-           return event.setAndContinue(RawAnimation.begin()
-                   .then("animation.pikmin.attack", Animation.LoopType.PLAY_ONCE));
-       }
-       event.resetCurrentAnimation();*/
-       return PlayState.CONTINUE;
     }
 
     protected PlayState popPredicate(AnimationState<PikminEntity> event) {
@@ -553,10 +547,6 @@ public class PikminEntity extends TamableAnimal implements GeoEntity {
         }
     }
 
-    public static boolean checkPikminSpawnRules(EntityType<PikminEntity> type, ServerLevelAccessor level, MobSpawnType spawnType, BlockPos pos, net.minecraft.util.RandomSource random) {
-        return Animal.checkAnimalSpawnRules(type, level, spawnType, pos, random) && pos.getY() > 60;
-    }
-
     @Override
     protected @Nullable SoundEvent getDeathSound() {
         return ModSounds.PIKMIN_DEATH.get();
@@ -705,7 +695,7 @@ public class PikminEntity extends TamableAnimal implements GeoEntity {
     }
 
     @Override
-    public void swing(InteractionHand hand, boolean updateSelf) {
+    public void swing(@NotNull InteractionHand hand, boolean updateSelf) {
         super.swing(hand, updateSelf);
         this.triggerAnim("attack", "attack");
     }
@@ -713,5 +703,51 @@ public class PikminEntity extends TamableAnimal implements GeoEntity {
     @Override
     public boolean fireImmune() {
         return this.isFireResistant() || super.fireImmune();
+    }
+
+    @Override
+    public void die(@NotNull DamageSource cause) {
+        super.die(cause);
+
+        if (!this.level().isClientSide && !this.isSoulBroadcasted) {
+            this.isSoulBroadcasted = true;
+            this.level().broadcastEntityEvent(this, DEATH_SOUL_EVENT_ID);
+        }
+    }
+
+    @Override
+    public void handleEntityEvent(byte id) {
+        if (id == DEATH_SOUL_EVENT_ID) {
+            if (this.level().isClientSide) {
+                spawnSoulParticle();
+            }
+        } else {
+            super.handleEntityEvent(id);
+        }
+    }
+
+    private void spawnSoulParticle() {
+        Level level = this.level();
+        if (level.isClientSide) {
+            PikminType type = this.getPikminType();
+
+            SimpleParticleType particleType = switch (type) {
+                case ROCK -> ModParticles.ROCK_SOUL_PARTICLES.get();
+                case WINGED -> ModParticles.WINGED_SOUL_PARTICLES.get();
+                default -> ModParticles.SOUL_PARTICLES.get();
+            };
+
+            int colorInt = type.getColor();
+
+            float red = ((colorInt >> 16) & 0xFF) / 255.0F;
+            float green = ((colorInt >> 8) & 0xFF) /255.0F;
+            float blue = (colorInt & 0xFF) / 255.0F;
+
+            double x = this.getX();
+            double y = this.getY() + (this.getBbHeight() * 0.5D);
+            double z = this.getZ();
+
+            level.addParticle(particleType, x, y, z, red, green, blue);
+        }
     }
 }

@@ -18,6 +18,7 @@ import net.wili.wilispikmins.data.OnionComponents;
 import net.wili.wilispikmins.entity.ModEntities;
 import net.wili.wilispikmins.item.ModItems;
 import net.wili.wilispikmins.network.ModPackets;
+import net.wili.wilispikmins.particle.ModParticles;
 import net.wili.wilispikmins.screen.ModMenuTypes;
 import net.wili.wilispikmins.sound.ModSounds;
 import org.slf4j.Logger;
@@ -66,6 +67,9 @@ public class WilisPikmins
         // register components and attachments
         OnionComponents.DATA_COMPONENT_TYPES.register(modEventBus);
         OnionComponents.ATTACHMENT_TYPES.register(modEventBus);
+
+        // register particles
+        ModParticles.register(modEventBus);
 
         modContainer.registerConfig(ModConfig.Type.COMMON, Config.SPEC);
     }

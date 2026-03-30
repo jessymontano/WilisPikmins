@@ -1,6 +1,7 @@
 package net.wili.wilispikmins.entity.custom.enums;
 
 import com.mojang.serialization.Codec;
+import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.chat.Component;
 import net.minecraft.util.StringRepresentable;
 import org.jetbrains.annotations.NotNull;
@@ -39,4 +40,12 @@ public enum PikminType implements StringRepresentable {
             PikminType::valueOf,
             PikminType::name
     );
+
+    public void writeToBuf(FriendlyByteBuf buf) {
+        buf.writeEnum(this);
+    }
+
+    public static PikminType readFromBuf(FriendlyByteBuf buf) {
+        return buf.readEnum(PikminType.class);
+    }
 }

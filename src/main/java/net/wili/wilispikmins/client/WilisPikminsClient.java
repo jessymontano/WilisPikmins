@@ -6,11 +6,14 @@ import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.fml.event.lifecycle.FMLClientSetupEvent;
 import net.neoforged.neoforge.client.event.EntityRenderersEvent;
 import net.neoforged.neoforge.client.event.RegisterMenuScreensEvent;
+import net.neoforged.neoforge.client.event.RegisterParticleProvidersEvent;
 import net.wili.wilispikmins.WilisPikmins;
 import net.wili.wilispikmins.entity.ModEntities;
 import net.wili.wilispikmins.entity.client.ModModelLayers;
 import net.wili.wilispikmins.entity.client.PikminModel;
 import net.wili.wilispikmins.entity.client.PikminRenderer;
+import net.wili.wilispikmins.particle.ModParticles;
+import net.wili.wilispikmins.particle.SoulParticles;
 import net.wili.wilispikmins.screen.ModMenuTypes;
 import net.wili.wilispikmins.screen.OnionScreen;
 
@@ -22,6 +25,13 @@ public class WilisPikminsClient {
         event.enqueueWork(() -> {
 
         });
+    }
+
+    @SubscribeEvent
+    public static void registerParticleFactories(RegisterParticleProvidersEvent event) {
+        event.registerSpriteSet(ModParticles.SOUL_PARTICLES.get(), SoulParticles.Provider::new);
+        event.registerSpriteSet(ModParticles.ROCK_SOUL_PARTICLES.get(), SoulParticles.Provider::new);
+        event.registerSpriteSet(ModParticles.WINGED_SOUL_PARTICLES.get(), SoulParticles.Provider::new);
     }
 
     @SubscribeEvent
