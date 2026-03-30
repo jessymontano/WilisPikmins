@@ -4,6 +4,8 @@
   "item.wilispikmins.yellow_pikmin_spawn_egg": "Yellow Pikmin Spawn Egg",
   "item.wilispikmins.onion_upgrade": "Onion Upgrade",
   "item.wilispikmins.nectar": "Nectar",
+  "item.wilispikmins.whistle": "Whistle",
+  "item.wilispikmins.charging_horn": "Charging horn",
 
   "entity.wilispikmins.pikmin": "Pikmin",
   "entity.wilispikmins.red_pikmin": "Red Pikmin",
@@ -56,6 +58,8 @@
   "sounds.wilispikmins.pikmin_pluck": "Pikmin plucked",
   "sounds.wilispikmins.pikmin_attack": "Pikmin attacks",
   "sounds.wilispikmins.pikmin_drink_nectar": "Drinking nectar",
+  "sounds.wilispikmins.whistle": "Whistle",
+  "sounds.wilispikmins.charging_horn": "Charging horn plays",
 
   "advancement.wilispikmins.root.title": "Wili's Pikmins",
   "advancement.wilispikmins.root.description": "Begin your pikmin adventure :)",
