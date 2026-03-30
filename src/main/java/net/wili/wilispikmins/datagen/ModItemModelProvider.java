@@ -65,6 +65,7 @@ public class ModItemModelProvider extends ItemModelProvider {
         basicItem(ModItems.NECTAR.get());
 
         basicItem(ModItems.WHISTLE.get());
+        basicItem(ModItems.CHARGING_HORN.get());
     }
 
     private String getItemPath(Supplier<Item> itemSupplier) {

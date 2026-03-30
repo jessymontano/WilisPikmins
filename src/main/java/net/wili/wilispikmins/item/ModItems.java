@@ -57,6 +57,10 @@ public class ModItems {
             () -> new WhistleItem(new Item.Properties()
                     .stacksTo(1)));
 
+    public static final Supplier<Item> CHARGING_HORN = ITEMS.register("charging_horn",
+            () -> new ChargingHornItem(new Item.Properties()
+                    .stacksTo(1)));
+
     public static void register(IEventBus eventBus) {
         ITEMS.register(eventBus);
     }
