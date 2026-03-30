@@ -709,4 +709,9 @@ public class PikminEntity extends TamableAnimal implements GeoEntity {
         super.swing(hand, updateSelf);
         this.triggerAnim("attack", "attack");
     }
+
+    @Override
+    public boolean fireImmune() {
+        return this.isFireResistant() || super.fireImmune();
+    }
 }
