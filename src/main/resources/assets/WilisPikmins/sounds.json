@@ -58,5 +58,11 @@
     "sounds": [
       "wilispikmins:pikmin_drink_nectar"
     ]
+  },
+  "whistle": {
+    "subtitle": "sounds.wilispikmins.whistle",
+    "sounds": [
+      "wilispikmins:whistle"
+    ]
   }
 }
