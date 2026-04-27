@@ -9,6 +9,7 @@ import net.neoforged.neoforge.event.entity.EntityAttributeCreationEvent;
 import net.neoforged.neoforge.registries.DeferredHolder;
 import net.neoforged.neoforge.registries.DeferredRegister;
 import net.wili.wilispikmins.WilisPikmins;
+import net.wili.wilispikmins.entity.custom.BulborbEntity;
 import net.wili.wilispikmins.entity.custom.PikminEntity;
 
 public class ModEntities {
@@ -23,6 +24,13 @@ public class ModEntities {
                             .clientTrackingRange(8)
                             .build("pikmin"));
 
+    public static final DeferredHolder<EntityType<?>, EntityType<BulborbEntity>> BULBORB =
+            ENTITY_TYPES.register("bulborb",
+                    () -> EntityType.Builder.of(BulborbEntity::new, MobCategory.MONSTER)
+                            .sized(1f, 1f)
+                            .clientTrackingRange(8)
+                            .build("bulborb"));
+
     public static void register(IEventBus eventBus) {
         ENTITY_TYPES.register(eventBus);
         eventBus.addListener(ModEntities::registerAttributes);
@@ -30,5 +38,6 @@ public class ModEntities {
 
     private static void registerAttributes(EntityAttributeCreationEvent event) {
         event.put(PIKMIN.get(), PikminEntity.createAttributes().build());
+        event.put(BULBORB.get(), BulborbEntity.createAttributes().build());
     }
 }

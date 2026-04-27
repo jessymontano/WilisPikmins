@@ -16,6 +16,7 @@ import net.wili.wilispikmins.block.ModBlocks;
 import net.wili.wilispikmins.block.entity.ModBlockEntities;
 import net.wili.wilispikmins.data.OnionComponents;
 import net.wili.wilispikmins.entity.ModEntities;
+import net.wili.wilispikmins.item.ModCreativeModeTabs;
 import net.wili.wilispikmins.item.ModItems;
 import net.wili.wilispikmins.network.ModPackets;
 import net.wili.wilispikmins.particle.ModParticles;
@@ -70,6 +71,9 @@ public class WilisPikmins
 
         // register particles
         ModParticles.register(modEventBus);
+
+        // register creative mode tabs
+        ModCreativeModeTabs.register(modEventBus);
 
         modContainer.registerConfig(ModConfig.Type.COMMON, Config.SPEC);
     }

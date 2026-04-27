@@ -66,6 +66,8 @@ public class ModItemModelProvider extends ItemModelProvider {
 
         basicItem(ModItems.WHISTLE.get());
         basicItem(ModItems.CHARGING_HORN.get());
+
+        withExistingParent(getItemPath(ModItems.BULBORB_SPAWN_EGG), mcLoc("item/template_spawn_egg"));
     }
 
     private String getItemPath(Supplier<Item> itemSupplier) {

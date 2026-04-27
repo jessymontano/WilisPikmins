@@ -2,10 +2,13 @@ package net.wili.wilispikmins.item;
 
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.world.item.Item;
+import net.minecraft.world.item.SpawnEggItem;
 import net.neoforged.bus.api.IEventBus;
+import net.neoforged.neoforge.common.DeferredSpawnEggItem;
 import net.wili.wilispikmins.WilisPikmins;
 import net.wili.wilispikmins.block.ModBlocks;
 import net.neoforged.neoforge.registries.DeferredRegister;
+import net.wili.wilispikmins.entity.ModEntities;
 import net.wili.wilispikmins.entity.custom.enums.PikminType;
 import net.wili.wilispikmins.item.custom.*;
 
@@ -60,6 +63,8 @@ public class ModItems {
     public static final Supplier<Item> CHARGING_HORN = ITEMS.register("charging_horn",
             () -> new ChargingHornItem(new Item.Properties()
                     .stacksTo(1)));
+
+    public static final Supplier<Item> BULBORB_SPAWN_EGG = ITEMS.register("bulborb_spawn_egg", () -> new DeferredSpawnEggItem(ModEntities.BULBORB, 0xf74c2a, 0xfcc15a, new Item.Properties()));
 
     public static void register(IEventBus eventBus) {
         ITEMS.register(eventBus);
