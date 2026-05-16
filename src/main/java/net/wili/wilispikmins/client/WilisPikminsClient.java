@@ -10,8 +10,7 @@ import net.neoforged.neoforge.client.event.RegisterParticleProvidersEvent;
 import net.wili.wilispikmins.WilisPikmins;
 import net.wili.wilispikmins.entity.ModEntities;
 import net.wili.wilispikmins.entity.client.BulborbRenderer;
-import net.wili.wilispikmins.entity.client.ModModelLayers;
-import net.wili.wilispikmins.entity.client.PikminModel;
+import net.wili.wilispikmins.entity.client.DwarfBulborbRenderer;
 import net.wili.wilispikmins.entity.client.PikminRenderer;
 import net.wili.wilispikmins.particle.ModParticles;
 import net.wili.wilispikmins.particle.SoulParticles;
@@ -44,6 +43,7 @@ public class WilisPikminsClient {
     public static void registerRenderers(EntityRenderersEvent.RegisterRenderers event) {
         event.registerEntityRenderer(ModEntities.PIKMIN.get(), PikminRenderer::new);
         event.registerEntityRenderer(ModEntities.BULBORB.get(), BulborbRenderer::new);
+        event.registerEntityRenderer(ModEntities.DWARF_BULBORB.get(), DwarfBulborbRenderer::new);
     }
 
     @SubscribeEvent
