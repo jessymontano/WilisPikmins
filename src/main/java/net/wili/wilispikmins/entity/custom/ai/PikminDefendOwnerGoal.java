@@ -2,7 +2,9 @@ package net.wili.wilispikmins.entity.custom.ai;
 
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.ai.goal.target.TargetGoal;
+import net.wili.wilispikmins.entity.custom.BaseBulborbEntity;
 import net.wili.wilispikmins.entity.custom.PikminEntity;
+import net.wili.wilispikmins.entity.custom.enums.BulborbState;
 import net.wili.wilispikmins.entity.custom.enums.PikminState;
 
 import java.util.EnumSet;
@@ -33,22 +35,14 @@ public class PikminDefendOwnerGoal extends TargetGoal {
         this.ownerLastHurtBy = owner.getLastHurtByMob();
         this.ownerLastHurt = owner.getLastHurtMob();
 
-        if (this.ownerLastHurtBy != null &&
-        this.ownerLastHurtBy != owner &&
-        this.ownerLastHurtBy.isAlive() &&
-        !this.pikmin.isAlliedTo(this.ownerLastHurtBy) &&
-                !(this.ownerLastHurtBy instanceof PikminEntity pikminEntity && owner.getUUID().equals(pikminEntity.getOwnerUUID()))) {
+        if (isValidTarget(this.ownerLastHurtBy, owner)) {
             int lastHurtTimestamp = owner.getLastHurtByMobTimestamp();
             if (lastHurtTimestamp != this.timestamp) {
                 return true;
             }
         }
 
-        if (this.ownerLastHurt != null &&
-        this.ownerLastHurt != owner &&
-        this.ownerLastHurt.isAlive() &&
-        !this.pikmin.isAlliedTo(this.ownerLastHurt) &&
-                !(this.ownerLastHurt instanceof PikminEntity pikminEntity && owner.getUUID().equals(pikminEntity.getOwnerUUID()))) {
+        if (isValidTarget(this.ownerLastHurt, owner)) {
             return true;
         }
 
@@ -81,12 +75,15 @@ public class PikminDefendOwnerGoal extends TargetGoal {
         LivingEntity target = this.pikmin.getTarget();
         LivingEntity owner = this.pikmin.getOwner();
 
-        if (target == null || !target.isAlive() || owner == null || !owner.isAlive() || this.pikmin.getPikminState() == PikminState.POPPING) {
+        boolean isTargetDeadBulborb = target instanceof BaseBulborbEntity bulborb && bulborb.getBulborbState() == BulborbState.DEAD;
+
+        if (target == null || !target.isAlive() || owner == null || !owner.isAlive() || isTargetDeadBulborb || this.pikmin.getPikminState() == PikminState.POPPING) {
             if (this.pikmin.getPikminState() == PikminState.ATTACKING) {
                 this.pikmin.setPikminState(
                         this.pikmin.getOwner() != null ?
                                 PikminState.FOLLOWING : PikminState.IDLE
                 );
+                this.pikmin.setTarget(null);
             }
             return false;
         }
@@ -102,5 +99,16 @@ public class PikminDefendOwnerGoal extends TargetGoal {
         this.pikmin.getOwner() != null) {
             this.pikmin.setPikminState(PikminState.FOLLOWING);
         }
+    }
+
+    private boolean isValidTarget(LivingEntity target, LivingEntity owner) {
+        if (target == null || target == owner || !target.isAlive()) return false;
+        if (this.pikmin.isAlliedTo(target)) return false;
+        if (target instanceof PikminEntity pikminEntity && owner.getUUID().equals(pikminEntity.getOwnerUUID())) return false;
+        if (target instanceof BaseBulborbEntity bulborb && bulborb.getBulborbState() == BulborbState.DEAD) {
+            return false;
+        }
+
+        return true;
     }
 }
