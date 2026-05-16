@@ -10,6 +10,7 @@ import net.neoforged.neoforge.registries.DeferredHolder;
 import net.neoforged.neoforge.registries.DeferredRegister;
 import net.wili.wilispikmins.WilisPikmins;
 import net.wili.wilispikmins.entity.custom.BulborbEntity;
+import net.wili.wilispikmins.entity.custom.DwarfBulborbEntity;
 import net.wili.wilispikmins.entity.custom.PikminEntity;
 
 public class ModEntities {
@@ -30,6 +31,12 @@ public class ModEntities {
                             .sized(1f, 1f)
                             .clientTrackingRange(8)
                             .build("bulborb"));
+    public static final DeferredHolder<EntityType<?>, EntityType<DwarfBulborbEntity>> DWARF_BULBORB =
+            ENTITY_TYPES.register("dwarf_bulborb",
+                    () -> EntityType.Builder.of(DwarfBulborbEntity::new, MobCategory.MONSTER)
+                            .sized(1f, 1f)
+                            .clientTrackingRange(8)
+                            .build("dwarf_bulborb"));
 
     public static void register(IEventBus eventBus) {
         ENTITY_TYPES.register(eventBus);
@@ -38,6 +45,7 @@ public class ModEntities {
 
     private static void registerAttributes(EntityAttributeCreationEvent event) {
         event.put(PIKMIN.get(), PikminEntity.createAttributes().build());
-        event.put(BULBORB.get(), BulborbEntity.createAttributes().build());
+        event.put(BULBORB.get(), BulborbEntity.createBulborbAttributes().build());
+        event.put(DWARF_BULBORB.get(), DwarfBulborbEntity.createDwarfAttributes().build());
     }
 }
