@@ -58,8 +58,29 @@ public class WingedPikminFlightSystem {
             return calculateFollowingMovement(owner);
         } else if (state == PikminState.IDLE) {
             return calculateIdleHoverMovement();
+        } else if (state == PikminState.ATTACKING && pikmin.getTarget() != null) {
+            return calculateAttackingMovement(pikmin.getTarget());
         }
         return Vec3.ZERO;
+    }
+
+    private Vec3 calculateAttackingMovement(LivingEntity target) {
+        Vec3 toTarget = new Vec3(
+                target.getX() - pikmin.getX(),
+                0,
+                target.getZ() - pikmin.getZ()
+        );
+
+        double distance = toTarget.horizontalDistance();
+
+        if (distance < 1.0) {
+            return Vec3.ZERO;
+        }
+
+        Vec3 direction = toTarget.normalize();
+        double speed = 0.18;
+
+        return direction.scale(speed);
     }
 
     private Vec3 calculateFollowingMovement(LivingEntity owner) {
@@ -146,6 +167,8 @@ public class WingedPikminFlightSystem {
             return owner.getY() + 1.5;
         } else if (state == PikminState.IDLE) {
             return groundY + 1.2 + Mth.sin(pikmin.tickCount * 0.05f) * 0.3;
+        } else if (state == PikminState.ATTACKING && pikmin.getTarget() != null) {
+            return pikmin.getTarget().getY() + (pikmin.getTarget().getBbHeight() / 2.0);
         }
         return groundY + 1.0;
     }
